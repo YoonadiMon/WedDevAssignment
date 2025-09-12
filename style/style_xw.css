@@ -1,0 +1,207 @@
+:root {
+    --MainGreen: hsl(145, 63%, 49%);
+    --LightGreen: hsl(145, 100%, 85%);
+    --White: hsl(0, 0%, 100%);
+    --Black: hsl(240, 100%, 5%);
+    --Gray: hsl(233, 8%, 79%);
+}
+
+/* Headings */
+.c-heading-1 { 
+    font-size: 2.5rem;
+    font-weight: 700; 
+}
+
+.c-heading-2 { 
+    font-size: 2rem; 
+    font-weight: 700; 
+}
+
+.c-heading-3 { 
+    font-size: 1.75rem; 
+    font-weight: 700; 
+}
+
+.c-heading-4 { 
+    font-size: 1.5rem; 
+    font-weight: 500; 
+}
+
+.c-heading-5 { 
+    font-size: 1.25rem; 
+    font-weight: 500; 
+}
+
+.c-heading-6 { 
+    font-size: 1rem;   
+    font-weight: 500; 
+}  
+
+/* Body */
+.c-text-body { 
+    font-size: 1rem;
+    font-weight: 400; 
+    color: var(--Black);
+}
+
+.c-text-subtitle { 
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--Gray);
+}
+
+.c-text-caption { 
+    font-size: 0.75rem; 
+    color: var(--Gray);
+}
+
+.c-text-overline { 
+    font-size: 0.75rem; 
+    text-transform: uppercase; 
+    letter-spacing: 0.05em; 
+    color: var(--Gray);
+}
+
+.c-text-label { 
+    font-size: 0.875rem; 
+    font-weight: 500; 
+    color: var(--Black);
+}
+
+/* === Functional Text === */
+.c-text-button { 
+    font-size: 0.875rem; 
+    font-weight: 500; 
+    text-transform: uppercase; 
+    color: var(--Black);
+}
+
+.c-text-input { 
+    font-size: 1rem; 
+    color: var(--Black);
+}
+
+.c-text-helper { 
+    font-size: 0.75rem; 
+    color: var(--Gray);
+}
+
+.c-text-link { 
+    font-size: 1rem; 
+    color: var(--MainGreen);
+    text-decoration: none; 
+}
+
+.c-text-link:hover { 
+    text-decoration: underline; 
+}
+
+/* === Header / Nav === */
+/* header logo */
+.c-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* space between icon & text */
+    font-size: 1.25rem; 
+    font-weight: 700;
+    color: var(--Black);
+    cursor: pointer;
+}
+
+.c-logo i, 
+.c-logo svg {
+    font-size: 1.5rem;  /* icon size */
+}
+
+/* desktop: horizontal bar*/
+.c-navbar-desktop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+}
+
+.c-navbar-desktop-item {
+    margin: 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--Black);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.c-navbar-desktop-item:hover {
+    color: var(--MainGreen);
+}
+
+/* Profile, chatbox, dark/light mode */
+/* in desktop ver use icons, in mobile use text ? */
+.c-navbar-desktop-icons {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    color: var(--Black);
+    cursor: pointer;
+}
+
+/* mobile: side bar */
+.c-navbar-side {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.5rem 0.75rem;
+}
+
+.c-navbar-side-item {
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+    color: var(--Black);
+  }
+
+/* === Forms === */
+.c-input {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--Gray);
+    border-radius: 6px;
+    font-size: 1rem;
+    color: var(--Black);
+    background-color: var(--White);
+}
+
+.c-input:focus {
+    border-color: var(--MainGreen);
+    outline: none;
+}
+
+/* Variants */
+.c-input-text {
+    width: 250px;
+    padding: 0.5rem;
+    border: 1px solid var(--Gray);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: var(--Black);
+}
+
+.c-input-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.c-input-dropdown {
+    appearance: none; /* removes browser default */
+    cursor: pointer;
+}
+
+/* Sizes */
+.c-input-small {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem; 
+}
+
+.c-input-medium {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+}
