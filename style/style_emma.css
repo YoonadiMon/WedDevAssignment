@@ -1,0 +1,62 @@
+/* Root variables */
+:root {
+  --btn-color: #5CC600;   /* main button color */
+  --btn-text: #ffffff;    /* text color */
+  --btn-padding: 0.6em 1.2em;
+  --btn-radius: 6px;
+  --btn-font-size: 1rem;
+}
+
+/* Base button */
+.c-btn {
+  display: inline-block;
+  padding: var(--btn-padding);
+  border: none;
+  border-radius: var(--btn-radius);
+  font-size: var(--btn-font-size);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+
+}
+
+/* Primary button */
+.c-btn-primary {
+  background-color: var(--btn-color);
+  color: var(--btn-text);
+}
+
+.c-btn-primary:hover {
+  background-color: #4caf00; 
+}
+
+/* Secondary button */
+.c-btn-secondary {
+  background-color: var(--btn-color-secondary);
+  color: var(--btn-text);
+}
+
+.c-btn-secondary:hover {
+  background-color: #4caf00; 
+}
+
+/* Small button */
+.c-btn-small {
+  padding: 0.3em 0.8em;
+  font-size: 0.85rem;
+}
+
+c.btn-small:hover {
+  background-color: #4caf00; 
+}
+
+/* Big button */
+.c-btn-big {
+  padding: 0.9em 1.6em;
+  font-size: 1.2rem;
+}
+.c-btn-big:hover {
+  background-color: #4caf00; 
+}
+
