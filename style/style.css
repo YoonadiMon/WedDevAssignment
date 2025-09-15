@@ -2,20 +2,496 @@
 
 /* VARIABLES */
 :root {
-  --MainGreen: hsl(145, 63%, 49%);
-  --LightGreen: hsl(145, 100%, 85%);
-  --White: hsl(0, 0%, 100%);
-  --Black: hsl(240, 100%, 5%);
-  --Gray: hsl(233, 8%, 79%);
+    --MainGreen: hsl(145, 63%, 49%);
+    --LightGreen: hsl(145, 100%, 85%);
+    --White: hsl(0, 0%, 100%);
+    --Black: hsl(240, 100%, 5%);
+    --Gray: hsl(233, 8%, 79%);
 }
 
 /* GLOBAL STYLES: MOBILE FIRST */
+/* Semantic HTML */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-size: 14px;
 }
 
-html {
-  font-size: 16px;
+body {
+    width: calc(100vw - 4rem);
+    height: calc(100vh - 2rem);
+    margin: 1rem 2rem;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+/* Unique Classes */
+.stopScroll {
+  overflow: hidden;
+  height: 100%;
+}
+
+.c-btn {
+  display: inline-block;
+  padding: 0.6em 1.2em;;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+
+}
+
+/* Primary button */
+.c-btn-primary {
+  background-color: var(--MainGreen);
+  color: var(--White);
+}
+
+.c-btn-primary:hover {
+  background-color: #4caf00; 
+}
+
+/* Secondary button */
+.c-btn-secondary {
+  background-color: var(--btn-color-secondary);
+  color: var(--White);
+}
+
+.c-btn-secondary:hover {
+  background-color: #4caf00; 
+}
+
+/* Small button */
+.c-btn-small {
+  padding: 0.3em 0.8em;
+  font-size: 0.85rem;
+}
+
+c.btn-small:hover {
+  background-color: #4caf00; 
+}
+
+/* Big button */
+.c-btn-big {
+  padding: 0.9em 1.6em;
+  font-size: 1.2rem;
+}
+.c-btn-big:hover {
+  background-color: #4caf00; 
+}
+
+/* Headings */
+.c-heading-1 { 
+    font-size: 2.5rem;
+    font-weight: 700; 
+}
+
+.c-heading-2 { 
+    font-size: 2rem; 
+    font-weight: 700; 
+}
+
+.c-heading-3 { 
+    font-size: 1.75rem; 
+    font-weight: 700; 
+}
+
+.c-heading-4 { 
+    font-size: 1.5rem; 
+    font-weight: 500; 
+}
+
+.c-heading-5 { 
+    font-size: 1.25rem; 
+    font-weight: 500; 
+}
+
+.c-heading-6 { 
+    font-size: 1rem;   
+    font-weight: 500; 
+}  
+
+/* Body */
+.c-text-body { 
+    font-size: 1rem;
+    font-weight: 400; 
+    color: var(--Black);
+}
+
+.c-text-subtitle { 
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--Gray);
+}
+
+.c-text-caption { 
+    font-size: 0.75rem; 
+    color: var(--Gray);
+}
+
+.c-text-overline { 
+    font-size: 0.75rem; 
+    text-transform: uppercase; 
+    letter-spacing: 0.05em; 
+    color: var(--Gray);
+}
+
+.c-text-label { 
+    font-size: 0.875rem; 
+    font-weight: 500; 
+    color: var(--Black);
+}
+
+/* === Functional Text === */
+.c-text-button { 
+    font-size: 0.875rem; 
+    font-weight: 500; 
+    text-transform: uppercase; 
+    color: var(--Black);
+}
+
+.c-text-input { 
+    font-size: 1rem; 
+    color: var(--Black);
+}
+
+.c-text-helper { 
+    font-size: 0.75rem; 
+    color: var(--Gray);
+}
+
+.c-text-link { 
+    font-size: 1rem; 
+    color: var(--MainGreen);
+    text-decoration: none; 
+}
+
+.c-text-link:hover { 
+    text-decoration: underline; 
+}
+
+/* === Header / Nav === */
+/* header logo */
+.c-logo-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* space between icon & text */
+    font-size: 1.25rem; 
+    font-weight: 700;
+    color: var(--Black);
+    cursor: pointer;
+}
+
+.c-logo {
+    width: 1.5rem;  
+}
+
+/* desktop: horizontal bar*/
+.c-navbar-desktop {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+}
+
+.c-navbar-desktop a {
+    margin: 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--Black);
+    cursor: pointer;
+    transition: color 0.2s ease;
+    text-decoration: none;
+}
+
+.c-navbar-desktop a:hover {
+    color: var(--MainGreen);
+}
+
+/* Profile, chatbox, dark/light mode */
+/* in desktop ver use icons, in mobile use text ? */
+.c-navbar-desktop-icons {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    color: var(--Black);
+    cursor: pointer;
+}
+
+/* mobile: side bar */
+.c-navbar-side {
+    display: block;
+    padding: 0.5rem 0.75rem;
+}
+
+.c-navbar-side-menu {
+    background: var(--LightGreen);
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 250px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.c-navbar-side-menu img {
+    position: absolute;
+    left: 75%;
+    top: 3rem;
+}
+
+.c-navbar-side-items {
+    height: 80%;
+    position: relative;
+    top: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    
+}
+
+.c-navbar-side-items a {
+    padding-left: 4rem;
+    margin-bottom: 4rem;
+    width: 100%;
+    font-size: 1.2rem;
+    justify-self: left;
+    color: var(--Black);
+    text-decoration: none;
+}
+
+.c-navbar-more {
+    display: none;
+    font-size: 1.25rem;
+    color: var(--Black);
+    cursor: pointer;
+}
+
+.cover {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 998; 
+}
+
+/* === Forms === */
+.c-input {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--Gray);
+    border-radius: 6px;
+    font-size: 1rem;
+    color: var(--Black);
+    background-color: var(--White);
+}
+
+.c-input:focus {
+    border-color: var(--MainGreen);
+    outline: none;
+}
+
+/* Variants */
+.c-input-text {
+    width: 250px;
+    padding: 0.5rem;
+    border: 1px solid var(--Gray);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: var(--Black);
+}
+
+.c-input-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.c-input-dropdown {
+    appearance: none; /* removes browser default */
+    cursor: pointer;
+}
+
+/* Sizes */
+.c-input-small {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem; 
+}
+
+.c-input-medium {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+}
+
+
+.c-input-large {
+  font-size: 1.25rem;
+  padding: 0.75rem 1rem;
+}
+
+.c-avatar {
+  border-radius: 50%;
+}
+
+.c-avatar-small {
+  width: 30px;
+  height: 30px;
+}
+
+.c-avatar-large {
+  width: 60px;
+  height: 60px;
+}
+
+.c-listing-cover {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.c-listing-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.c-event-cover {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.c-blog-cover {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.c-blog-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.c-icon-btn {
+  font-size: 1.5rem;
+  padding: 0.5rem;
+}
+
+.c-icon-btn-small {
+  font-size: 1rem;
+  padding: 0.25rem;
+}
+
+.c-icon-btn-large {
+  font-size: 2rem;
+  padding: 0.75rem;
+}
+
+.c-chatlist-name {
+  font-weight: bold;
+}
+
+.c-chatlist-time {
+  font-size: 0.875rem;
+  color: var(--Gray);
+}
+
+.c-chatlist-badge {
+  background-color: var(--MainGreen);
+  color: var(--White);
+  border-radius: 50%;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.c-chatlist-preview {
+  color: var(--Gray);
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.c-message-sent {
+  background-color: var(--LightGreen);
+  align-self: flex-end;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  margin: 0.25rem 0;
+  max-width: 60%;
+}
+
+.c-message-recv {
+  background-color: var(--White);
+  align-self: flex-start;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  margin: 0.25rem 0;
+  max-width: 60%;
+}
+
+.c-message-time {
+  font-size: 0.75rem;
+  color: var(--Gray);
+  text-align: right;
+}
+
+.c-message-send {
+  background-color: var(--MainGreen);
+  color: var(--White);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* BREAKPINTS FOR RESPONSIVENESS */
+
+/* Mobile (e.g., ~320px - 576px) -> default
+Tablet (e.g., ~576px - 992px)
+Desktop (e.g., ~992px - 1200px) */
+
+@media (min-width: 576px) {
+    /* Tablet styles here */
+    .c-navbar-desktop {
+        display: flex;
+    }
+    .c-navbar-side {
+        display: none;
+    }
+    .c-navbar-more {
+        display: flex;
+    }
+}
+
+@media (min-width: 992px) {
+    /* Desktop styles here */
+    .c-navbar-desktop {
+        display: flex;
+    }
+    .c-navbar-side {
+        display: none;
+    }
+    .c-navbar-more {
+        display: flex;
+    }
 }

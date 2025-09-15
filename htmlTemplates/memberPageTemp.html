@@ -9,36 +9,46 @@
 </head>
 
 <body>
-
-    <!-- Navbar -->
+    <div id="cover" class="" onclick="hideMenu()"></div>
+    <!-- Logo + Name & Navbar -->
     <header>
-        <!-- <section style="display: flex; justify-content: space-between; align-items: center; padding: 10px;"> -->
-
         <!-- Logo + Name -->
-        <section>
-            <img src="/assets/images/Logo.png" alt="Logo">
-            <title>ReLeaf</title>
+        <section class="c-logo-section">
+            <img src="/assets/images/Logo.png" alt="Logo" class="c-logo">
+            <div>ReLeaf</div>
         </section>
 
         <!-- Menu Links -->
-        <nav>
-            <a href="/pages/MemberPages/mHome.html">Home</a>
-            <a href="/pages/CommonPages/mainBlog.html">Blog</a>
+
+        <!-- Menu Links Mobile -->
+        <nav class="c-navbar-side">
+            <img src="/assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()">
+            <div id="sidebarNav" class="c-navbar-side-menu">
+                <img src="/assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()">
+                <div class="c-navbar-side-items">
+                    <a href="/pages/adminPages/aHome.html">Home</a>
+                    <a href="/pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
+                    <a href="/pages/CommonPages/mainEvent.html">Event</a>
+                    <a href="/pages/CommonPages/mainTrade.html">Trade</a>
+                    <a href="/pages/CommonPages/aboutUs.html">About</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Menu Links Desktop + Tablet -->
+        <nav class="c-navbar-desktop">
+            <a href="/pages/adminPages/aHome.html">Home</a>
+            <a href="/pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
             <a href="/pages/CommonPages/mainEvent.html">Event</a>
             <a href="/pages/CommonPages/mainTrade.html">Trade</a>
             <a href="/pages/CommonPages/aboutUs.html">About</a>
-        </nav>
-
-        <!-- Right Side -->
-        <section>
+        </nav>          
+        <section class="c-navbar-more">
             <input type="text" placeholder="Search..." id="searchBar">
             <button onclick="toggleMode()" id="modeBtn">🌙</button>
             <a href="#"><img src="chat1.png" alt="Chatbox"></a>
             <a href="#"><img src="avatar.png" alt="Avatar"></a>
         </section>
-
-        </section>
-        <hr>
     </header>
 
     <!-- Footer -->
@@ -92,6 +102,7 @@
         <hr>
     </footer>
 
+    <script src="/javascript/mainScript.js"></script>
 </body>
 
 </html>
