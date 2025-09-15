@@ -1,55 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>memberTempPage: Change Title As Needed</title>
-    <link rel="stylesheet" href="/style/style.css">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>memberTempPage: Change Title As Needed</title>
+        <link rel="stylesheet" href="/style/style.css">
+    </head>
 
-<body>
-    <div id="cover" class="" onclick="hideMenu()"></div>
-    <!-- Logo + Name & Navbar -->
-    <header>
-        <!-- Logo + Name -->
-        <section class="c-logo-section">
-            <img src="/assets/images/Logo.png" alt="Logo" class="c-logo">
-            <div>ReLeaf</div>
-        </section>
+    <body> 
+        <div id="cover" class="" onclick="hideMenu()"></div>
+        
+        <!-- Logo + Name & Navbar -->
+        <header>
+            <!-- Logo + Name -->
+            <section class="c-logo-section">
+                <img src="/assets/images/Logo.png" alt="Logo" class="c-logo">
+                <div class="c-text">ReLeaf</div>
+            </section>
 
-        <!-- Menu Links -->
+            <!-- Menu Links -->
 
-        <!-- Menu Links Mobile -->
-        <nav class="c-navbar-side">
-            <img src="/assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()">
-            <div id="sidebarNav" class="c-navbar-side-menu">
-                <img src="/assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()">
-                <div class="c-navbar-side-items">
-                    <a href="/pages/adminPages/aHome.html">Home</a>
-                    <a href="/pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
-                    <a href="/pages/CommonPages/mainEvent.html">Event</a>
-                    <a href="/pages/CommonPages/mainTrade.html">Trade</a>
-                    <a href="/pages/CommonPages/aboutUs.html">About</a>
+            <!-- Menu Links Mobile -->
+            <nav class="c-navbar-side">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                <img src="/assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
+                <div id="sidebarNav" class="c-navbar-side-menu">
+                    
+                    <img src="/assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
+                    <div class="c-navbar-side-items">
+                        <section class="c-navbar-side-more">
+                            <button id="themeToggle1">
+                                <img src="/assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
+                            </button>
+                            <a href="">
+                                <img src="/assets/images/chat-light.svg" alt="Chatbox">
+                            </a>
+                            <a href="#">
+                                <img src="/assets/images/profile-light.svg" alt="Profile">
+                            </a>
+                        </section>
+
+                        <a href="/pages/adminPages/aHome.html">Home</a>
+                        <a href="/pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
+                        <a href="/pages/CommonPages/mainEvent.html">Event</a>
+                        <a href="/pages/CommonPages/mainTrade.html">Trade</a>
+                        <a href="/pages/CommonPages/aboutUs.html">About</a>
+                    </div>
                 </div>
-            </div>
-        </nav>
 
-        <!-- Menu Links Desktop + Tablet -->
-        <nav class="c-navbar-desktop">
-            <a href="/pages/adminPages/aHome.html">Home</a>
-            <a href="/pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
-            <a href="/pages/CommonPages/mainEvent.html">Event</a>
-            <a href="/pages/CommonPages/mainTrade.html">Trade</a>
-            <a href="/pages/CommonPages/aboutUs.html">About</a>
-        </nav>          
-        <section class="c-navbar-more">
-            <input type="text" placeholder="Search..." id="searchBar">
-            <button onclick="toggleMode()" id="modeBtn">🌙</button>
-            <a href="#"><img src="chat1.png" alt="Chatbox"></a>
-            <a href="#"><img src="avatar.png" alt="Avatar"></a>
-        </section>
-    </header>
+            </nav>
+
+            <!-- Menu Links Desktop + Tablet -->
+            <nav class="c-navbar-desktop">
+                <a href="/pages/MemberPages/mHome.html">Home</a>
+                <a href="/pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
+                <a href="/pages/CommonPages/mainEvent.html">Event</a>
+                <a href="/pages/CommonPages/mainTrade.html">Trade</a>
+                <a href="/pages/CommonPages/aboutUs.html">About</a>
+            </nav>          
+            <section class="c-navbar-more">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                <button id="themeToggle2">
+                    <img src="/assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
+                </button>
+                <a href="">
+                    <img src="/assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                </a>
+                <a href="#">
+                    <img src="/assets/images/profile-light.svg" alt="Profile" id="profileImg">
+                </a>
+            </section>
+            
+        </header>
 
     <!-- Footer -->
     <footer>
@@ -57,12 +80,18 @@
         <!-- <section style="display: flex; justify-content: space-between; padding: 10px;"> -->
 
         <!-- Column 1 -->
-        <section>
-            <img src="logo.png" alt="Logo"> <b>ReLeaf</b><br><br>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br>
-            Phasellus eleifend lacus quam.<br><br>
-            +60 12 345 6789 or
-            abc@gmail.com
+        <section class="c-logo-section">
+            <img src="/assets/images/Logo.png" alt="Logo" class="c-logo"> 
+            <div class="c-text">ReLeaf</div>
+            <div class="c-text">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br>Phasellus eleifend lacus quam.
+            </div>
+            <div class="c-text c-text-label">
+                +60 12 345 6789
+            </div>
+            <div class="c-text">
+                abc@gmail.com
+            </div>
         </section>
 
         <!-- Column 2 -->
