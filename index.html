@@ -1,12 +1,345 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEDDEVASSIGNMENT - Home</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f8fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo span {
+            color: #3498db;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .nav-links a:hover {
+            color: #3498db;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            background: white;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #2c3e50;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background: #3498db;
+            margin: 10px auto;
+        }
+        
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card p {
+            color: #7f8c8d;
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            margin: 1rem 0;
+        }
+        
+        .footer-links li {
+            margin: 0 1rem;
+        }
+        
+        .footer-links a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-  <a href="/pages/adminPages/adminIndex.html">Admin</a>
-  <a href="/pages/MemberPages/memberIndex.html">Member</a>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">WED<span>DEV</span>ASSIGNMENT</div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="CommonPages/aboutUs.html">About Us</a></li>
+                    <li><a href="CommonPages/mainBlog.html">Blog</a></li>
+                    <li><a href="CommonPages/mainEvent.html">Events</a></li>
+                    <li><a href="CommonPages/loginPage.html">Login</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Welcome to WEDDEVASSIGNMENT</h1>
+            <p>Your platform for collaboration, learning, and growth. Access resources, connect with others, and manage your account.</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <section>
+            <h2 class="section-title">Access Areas</h2>
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Admin Portal</h3>
+                        <p>Access the administrative dashboard to manage users, content, and system settings.</p>
+                        <a href="pages/adminPages/adminIndex.html" class="btn">Admin Login</a>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Member Portal</h3>
+                        <p>Access your member dashboard to view resources, participate in events, and more.</p>
+                        <a href="pages/MemberPages/memberIndex.html" class="btn">Member Login</a>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Public Resources</h3>
+                        <p>Browse our blog, events, and trading resources without logging in.</p>
+                        <a href="CommonPages/mainBlog.html" class="btn">Explore Resources</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2 class="section-title">Quick Links</h2>
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-content">
+                        <h3>FAQ</h3>
+                        <p>Find answers to frequently asked questions about our platform.</p>
+                        <a href="pages/MemberPages/mFAQ.html" class="btn">Member FAQ</a>
+                        <a href="pages/adminPages/afAQManagement.html" style="margin-left: 10px;" class="btn">Admin FAQ</a>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Create Account</h3>
+                        <p>Don't have an account yet? Sign up to access all member features.</p>
+                        <a href="CommonPages/signUpPage.html" class="btn">Sign Up</a>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <h3>Support</h3>
+                        <p>Need help? Submit a support ticket or check our documentation.</p>
+                        <a href="pages/adminPages/aHelpTicket.html" class="btn">Get Help</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 WEDDEVASSIGNMENT. All rights reserved.</p>
+            <ul class="footer-links">
+                <li><a href="CommonPages/aboutUs.html">About Us</a></li>
+                <li><a href="CommonPages/mainBlog.html">Blog</a></li>
+                <li><a href="CommonPages/mainEvent.html">Events</a></li>
+                <li><a href="CommonPages/mainTrade.html">Trading</a></li>
+                <li><a href="pages/MemberPages/mFAQ.html">FAQ</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <script>
+        // This script handles potential GitHub Pages routing issues
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if we're on GitHub Pages
+            const isGitHubPages = window.location.hostname === 'github.io' || 
+                                 window.location.hostname.includes('github.io');
+            
+            if (isGitHubPages) {
+                console.log('GitHub Pages environment detected');
+                
+                // Modify all internal links to work with GitHub Pages
+                document.querySelectorAll('a').forEach(link => {
+                    const href = link.getAttribute('href');
+                    
+                    // Skip external links and anchor links
+                    if (href && !href.startsWith('http') && !href.startsWith('#') && 
+                        !href.startsWith('mailto:') && !href.startsWith('tel:')) {
+                        
+                        // Ensure the link has the correct path for GitHub Pages
+                        if (!href.startsWith('/')) {
+                            // Get the base path for the GitHub Pages site
+                            const basePath = window.location.pathname.split('/').slice(0, -1).join('/');
+                            
+                            // Check if the link points to a file that exists in our structure
+                            if (!href.startsWith(basePath) && basePath !== '') {
+                                // Prepend the base path to ensure correct routing
+                                link.setAttribute('href', basePath + '/' + href);
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Add click event listeners to all links for debugging
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    console.log('Navigating to:', this.getAttribute('href'));
+                });
+            });
+        });
+    </script>
 </body>
 </html>
