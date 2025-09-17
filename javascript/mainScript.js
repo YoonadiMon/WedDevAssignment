@@ -39,18 +39,18 @@ function updateThemeIcons(isDark) {
     if (toggleBtn2) {
         const img1 = toggleBtn2.querySelector('img');
         if (img1) {
-            img1.src = isDark ? '/assets/images/dark-mode-icon.svg' : '/assets/images/light-mode-icon.svg';
+            img1.src = isDark ? '../../assets/images/dark-mode-icon.svg' : '../../assets/images/light-mode-icon.svg';
             img1.alt = isDark ? 'Dark Mode Icon' : 'Light Mode Icon';
         }
     }
     if (profileImg) {
-        profileImg.src = isDark ? '/assets/images/profile-dark.svg' : '/assets/images/profile-light.svg';
+        profileImg.src = isDark ? '../../assets/images/profile-dark.svg' : '../../assets/images/profile-light.svg';
     }
     if (chatImg) {
-        chatImg.src = isDark ? '/assets/images/chat-dark.svg' : '/assets/images/chat-light.svg';
+        chatImg.src = isDark ? '../../assets/images/chat-dark.svg' : '../../assets/images/chat-light.svg';
     }
     if (menuBtn) {
-        menuBtn.src = isDark ? '/assets/images/icon-menu-dark.svg' : '/assets/images/icon-menu.svg';
+        menuBtn.src = isDark ? '../../assets/images/icon-menu-dark.svg' : '../../assets/images/icon-menu.svg';
     }
 }
 
