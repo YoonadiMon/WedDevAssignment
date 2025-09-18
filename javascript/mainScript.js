@@ -6,7 +6,7 @@ const body = document.body;
 const toggleBtn1 = document.getElementById('themeToggle1'); // Mobile
 const toggleBtn2 = document.getElementById('themeToggle2'); // Desktop
 
-const profileImg = document.getElementById('profileImg');
+const settingImg = document.getElementById('settingImg');
 const chatImg = document.getElementById('chatImg');
 const menuBtn = document.getElementById('menuBtn');
 
@@ -35,6 +35,7 @@ function toggleTheme() {
     updateThemeIcons(isDark);
 }
 
+// Function to update theme-related icons for light and dark modes
 function updateThemeIcons(isDark) {
     if (toggleBtn2) {
         const img1 = toggleBtn2.querySelector('img');
@@ -43,8 +44,8 @@ function updateThemeIcons(isDark) {
             img1.alt = isDark ? 'Dark Mode Icon' : 'Light Mode Icon';
         }
     }
-    if (profileImg) {
-        profileImg.src = isDark ? '../../assets/images/profile-dark.svg' : '../../assets/images/profile-light.svg';
+    if (settingImg) {
+        settingImg.src = isDark ? '../../assets/images/setting-dark.svg' : '../../assets/images/setting-light.svg';
     }
     if (chatImg) {
         chatImg.src = isDark ? '../../assets/images/chat-dark.svg' : '../../assets/images/chat-light.svg';
