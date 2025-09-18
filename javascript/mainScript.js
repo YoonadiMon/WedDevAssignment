@@ -7,6 +7,7 @@ const toggleBtn1 = document.getElementById('themeToggle1'); // Mobile
 const toggleBtn2 = document.getElementById('themeToggle2'); // Desktop
 
 const settingImg = document.getElementById('settingImg');
+const profileImg = document.getElementById('profileImg');
 const chatImg = document.getElementById('chatImg');
 const menuBtn = document.getElementById('menuBtn');
 
@@ -46,6 +47,9 @@ function updateThemeIcons(isDark) {
     }
     if (settingImg) {
         settingImg.src = isDark ? '../../assets/images/setting-dark.svg' : '../../assets/images/setting-light.svg';
+    }
+    if (profileImg) {
+        profileImg.src = isDark ? '../../assets/images/profile-dark.svg' : '../../assets/images/profile-light.svg';
     }
     if (chatImg) {
         chatImg.src = isDark ? '../../assets/images/chat-dark.svg' : '../../assets/images/chat-light.svg';
