@@ -209,6 +209,10 @@ c.btn-small:hover {
     color: var(--text-color);
 }
 
+.c-text-center {
+    text-align: center;
+}
+
 .c-text-body { 
     font-size: 1rem;
     font-weight: 400; 
