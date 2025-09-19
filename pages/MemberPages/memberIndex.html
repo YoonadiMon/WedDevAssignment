@@ -1,83 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>memberTempPage: Change Title As Needed</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>memberTempPage: Change Title As Needed</title>
 
-        <link rel="stylesheet" href="../../style/style.css">
+    <link rel="stylesheet" href="../../style/style.css">
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    </head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+</head>
 
-    <body> 
-        <div id="cover" class="" onclick="hideMenu()"></div>
-        
-        <!-- Logo + Name & Navbar -->
-        <header>
-            <!-- Logo + Name -->
-            <section class="c-logo-section">
-                <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
-                <div class="c-text">ReLeaf</div>
-            </section>
+<body>
+    <div id="cover" class="" onclick="hideMenu()"></div>
 
-            <!-- Menu Links -->
+    <!-- Logo + Name & Navbar -->
+    <header>
+        <!-- Logo + Name -->
+        <section class="c-logo-section">
+            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+            <div class="c-text">ReLeaf</div>
+        </section>
 
-            <!-- Menu Links Mobile -->
-            <nav class="c-navbar-side">
-                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-                <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
-                <div id="sidebarNav" class="c-navbar-side-menu">
-                    
-                    <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
-                    <div class="c-navbar-side-items">
-                        <section class="c-navbar-side-more">
-                            <button id="themeToggle1">
-                                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
-                            </button>
+        <!-- Menu Links -->
+
+        <!-- Menu Links Mobile -->
+        <nav class="c-navbar-side">
+            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
+                id="menuBtn">
+            <div id="sidebarNav" class="c-navbar-side-menu">
+
+                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
+                    class="close-btn">
+                <div class="c-navbar-side-items">
+                    <section class="c-navbar-side-more">
+                        <button id="themeToggle1">
+                            <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                        </button>
+
+                        <div class="c-chatbox" id="chatboxMobile">
                             <a href="../../pages/MemberPages/mChat.html">
                                 <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                             </a>
-                            <a href="../../pages/MemberPages/mSetting.html">
-                                <img src="../../assets/images/setting-light.svg" alt="Settings">
-                            </a>
-                        </section>
+                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                        </div>
 
-                        <a href="../../pages/MemberPages/memberIndex.html">Home</a>
-                        <a href="../../pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.html">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
-                        <a href="../../pages/CommonPages/aboutUs.html">About</a>
-                    </div>
+                        <a href="../../pages/MemberPages/mSetting.html">
+                            <img src="../../assets/images/setting-light.svg" alt="Settings">
+                        </a>
+                    </section>
+
+                    <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                    <a href="../../pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
+                    <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                    <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
                 </div>
+            </div>
 
-            </nav>
+        </nav>
 
-            <!-- Menu Links Desktop + Tablet -->
-            <nav class="c-navbar-desktop">
-                <a href="../../pages/MemberPages/memberIndex.html">Home</a>
-                <a href="../../pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
-                <a href="../../pages/CommonPages/mainEvent.html">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
-                <a href="../../pages/CommonPages/aboutUs.html">About</a>
-            </nav>          
-            <section class="c-navbar-more">
-                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-                <button id="themeToggle2">
-                    <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
-                </button>
-                <a href="../../pages/MemberPages/mChat.html">
-                    <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                </a>
-                <a href="../../pages/MemberPages/mSetting.html">
-                    <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
-                </a>
-            </section>
+        <!-- Menu Links Desktop + Tablet -->
+        <nav class="c-navbar-desktop">
+            <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+            <a href="../../pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
+            <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+            <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+            <a href="../../pages/CommonPages/aboutUs.html">About</a>
+        </nav>
+        <section class="c-navbar-more">
+            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+            <button id="themeToggle2">
+                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+            </button>
             
-        </header>
+            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+            </a>
+
+            <a href="../../pages/MemberPages/mSetting.html">
+                <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
+            </a>
+        </section>
+
+    </header>
 
     <!-- Footer -->
     <footer>
@@ -85,7 +97,7 @@
 
         <!-- Column 1 -->
         <section class="c-logo-section">
-            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo"> 
+            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
             <div class="c-text">ReLeaf</div>
             <div class="c-text c-text-center">
                 “Relief for the Planet, One Leaf at a Time.”

@@ -631,3 +631,38 @@ Desktop (e.g., ~1150px - 1200px) */
         display: flex;
     }
 }
+
+/* Chatbox wrapper */
+.c-chatbox {
+  position: relative;
+  display: inline-flex;
+}
+
+
+/* Notification badge */
+.c-notification-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(50%, -50%);
+  background-color: red;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border-radius: 999px; /* pill/round shape */
+  min-width: 18px;      /* small numbers still look round */
+  height: 18px;
+  padding: 0 5px;       /* allow horizontal growth */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;  /* prevents wrapping */
+  z-index: 2;
+}
+
+/* Ensure badge stays pinned in sidebar */
+.c-navbar-side .c-notification-badge {
+  top: 6px;
+  right: 5px;
+}
+
