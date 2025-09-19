@@ -7,6 +7,7 @@
     --White: hsl(0, 0%, 100%);
     --Black: hsl(240, 100%, 5%);
     --Gray: hsl(233, 8%, 79%);
+    --Red: hsl(0, 100%, 50%);
     --side-nav-bar-width: 350px;
 
     /* Default light mode */
@@ -645,8 +646,8 @@ Desktop (e.g., ~1150px - 1200px) */
   top: 0;
   right: 0;
   transform: translate(50%, -50%);
-  background-color: red;
-  color: white;
+  background-color: var(--Red);
+  color: var(--White);
   font-size: 0.7rem;
   font-weight: bold;
   border-radius: 999px; /* pill/round shape */
