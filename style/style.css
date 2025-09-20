@@ -667,3 +667,121 @@ Desktop (e.g., ~1150px - 1200px) */
   right: 5px;
 }
 
+/* Search results */
+.search-container {
+    max-width: 100%;
+    margin: auto;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.tabs {
+    display: flex; 
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tab {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--Gray);
+    font-size: 0.875rem;
+    color : var(--Gray);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.tab.active {
+    background: var(--MainGreen);
+    border: none;
+    color: var(--White);
+}
+
+.results {
+    display: flex;
+    margin-top: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.result-item {
+    background: var(--sec-bg-color);
+    padding: 0.75rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.result-item img {
+    display: block;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.result-item h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--Black);
+}
+
+.result-item p {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    color: var(--Black);
+    opacity: 0.7;
+}
+
+/* Clickable search results */
+.result-item.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.result-item.clickable:hover {
+    transform: translateY(-2px);
+    background: var(--MainGreen);
+    color: var(--White);
+}
+
+.result-item.clickable:hover h4,
+.result-item.clickable:hover p{
+    color: var(--White);
+}
+
+.result-item.clickable:active {
+    transform: translateY(0);
+}
+
+/* Content default state */
+.content {
+    display: block;
+}
+
+/* Initially hide search results */
+.search-container {
+    display: none;
+}
+
+/* Desktop responsive */
+@media (min-width: 1150px) {
+    .tabs {
+        gap: 1rem;
+    }
+
+    .result-item {
+        padding: 1rem;
+    }
+
+    .result-item img {
+        width: 65px;
+        height: 65px;
+    }
+
+    .result-item h4 {
+        font-size: 1.25rem;
+    }
+}   
