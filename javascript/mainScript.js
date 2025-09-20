@@ -11,41 +11,44 @@ const profileImg = document.getElementById('profileImg');
 const chatImg = document.getElementById('chatImg');
 const menuBtn = document.getElementById('menuBtn');
 
-// Chatbox notification badge
-let unread = 3; // assume unread messages count
+// chatbox in member-side only
+if (!isAdmin) {
+    // Chatbox notification badge
+    let unread = 3; // assume unread messages count
 
-const badges = [
-    document.getElementById("chatBadgeDesktop"),
-    document.getElementById("chatBadgeMobile")
-];
-const chatboxes = [
-    document.getElementById("chatboxDesktop"),
-    document.getElementById("chatboxMobile")
-];
+    const badges = [
+        document.getElementById("chatBadgeDesktop"),
+        document.getElementById("chatBadgeMobile")
+    ];
+    const chatboxes = [
+        document.getElementById("chatboxDesktop"),
+        document.getElementById("chatboxMobile")
+    ];
 
 
-function updateBadge() {
-    badges.forEach(badge => {
-        if (unread > 0) {
-            badge.textContent = unread > 99 ? "99+" : unread;
-            badge.style.display = "flex";
-        } else {
-            badge.style.display = "none";
-        }
+    function updateBadge() {
+        badges.forEach(badge => {
+            if (unread > 0) {
+                badge.textContent = unread > 99 ? "99+" : unread;
+                badge.style.display = "flex";
+            } else {
+                badge.style.display = "none";
+            }
+        });
+    }
+
+    // initial render
+    updateBadge();
+
+    // reset on click (works for both desktop + mobile)
+    chatboxes.forEach(chatbox => {
+        chatbox.addEventListener("click", (e) => {
+            // e.preventDefault();   // stop page reload, just too test when on click the badge resets
+            unread = 0;
+            updateBadge();
+        });
     });
 }
-
-// initial render
-updateBadge();
-
-// reset on click (works for both desktop + mobile)
-chatboxes.forEach(chatbox => {
-    chatbox.addEventListener("click", (e) => {
-        // e.preventDefault();   // stop page reload, just too test when on click the badge resets
-        unread = 0;
-        updateBadge();
-    });
-});
 
 
 function showMenu() {
