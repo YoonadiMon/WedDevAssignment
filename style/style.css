@@ -84,9 +84,13 @@ footer {
     gap: 2rem;
 }
 
-footer hr {
+hr {
     border: 0;
     height: 1px;
+    width: 90vw;
+    display: flex;
+    align-items: center;
+    justify-self: center;
     background-color: var(--Gray);
     margin-bottom: 2rem;
 }
