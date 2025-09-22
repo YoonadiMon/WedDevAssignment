@@ -87,7 +87,7 @@ footer {
 hr {
     border: 0;
     height: 1px;
-    width: 80vw;
+    width: 90vw;
     background-color: var(--Gray);
     margin: 1rem auto;
     display: block; 
@@ -315,6 +315,10 @@ c.btn-small:hover {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 1.5rem;
+}
+
+.c-footer-links-section div {
+    margin-bottom: 0.8rem;
 }
 
 /* desktop: horizontal bar*/
