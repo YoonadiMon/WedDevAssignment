@@ -89,8 +89,9 @@ hr {
     height: 1px;
     width: 80vw;
     align-self: center;
-    background-color: var(--Red);
-    margin-bottom: 2rem;
+    background-color: var(--Gray);
+    margin-bottom: 2rem auto;
+    display: block; 
 }
 
 footer section:first-child {
