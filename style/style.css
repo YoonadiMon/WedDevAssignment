@@ -312,8 +312,10 @@ c.btn-small:hover {
 .c-footer-links-section {
     display: flex;
     flex-direction: row;
-    column-gap: 5rem;
-    row-gap: 1rem;
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
 }
 
 /* desktop: horizontal bar*/
