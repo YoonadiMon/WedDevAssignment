@@ -87,10 +87,8 @@ footer {
 hr {
     border: 0;
     height: 1px;
-    width: 90vw;
-    display: flex;
-    align-items: center;
-    justify-self: center;
+    width: 80vw;
+    align-self: center;
     background-color: var(--Gray);
     margin-bottom: 2rem;
 }
@@ -305,6 +303,7 @@ c.btn-small:hover {
 /* Footer */
 .c-footer-info-section {
     display: flex;
+    align-items: center;
     flex-direction: column;
     gap: 1rem;
 }
@@ -312,7 +311,8 @@ c.btn-small:hover {
 .c-footer-links-section {
     display: flex;
     flex-direction: row;
-    column-gap: 1rem;
+    column-gap: 5rem;
+    row-gap: 1rem;
 }
 
 /* desktop: horizontal bar*/
