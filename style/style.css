@@ -89,7 +89,7 @@ hr {
     height: 1px;
     width: 80vw;
     align-self: center;
-    background-color: var(--Gray);
+    background-color: var(--Red);
     margin-bottom: 2rem;
 }
 
