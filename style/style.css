@@ -288,7 +288,7 @@ c.btn-small:hover {
 
 /* === Header / Nav === */
 /* header logo */
-.c-logo-section .c-footer-info-section {
+.c-logo-section  {
     display: flex;
     align-items: center;
     gap: 0.5rem; /* space between icon & text */
@@ -300,6 +300,16 @@ c.btn-small:hover {
 
 .c-logo {
     width: 1.5rem;  
+}
+
+.c-footer-info-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* space between icon & text */
+    font-size: 1.25rem; 
+    font-weight: 700;
+    color: var(--Black);
+    cursor: pointer;
 }
 
 /* Footer */
@@ -364,8 +374,8 @@ c.btn-small:hover {
 }
 
 .c-navbar-side input {
-    width: 250px;
-    margin-right: 3rem;
+    width: 45vw;
+    margin-right: 1rem;
 }
 
 .c-navbar-side-menu {
