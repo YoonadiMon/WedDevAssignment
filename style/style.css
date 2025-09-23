@@ -15,13 +15,13 @@
     --sec-bg-color: var(--LightGreen);
     --text-color: var(--Black);
 
-    /* color i use for chatbox */
+    /* colors used for chatbox */
 
     --bg-color-light:#f8fafc;
-    --bg-color-light2:#f1f5f9;
-    --bg-color-light3:#ecfdf5;
+    --bg-color-light-2:#f1f5f9;
+    --bg-color-light-3:#ecfdf5;
     --border-color:#e2e8f0;
-    --text-color2:#94a3b8;
+    --text-color-2:#94a3b8;
     --text-heading:#334155;
     --btn-color:#10b981;
     --btn-color-hover:#059669;
@@ -34,10 +34,10 @@
     --text-color: var(--White);
 
     --bg-color-light: #1a1a1a;
-    --bg-color-light2: #222222;
-    --bg-color-light3: #2c2c2c;
+    --bg-color-light-2: #222222;
+    --bg-color-light-3: #2c2c2c;
     --border-color: #444444;
-    --text-color2: #a0a0a0;
+    --text-color-2: #a0a0a0;
     --text-heading: #f0f0f0;
     --btn-color: #10b981;       /* Optional: keep your emerald green */
     --btn-color-hover: #059669; /* Optional: hover color */
@@ -877,7 +877,7 @@ Desktop (e.g., ~1150px - 1200px) */
 /* start: Sidebar styling */
 .chat-sidebar {
   width: 64px;
-  background-color: var(--bg-color-light2);
+  background-color: var(--bg-color-light-2);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -917,7 +917,7 @@ Desktop (e.g., ~1150px - 1200px) */
   padding: 14px 8px;
   font-size: 22px;
   text-decoration: none;
-  color: var(--text-color2);
+  color: var(--text-color-2);
   position: relative;
   transition: all 0.2s ease;
   border-radius: 8px;
@@ -1017,7 +1017,7 @@ Desktop (e.g., ~1150px - 1200px) */
   align-items: center;
   padding: 10px 16px;
   text-decoration: none;
-  color: var(--text-color2);
+  color: var(--text-color-2);
   font-size: 14px;
   font-weight: 500;
   transition: all 0.15s ease;
@@ -1029,13 +1029,13 @@ Desktop (e.g., ~1150px - 1200px) */
 }
 /* Profile dropdown links active */
 .chat-sidebar-profile-dropdown a:active {
-  background-color: var(--bg-color-light2);
+  background-color: var(--bg-color-light-2);
 }
 /* Profile dropdown icon spacing */
 .chat-sidebar-profile-dropdown a i {
   margin-right: 12px;
   font-size: 16px;
-  color: var(--text-color2);
+  color: var(--text-color-2);
 }
 
 /* start: Content side container for the chat and sidebar */
@@ -1170,7 +1170,7 @@ Desktop (e.g., ~1150px - 1200px) */
 .content-message-title {
   margin-left: 20px;
   margin-right: 20px;
-  color: var(--text-color2);
+  color: var(--text-color-2);
   font-size: 12px;
   font-weight: 600;
   margin-bottom: 8px;
@@ -1206,7 +1206,7 @@ Desktop (e.g., ~1150px - 1200px) */
   object-fit: cover;
   flex-shrink: 0;
   margin-right: 14px;
-  border: 2px solid var(--bg-color-light2);
+  border: 2px solid var(--bg-color-light-2);
 }
 /* Container for message info text */
 .content-message-info {
@@ -1225,7 +1225,7 @@ Desktop (e.g., ~1150px - 1200px) */
 /* Message preview text in sidebar */
 .content-message-text {
   font-size: 13px;
-  color: var(--text-color2);
+  color: var(--text-color-2);
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -1253,13 +1253,13 @@ Desktop (e.g., ~1150px - 1200px) */
 /* Message time stamp */
 .content-message-time {
   font-size: 11px;
-  color: var(--text-color2);
+  color: var(--text-color-2);
   font-weight: 500;
 }
 
 /* start: Conversation pane styles */
 .conversation {
-  background-color: var(--bg-color-light3);
+  background-color: var(--bg-color-light-3);
   height: 100%;
   padding-left: 280px;
   display: none;
@@ -1318,7 +1318,7 @@ Desktop (e.g., ~1150px - 1200px) */
   border-radius: 50%;
   object-fit: cover;
   margin-right: 12px;
-  border: 2px solid var(--bg-color-light2);
+  border: 2px solid var(--bg-color-light-2);
 }
 /* Conversation username */
 .conversation-user-name {
@@ -1333,7 +1333,7 @@ Desktop (e.g., ~1150px - 1200px) */
   overflow-x: hidden;
   height: 100%;
   padding: 24px;
-  background: linear-gradient(to bottom, var(--bg-color-light3), var(--bg-color-light2));
+  background: linear-gradient(to bottom, var(--bg-color-light-3), var(--bg-color-light-2));
 }
 /* Conversation messages wrapper */
 .conversation-wrapper {
@@ -1419,7 +1419,7 @@ Desktop (e.g., ~1150px - 1200px) */
 /* Message time text */
 .conversation-item-time {
   font-size: 10px;
-  color: var(--text-color2);
+  color: var(--text-color-2);
   display: block;
   text-align: right;
   margin-top: 6px;
@@ -1435,7 +1435,7 @@ Desktop (e.g., ~1150px - 1200px) */
 .coversation-divider {
   text-align: center;
   font-size: 12px;
-  color: var(--text-color2);
+  color: var(--text-color-2);
   margin: 32px 0 24px 0;
   position: relative;
   font-weight: 600;
@@ -1502,7 +1502,7 @@ Desktop (e.g., ~1150px - 1200px) */
 }
 /* Placeholder color for chat input */
 .conversation-form-input::placeholder {
-  color: var(--text-color2);
+  color: var(--text-color-2);
 }
 .conversation-form-button {
   width: 50px;
@@ -1535,13 +1535,13 @@ Desktop (e.g., ~1150px - 1200px) */
   justify-content: center;
   padding: 40px;
   padding-left: calc(280px + 40px);
-  color: var(--text-color2);
+  color: var(--text-color-2);
   text-align: center;
 }
 .conversation-default i {
   font-size: 48px;
   margin-bottom: 16px;
-  color: var(--bg-color-light2);
+  color: var(--bg-color-light-2);
 }
 .conversation-default p {
   margin-top: 8px;
