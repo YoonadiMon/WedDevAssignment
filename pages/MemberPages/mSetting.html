@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mSetting Page</title>
+
+    <link rel="stylesheet" href="../../style/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="cover" class="" onclick="hideMenu()"></div>
+
+    <!-- Logo + Name & Navbar -->
+    <header>
+        <!-- Logo + Name -->
+        <section class="c-logo-section">
+            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+            <div class="c-text">ReLeaf</div>
+        </section>
+
+        <!-- Menu Links -->
+
+        <!-- Menu Links Mobile -->
+        <nav class="c-navbar-side">
+            <!-- <input type="text" placeholder="Search..." id="searchBar" class="search-bar"> -->
+            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
+                id="menuBtn">
+            <div id="sidebarNav" class="c-navbar-side-menu">
+
+                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
+                    class="close-btn">
+                <div class="c-navbar-side-items">
+                    <section class="c-navbar-side-more">
+                        <button id="themeToggle1">
+                            <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                        </button>
+
+                        <div class="c-chatbox" id="chatboxMobile">
+                            <a href="../../pages/MemberPages/mChat.html">
+                                <img src="../../assets/images/chat-light.svg" alt="Chatbox">
+                            </a>
+                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                        </div>
+
+                        <!-- <a href="../../pages/MemberPages/mSetting.html">
+                                <img src="../../assets/images/setting-light.svg" alt="Settings">
+                            </a> -->
+                    </section>
+
+                    <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                    <a href="../../pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
+                    <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                    <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                </div>
+            </div>
+
+        </nav>
+
+        <!-- Menu Links Desktop + Tablet -->
+        <nav class="c-navbar-desktop">
+            <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+            <a href="../../pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
+            <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+            <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+            <a href="../../pages/CommonPages/aboutUs.html">About</a>
+        </nav>
+        <section class="c-navbar-more">
+            <!-- <input type="text" placeholder="Search..." id="searchBar" class="search-bar"> -->
+
+            <button id="themeToggle2">
+                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+            </button>
+            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+            </a>
+
+
+            <!-- <a href="../../pages/MemberPages/mSetting.html">
+                    <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
+                </a> -->
+        </section>
+
+    </header>
+
+    <!-- Main Content -->
+    <main>
+
+        <!-- Results -->
+        <div class="results" id="results"></div>
+        </section>
+    </main>
+
+
+
+    <!-- <main class="settings">
+        <h1>Settings</h1>
+        <ul class="settings-list">
+            <li>
+                <div class="icon-box">
+                    <a href="../MemberPages/mProfile.html">
+                        <img src="../../assets/images/edit-profile-light.svg" alt="Edit Profile Picture"
+                            class="edit-profile-pic">
+                    </a>
+                </div>
+                <span>Edit Profile</span>
+            </li>
+
+            <li id="themeToggleLi">
+                <div class="icon-box">
+                    <img src="../../assets/images/dark-mode-icon.svg" alt="dark-mode-icon">
+                </div>
+                <span>Dark Mode</span>
+
+            </li>
+            <li>
+                <div class="icon-box">
+                    <a href="../MemberPages/">
+                        <img src="../../assets/images/lock-icon-light.svg" alt="Privacy & Security"
+                            class="privacy-security-icon">
+                    </a>
+                </div>
+                <span>Privacy & Security</span>
+            </li>
+            <li>
+                <div class="icon-box">
+                    <a href="../MemberPages/">
+                        <img src="../../assets/images/help-support-icon-light.svg" alt="Help & Support"
+                            class="help-support-icon">
+                    </a>
+
+                </div>
+                <span>Help & Support</span>
+            </li>
+            <li>
+                <div class="icon-box">
+                    <a href="../../CommonPages/loginPage.html">
+                        <img src="../../assets/images/logout-icon-light.svg" alt="Log out" class="logout-icon">
+                    </a>
+
+                </div>
+                <span>Log out</span>
+            </li>
+        </ul>
+    </main> -->
+
+
+    <main class="settings">
+        <h1>Settings</h1>
+        <ul class="settings-list">
+            <li data-href="../MemberPages/mProfile.html">
+                <div class="icon-box">
+                    <img src="../../assets/images/edit-profile-light.svg" alt="Edit Profile Picture"
+                        class="edit-profile-pic">
+                </div>
+                <span>Edit Profile</span>
+            </li>
+
+            <li id="themeToggleLi">
+                <div class="icon-box">
+                    <img src="../../assets/images/dark-mode-icon.svg" alt="dark-mode-icon">
+                </div>
+                <span>Dark Mode</span>
+            </li>
+
+            <li data-href="../MemberPages/privacy.html">
+                <div class="icon-box">
+                    <img src="../../assets/images/lock-icon-light.svg" alt="Privacy & Security"
+                        class="privacy-security-icon">
+                </div>
+                <span>Privacy & Security</span>
+            </li>
+
+            <li data-href="../MemberPages/help.html">
+                <div class="icon-box">
+                    <img src="../../assets/images/help-support-icon-light.svg" alt="Help & Support"
+                        class="help-support-icon">
+                </div>
+                <span>Help & Support</span>
+            </li>
+
+            <li data-href="../../CommonPages/loginPage.html">
+                <div class="icon-box">
+                    <img src="../../assets/images/logout-icon-light.svg" alt="Log out" class="logout-icon">
+                </div>
+                <span>Log out</span>
+            </li>
+        </ul>
+    </main>
+
+    <script>const isAdmin = false;</script>
+    <script src="../../javascript/mainScript.js"></script>
+    <script src="../../javascript/setting.js"></script>
+
+</body>
+
+</html>
