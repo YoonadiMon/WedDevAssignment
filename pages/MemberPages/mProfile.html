@@ -1,11 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>mProfile Page</title>
+
+    <link rel="stylesheet" href="../../style/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
 </head>
+
 <body>
-    <p>nothing here</p>
+    <div id="cover" class="" onclick="hideMenu()"></div>
+
+    <!-- Logo + Name & Navbar -->
+    <header>
+        <!-- Logo + Name -->
+        <section class="c-logo-section">
+            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+            <div class="c-text">ReLeaf</div>
+        </section>
+
+        <!-- Menu Links Mobile -->
+        <nav class="c-navbar-side">
+            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
+                id="menuBtn">
+            <div id="sidebarNav" class="c-navbar-side-menu">
+                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
+                    class="close-btn">
+                <div class="c-navbar-side-items">
+                    <section class="c-navbar-side-more">
+                        <button id="themeToggle1">
+                            <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                        </button>
+
+                        <div class="c-chatbox" id="chatboxMobile">
+                            <a href="../../pages/MemberPages/mChat.html">
+                                <img src="../../assets/images/chat-light.svg" alt="Chatbox">
+                            </a>
+                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                        </div>
+                    </section>
+
+                    <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                    <a href="../../pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
+                    <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                    <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Menu Links Desktop + Tablet -->
+        <nav class="c-navbar-desktop">
+            <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+            <a href="../../pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
+            <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+            <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+            <a href="../../pages/CommonPages/aboutUs.html">About</a>
+        </nav>
+
+        <section class="c-navbar-more">
+            <button id="themeToggle2">
+                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+            </button>
+            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+            </a>
+        </section>
+    </header>
+
+
+    <!-- Main Content -->
+    <main>
+        <div class="results" id="results"></div>
+
+        <div class="mprofile-container">
+            <main>
+                <div class="left">
+
+                    <!-- back btn -->
+                    <div class="back-button-container">
+                        <a href="../MemberPages/mSetting.html" class="btn-back-mProfile" title="Back to Settings">
+                            <img src="../../assets/images/icon-back-light.svg" alt="Back icon" />
+                        </a>
+                    </div>
+
+
+                    <!-- avatar content -->
+                    <div class="avatar" id="avatar">
+                        <img id="avatarImg" src="" alt="avatar" style="display:none">
+                    </div>
+
+                    <div class="change-wrap">
+                        <button id="changeBtn" class="btn-change">🎨 New Style</button>
+                        <div class="hint" id="fileHint">Generated avatar</div>
+                    </div>
+                </div>
+
+
+
+                <div class="right">
+                    <!-- form content -->
+                    <h1>Editing Profile</h1>
+
+                    <div class="form-row">
+                        <div class="label">Full Name:</div>
+                        <input id="fullName" class="input" type="text" placeholder="Enter your full name" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Username:</div>
+                        <input id="username" class="input" type="text" placeholder="Enter your username" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Phone:</div>
+                        <input id="phone" class="input" type="text" placeholder="Enter your phone number" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Email:</div>
+                        <input id="email" class="input" type="email" placeholder="Enter your email address" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Gender:</div>
+                        <select id="gender" class="input small">
+                            <option value="">Select gender</option>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Non-binary">Non-binary</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Bio:</div>
+                        <textarea id="bio" class="input" placeholder="Tell us about yourself..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Location:</div>
+                        <select id="location" class="input">
+                            <option value="">Select location</option>
+                            <option>Malaysia</option>
+                            <option>Singapore</option>
+                            <option>Indonesia</option>
+                            <option>Thailand</option>
+                            <option>United Kingdom</option>
+                            <option>United States</option>
+                        </select>
+                    </div>
+
+                    <div class="save-wrap">
+                        <button id="saveBtn" class="btn-save">Save Changes</button>
+                    </div>
+                </div>
+            </main>
+            <div id="toast" class="toast" role="status" aria-live="polite"></div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>const isAdmin = false;</script>
+    <script src="../../javascript/mainScript.js"></script>
+    <script src="../../javascript/mProfile.js"></script>
 </body>
+
 </html>
