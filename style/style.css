@@ -141,6 +141,13 @@ footer a:hover {
     color: var(--MainGreen);
 }
 
+label {
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
 /* Unique Classes */
 .stopScroll {
   overflow: hidden;
@@ -324,6 +331,13 @@ c.btn-small:hover {
 
 .c-logo {
     width: 1.5rem;  
+}
+
+.c-logo-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
 }
 
 .c-footer-info-section {
