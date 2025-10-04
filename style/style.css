@@ -14,6 +14,13 @@
     --bg-color: var(--White);
     --sec-bg-color: var(--LightGreen);
     --text-color: var(--Black);
+    
+    /* others */
+    --Yellow: hsl(48, 100%, 50%);
+    --LowRed: hsla(0, 100%, 50%, 0.5);
+    --LowYellow: hsla(48, 100%, 49%, 0.5);
+    --LowGreen: hsla(145, 63%, 49%, 0.5);
+    --DarkGray: hsla(145, 63%, 49%, 0.1);
 
     /* colors used for chatbox */
 
@@ -27,12 +34,12 @@
     --btn-color-hover:#059669;
 
     --list-color: rgba(239, 68, 68, 0.1);
-  --list-color-2: rgba(239, 68, 68, 0.15);
-  --list-color-3: #ef4444;
-  
-  /* --list-color-5: rgba(239, 68, 68, 0.1);
-  --list-color-6: rgba(239, 68, 68, 0.15); */
-  --shadow-color: rgba(16, 185, 129, 0.15);
+    --list-color-2: rgba(239, 68, 68, 0.15);
+    --list-color-3: #ef4444;
+    
+    /* --list-color-5: rgba(239, 68, 68, 0.1);
+    --list-color-6: rgba(239, 68, 68, 0.15); */
+    --shadow-color: rgba(16, 185, 129, 0.15);
 
 
 }
