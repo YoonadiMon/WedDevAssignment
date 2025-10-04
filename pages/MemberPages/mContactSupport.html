@@ -13,6 +13,136 @@
         <link
             href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
             rel="stylesheet">
+
+        <style>
+            .support-container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            .help-section {
+                background-color: var(--bg-color);
+                border-radius: 8px;
+                padding: 20px 10px 15px 10px;
+                text-align: center;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .help-icon {
+                width: 80px;
+                height: 80px;
+                background-color: var(--Gray);
+                border-radius: 50%;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 48px;
+                color: var(--White);
+                margin-bottom: 20px;
+            }
+
+          .help-section h2 {
+              font-size: 24px;
+              margin-bottom: 15px;
+              font-weight: 400;
+          }
+
+          .help-section p {
+              color: var(--Gray);
+              margin-bottom: 25px;
+              line-height: 1.6;
+              max-width: 800px;
+              margin-left: auto;
+              margin-right: auto;
+          }
+
+          .open-ticket-btn {
+              background-color: var(--MainGreen);
+              color: white;
+              border: none;
+              padding: 12px 30px;
+              font-size: 16px;
+              border-radius: 4px;
+              cursor: pointer;
+              transition: background-color 0.3s;
+          }
+
+          .open-ticket-btn:hover {
+              background-color: var(--MainGreen);
+          }
+
+          .tickets-section {
+              background-color: var(--DarkerGray);
+              border-radius: 8px;
+              padding: 30px;
+              margin-bottom: 30px;
+          }
+
+          .tickets-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 30px;
+          }
+
+          .tickets-header h3 {
+              font-size: 22px;
+              font-weight: 400;
+              color: var(--White);
+          }
+
+          .add-new-btn {
+              background-color: var(--MainGreen);
+              color: var(--White);
+              border: none;
+              padding: 10px 20px;
+              font-size: 14px;
+              border-radius: 20px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              transition: background-color 0.3s;
+          }
+
+          .add-new-btn:hover {
+              background-color: var(--LightGreen);
+              color: var(--Black);
+          }
+
+          .tickets-table {
+              width: 100%;
+              border-collapse: collapse;
+          }
+
+          .tickets-table thead {
+              border-bottom: 1px solid var(--DarkGray);
+          }
+
+          .tickets-table th {
+              padding: 15px;
+              text-align: left;
+              font-weight: 400;
+              color: var(--Gray);
+              font-size: 14px;
+          }
+
+          .tickets-table tbody tr {
+              border-bottom: 1px solid var(--DarkGray);
+          }
+
+          .tickets-table td {
+              padding: 20px 15px;
+              color: var(--White);
+          }
+
+          .no-tickets {
+              text-align: center;
+              padding: 40px;
+              color: var(--Gray);
+          }
+        </style>
     </head>
 
     <body>
@@ -98,10 +228,39 @@
 
         <!-- Main Content -->
         <main>
-            <!-- Content Placeholder -->
-            <section class="content" id="content">
-                <p> Welcome to ReLeaf. Your content will appear here.</p>
-            </section>
+            <!-- Content Section -->
+            <!-- Help Section -->
+            <div class="help-section">
+                <div class="help-icon">?</div>
+                <h2>Need some help?</h2>
+                <p>Our team is happy to help or answer any question you may have. All you need to do is to create a support ticket, ask your question and our team will respond as soon as possible.</p>
+                <button class="open-ticket-btn">Open a support ticket</button>
+            </div>
+
+            <!-- Tickets Section -->
+            <div class="tickets-section">
+                <div class="tickets-header">
+                    <h3>Your Support Tickets</h3>
+                    <button class="add-new-btn">Add New +</button>
+                </div>
+
+                <table class="tickets-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Last Reply</th>
+                            <th>Category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="4" class="no-tickets">No support tickets yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
             <!-- Search & Results -->
             <section class="search-container" id="searchContainer" style="display: none;">
