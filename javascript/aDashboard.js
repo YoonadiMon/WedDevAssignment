@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalTickets = 522;
     const pendingTickets = 32;
     const resolvedTickets = totalTickets - pendingTickets;
-    const mostCommonIssue = "Log In Issues";
+    const mostCommonIssue = "Login Issues";
     const mostCommonPercentage = 40;
 
     const weeklySignups = [
