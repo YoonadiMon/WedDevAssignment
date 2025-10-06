@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Support Ticket - ReLeaf</title>
+    <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
+
+    <link rel="stylesheet" href="../../style/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+    <style>
+        .support-ticket-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            color: var(--MainGreen);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .back-button:hover {
+            color: var(--btn-color-hover);
+        }
+
+        .ticket-form-section {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .ticket-form-section h2 {
+            font-size: 24px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            color: var(--text-heading);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-heading);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--MainGreen);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .priority-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        .priority-low { color: var(--MainGreen); }
+        .priority-medium { color: #f59e0b; }
+        .priority-high { color: #ef4444; }
+
+        .file-upload {
+            border: 2px dashed var(--border-color);
+            border-radius: 6px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: var(--MainGreen);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--Gray);
+        }
+
+        .file-upload-text {
+            color: var(--Gray);
+            margin-bottom: 10px;
+        }
+
+        .file-upload-hint {
+            font-size: 12px;
+            color: var(--Gray);
+        }
+
+        .attachments-preview {
+            margin-top: 15px;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: var(--sec-bg-color);
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        .attachment-name {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .remove-attachment {
+            background: none;
+            border: none;
+            color: var(--Red);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .cancel-btn {
+            background-color: transparent;
+            color: var(--Gray);
+            border: 1px solid var(--border-color);
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .cancel-btn:hover {
+            background-color: var(--sec-bg-color);
+        }
+
+        .submit-btn {
+            background-color: var(--MainGreen);
+            color: var(--White);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--btn-color-hover);
+        }
+
+        .submit-btn:disabled {
+            background-color: var(--Gray);
+            cursor: not-allowed;
+        }
+
+        .info-section {
+            background-color: var(--sec-bg-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .info-section h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--text-heading);
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-list li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .info-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--MainGreen);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .cancel-btn, .submit-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cover" class="" onclick="hideMenu()"></div>
+
+    <!-- Logo + Name & Navbar -->
+    <header>
+        <!-- Logo + Name -->
+        <section class="c-logo-section">
+            <a href="../../pages/MemberPages/memberIndex.html" class="c-logo-link">
+                <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                <div class="c-text">ReLeaf</div>
+            </a>
+        </section>
+
+        <!-- Menu Links Mobile -->
+        <nav class="c-navbar-side">
+            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
+                id="menuBtn">
+            <div id="sidebarNav" class="c-navbar-side-menu">
+
+                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
+                    class="close-btn">
+                <div class="c-navbar-side-items">
+                    <section class="c-navbar-side-more">
+                        <button id="themeToggle1">
+                            <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                        </button>
+
+                        <div class="c-chatbox" id="chatboxMobile">
+                            <a href="../../pages/MemberPages/mChat.html">
+                                <img src="../../assets/images/chat-light.svg" alt="Chatbox">
+                            </a>
+                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                        </div>
+
+                        <a href="../../pages/MemberPages/mSetting.html">
+                            <img src="../../assets/images/setting-light.svg" alt="Settings">
+                        </a>
+                    </section>
+
+                    <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                    <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                    <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                </div>
+            </div>
+
+        </nav>
+
+        <!-- Menu Links Desktop + Tablet -->
+        <nav class="c-navbar-desktop">
+            <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+            <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+            <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+            <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+            <a href="../../pages/CommonPages/aboutUs.html">About</a>
+        </nav>
+        <section class="c-navbar-more">
+            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+            
+            <button id="themeToggle2">
+                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+            </button>
+            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+            </a>
+
+            <a href="../../pages/MemberPages/mSetting.html">
+                <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
+            </a>
+        </section>
+    
+    </header>
+
+    <hr>
+
+    <!-- Main Content -->
+    <main>
+        <div class="support-ticket-container">
+            <!-- Back Button -->
+            <a href="../../pages/MemberPages/mContactSupport.html" class="back-button">
+                ← Back to Support
+            </a>
+
+            <!-- Ticket Form Section -->
+            <div class="ticket-form-section">
+                <h2>Create Support Ticket</h2>
+                
+                <form id="supportTicketForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ticketSubject">Subject *</label>
+                            <input type="text" id="ticketSubject" name="subject" required placeholder="Brief description of your issue">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ticketCategory">Category *</label>
+                            <select id="ticketCategory" name="category" required>
+                                <option value="">Select a category</option>
+                                <option value="technical">Technical Issue</option>
+                                <option value="account">Account Problem</option>
+                                <option value="billing">Billing & Payment</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="bug">Bug Report</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ticketPriority">Priority *</label>
+                            <select id="ticketPriority" name="priority" required>
+                                <option value="">Select priority</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                            <div class="priority-indicator" id="priorityIndicator">
+                                <!-- Priority indicator will be shown here -->
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ticketEmail">Contact Email *</label>
+                            <input type="email" id="ticketEmail" name="email" required placeholder="your@email.com">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ticketDescription">Description *</label>
+                        <textarea id="ticketDescription" name="description" required placeholder="Please provide detailed information about your issue..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Attachments (Optional)</label>
+                        <div class="file-upload" id="fileUploadArea">
+                            <div class="upload-icon">📎</div>
+                            <div class="file-upload-text">Click to upload files or drag and drop</div>
+                            <div class="file-upload-hint">Maximum file size: 10MB. Supported formats: PDF, JPG, PNG, DOC</div>
+                            <input type="file" id="fileInput" multiple>
+                        </div>
+                        <div class="attachments-preview" id="attachmentsPreview">
+                            <!-- Attachments will be listed here -->
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="window.location.href='../../pages/MemberPages/mSupport.html'">Cancel</button>
+                        <button type="submit" class="submit-btn" id="submitBtn">Submit Ticket</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Information Section -->
+            <div class="info-section">
+                <h3>Before Submitting Your Ticket</h3>
+                <ul class="info-list">
+                    <li>Please check our <a href="../../pages/CommonPages/mainFAQ.html" style="color: var(--MainGreen);">FAQs</a> to see if your question has already been answered</li>
+                    <li>Provide as much detail as possible to help us resolve your issue quickly</li>
+                    <li>Include any error messages you're receiving</li>
+                    <li>For technical issues, mention your device and browser information</li>
+                    <li>We typically respond within 24-48 hours</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Search & Results -->
+        <section class="search-container" id="searchContainer" style="display: none;">
+            <!-- Tabs -->
+            <div class="tabs" id="tabs">
+                <div class="tab active" data-type="all">All</div>
+                <div class="tab" data-type="profiles">Profiles</div>
+                <div class="tab" data-type="blogs">Blogs</div>
+                <div class="tab" data-type="events">Events</div>
+                <div class="tab" data-type="trades">Trades</div>
+            </div>
+
+            <!-- Results -->
+            <div class="results" id="results"></div>
+        </section>
+    </main>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <!-- Column 1 -->
+        <section class="c-footer-info-section">
+            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+            <div class="c-text">ReLeaf</div>
+            <div class="c-text c-text-center">
+                "Relief for the Planet, One Leaf at a Time."
+                <br>
+                "Together, We Can ReLeaf the Earth."
+            </div>
+            <div class="c-text c-text-label">
+                +60 12 345 6789
+            </div>
+            <div class="c-text">
+                abc@gmail.com
+            </div>
+        </section>
+        
+        <!-- Column 2 -->
+        <section class="c-footer-links-section">
+            <div>
+                <b>My Account</b><br>
+                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+            </div>
+            <div>
+                <b>Helps</b><br>
+                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+            </div>
+            <div>
+                <b>Community</b><br>
+                <a href="../../pages/CommonPages/mainEvent.html">Events</a><br>
+                <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
+                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+            </div>
+        </section>
+    </footer>
+
+    <script>
+        const isAdmin = false;        
+    </script>
+    <script src="../../javascript/mCreateTicket.js"></script>
+    <script src="../../javascript/mainScript.js"></script>
+</body>
+</html>
