@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             alert('Login successful!');
 
-            // GO TO MEMBER INDEX AFTER SUCCESSFUL REGISTER 
+            // GO TO MEMBER INDEX AFTER SUCCESSFUL LOGIN
         });
     }
     
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             alert('Registration successful!');
 
-            // GO TO MEMBER INDEX AFTER SUCCESSFUL REGISTER 
+            // GO TO LOGIN AFTER SUCCESSFUL REGISTER 
         });
     }
 });
