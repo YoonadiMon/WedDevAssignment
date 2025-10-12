@@ -103,19 +103,22 @@
             }
 
             .auth-password-wrapper .password-toggle-btn {
+                position: absolute;
+                right: 0.5rem;
                 background: transparent;
                 border: none;
-                cursor: pointer;
                 padding: 0.25rem;
+                cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                transition: opacity 0.2s ease;
             }
 
             .password-toggle-btn img {
                 width: 18px;
                 height: 18px;
-                transition: all 0.2s ease;
+                object-fit: contain;
             }
 
             .password-toggle-btn img {
@@ -427,7 +430,7 @@
                         <label for="registerPassword">Password</label>
                         <section class="auth-password-wrapper">
                             <input class="c-input" type="password" id="registerPassword" name="password" placeholder="Enter your password (min 8 characters)" required>
-                            <button class="password-toggle-btn" id="showPw2" type="button"> 
+                            <button id="showPw2" type="button"> 
                                 <img src="../../assets/images/visibility-on-btn.svg" alt="Show Password">
                             </button>   
                         </section>
@@ -438,7 +441,7 @@
                         <label for="registerConfirmPassword">Confirm Password</label>
                         <section class="auth-password-wrapper">
                             <input class="c-input" type="password" id="registerConfirmPassword" name="confirm-password" placeholder="Re-enter your password" required>
-                            <button class="password-toggle-btn" id="showPw3" type="button"> 
+                            <button id="showPw3" type="button"> 
                                 <img src="../../assets/images/visibility-on-btn.svg" alt="Show Password">
                             </button>   
                         </section>

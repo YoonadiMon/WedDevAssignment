@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Event Details - ReLeaf</title>
+        <title>ReLeaf - Event Details</title>
         <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
 
         <link rel="stylesheet" href="../../style/style.css">
@@ -62,21 +62,10 @@
                 padding: 2rem;
             }
 
-            .event-type-badge {
-                display: inline-block;
-                background: var(--LightGreen);
-                color: var(--MainGreen);
-                padding: 0.5rem 1rem;
-                border-radius: 20px;
-                font-size: 0.85rem;
-                font-weight: 600;
-                margin-bottom: 1rem;
-            }
-
             .event-title {
                 font-size: 2.5rem;
                 font-weight: 700;
-                color: var(--text-color);
+                color: var(--MainGreen);
                 margin-bottom: 1rem;
                 line-height: 1.2;
             }
@@ -85,7 +74,7 @@
                 display: flex;
                 flex-wrap: wrap;
                 gap: 2rem;
-                color: var(--DarkerGray);
+                color: var(--text-color);
                 font-size: 0.95rem;
                 margin-bottom: 1.5rem;
             }
@@ -105,7 +94,7 @@
                 align-items: center;
                 gap: 1rem;
                 padding: 1rem;
-                background: var(--sec-bg-color);
+                background: linear-gradient(135deg, var(--LightGreen), var(--MainGreen));
                 border-radius: 10px;
                 margin-top: 1rem;
             }
@@ -126,7 +115,7 @@
             .event-host-info h4 {
                 font-size: 1rem;
                 font-weight: 600;
-                color: var(--text-color);
+                color: var(--Black);
                 margin-bottom: 0.25rem;
             }
 
@@ -180,10 +169,10 @@
             }
 
             .event-tag {
-                background: var(--LightGreen);
-                color: var(--MainGreen);
+                background: var(--MainGreen);
+                color: var(--Black);
                 padding: 0.5rem 1rem;
-                border-radius: 20px;
+                border-radius: 8px;
                 font-size: 0.85rem;
                 font-weight: 500;
             }
@@ -206,7 +195,7 @@
             .event-attendees {
                 text-align: center;
                 padding: 1.5rem;
-                background: var(--sec-bg-color);
+                background: var(--LightGreen);
                 border-radius: 12px;
                 margin-bottom: 1.5rem;
             }
@@ -214,12 +203,16 @@
             .event-attendees-count {
                 font-size: 2.5rem;
                 font-weight: 700;
-                color: var(--MainGreen);
+                color: var(--text-color);
                 margin-bottom: 0.5rem;
             }
 
+            .dark-mode .event-attendees {
+                background: var(--LowGreen);
+            }
+
             .event-attendees-label {
-                color: var(--DarkerGray);
+                color: var(--text-color);
                 font-size: 0.9rem;
             }
 
@@ -242,7 +235,7 @@
             }
 
             .event-info-label {
-                color: var(--DarkerGray);
+                color: var(--Gray);
                 font-weight: 500;
             }
 
@@ -255,21 +248,20 @@
             /* Register Button */
             .register-button {
                 width: 100%;
-                background: linear-gradient(135deg, var(--MainGreen), var(--LightGreen));
+                background: var(--MainGreen);
                 color: var(--White);
                 border: none;
                 padding: 1rem 2rem;
                 font-size: 1.1rem;
-                font-weight: 700;
+                font-weight: 900;
                 border-radius: 10px;
                 cursor: pointer;
                 transition: all 0.3s ease;
-                box-shadow: 0 4px 16px var(--Gray);
+                box-shadow: 0 4px 16px var(--LowGreen);
             }
 
             .register-button:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 6px 24px var(--Gray);
             }
 
             .register-button:active {
@@ -290,7 +282,7 @@
                 left: 0;
                 width: 100vw;
                 height: 100vh;
-                background: rgba(0, 0, 0, 0.6);
+                background: var(--DarkerGray);
                 z-index: 1000;
                 align-items: center;
                 justify-content: center;
@@ -306,7 +298,7 @@
                 padding: 2rem;
                 max-width: 500px;
                 width: 90%;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 8px 32px var(--DarkerGray);
                 animation: modalSlideIn 0.3s ease;
             }
 
@@ -398,10 +390,6 @@
             .modal-btn-confirm {
                 background: var(--MainGreen);
                 color: var(--White);
-            }
-
-            .modal-btn-confirm:hover {
-                background: #059669;
             }
 
             /* Success Modal */
@@ -539,7 +527,6 @@
                 <div class="event-header">
                     <img src="../../assets/images/event1.jpg" alt="Event Banner" class="event-banner" id="eventBanner" onerror="this.src='../../assets/images/Logo.png'">
                     <div class="event-header-content">
-                        <span class="event-type-badge" id="eventTypeBadge">In-Person</span>
                         <h1 class="event-title" id="eventTitle">Beach Clean-up Drive 2025</h1>
                         
                         <div class="event-meta">
@@ -625,7 +612,7 @@
                                 </li>
                             </ul>
 
-                            <button class="register-button" id="registerBtn" onclick="showConfirmation()">
+                            <button class="register-button" id="registerBtn">
                                 Register for Event
                             </button>
                         </div>

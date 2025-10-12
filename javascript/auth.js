@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializePage();
 });
 
-
 // Password visibility
 document.addEventListener('DOMContentLoaded', function() {    
     // Toggle password visibility functionality

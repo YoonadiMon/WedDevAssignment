@@ -1,6 +1,3 @@
-// Import event data from eventBrowse.js
-// Note: Make sure eventBrowse.js is loaded before this script
-
 // Sample user data (in production, this would come from logged-in user session/account)
 const currentUser = {
     id: 12345,
@@ -17,9 +14,17 @@ function getEventIdFromURL() {
 
 // Load event data on page load
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, loading event data...');
     const eventId = parseInt(getEventIdFromURL());
+    console.log('Event ID:', eventId);
+    console.log('Available events:', eventsData);
     loadEventData(eventId);
     loadUserData();
+
+    const registerBtn = document.getElementById('registerBtn');
+    if (registerBtn && !registerBtn.disabled) {
+        registerBtn.addEventListener('click', showConfirmation);
+    }
 });
 
 // Load event details
@@ -108,9 +113,12 @@ function loadUserData() {
 
 // Show confirmation modal
 function showConfirmation() {
+    console.log('Register button clicked!');
     const modal = document.getElementById('confirmModal');
+    console.log('Modal element:', modal);
     modal.classList.add('active');
     document.body.classList.add('stopScroll');
+    console.log('Modal should now be visible');
 }
 
 // Hide confirmation modal

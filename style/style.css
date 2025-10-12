@@ -535,7 +535,7 @@ c.btn-small:hover {
 .c-input-select {
     appearance: none; /* removes browser default */
     cursor: pointer;
-    background-image: url(../assets/images/dropdown-icon-light.svg);
+    background-image: url(../../assets/images/dropdown-icon-light.svg);
     background-size: 1.5rem;
     padding-right: 2.5rem;
     background-repeat: no-repeat;
@@ -543,7 +543,13 @@ c.btn-small:hover {
 }
 
 .dark-mode .c-input-select {
+    appearance: none;
+    cursor: pointer;
     background-image: url(../assets/images/dropdown-icon-dark.svg);
+    background-size: 1.5rem;
+    padding-right: 2.5rem;
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
 }
 
 /* Sizes */
@@ -683,7 +689,7 @@ c.btn-small:hover {
   justify-content: center;
 }
 
-/* BREAKPINTS FOR RESPONSIVENESS */
+/* BREAKPOINTS FOR RESPONSIVENESS */
 
 /* Mobile (e.g., ~320px - 576px) -> default
 Tablet (e.g., ~760px - 992px)
