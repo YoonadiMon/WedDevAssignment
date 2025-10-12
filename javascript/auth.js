@@ -53,11 +53,22 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
     // All toggle buttons 
     const toggleButtons = [
-        { buttonId: 'toggleButton', passwordId: 'loginPassword' },
-        { buttonId: 'toggleButton1', passwordId: 'registerPassword' },
-        { buttonId: 'toggleButton2', passwordId: 'registerConfirmPassword' }
+        { buttonId: 'showPw1', passwordId: 'loginPassword' },
+        { buttonId: 'showPw2', passwordId: 'registerPassword' },
+        { buttonId: 'showPw3', passwordId: 'registerConfirmPassword' }
     ];
     
+    const isDark = document.body.classList.contains('dark-mode');
+    toggleButtons.forEach(toggle => {
+        const toggleButton = document.getElementById(toggle.buttonId);
+        const eyeIcon = toggleButton?.querySelector('img');
+        if (eyeIcon) {
+            eyeIcon.src = isDark 
+                ? '../../assets/images/visibility-on-btn-dark.svg' 
+                : '../../assets/images/visibility-on-btn.svg';
+        }
+    });
+
     toggleButtons.forEach(toggle => {
         const toggleButton = document.getElementById(toggle.buttonId);
         const passwordInput = document.getElementById(toggle.passwordId);
@@ -74,8 +85,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Update the eye icon
                 const eyeIcon = toggleButton.querySelector('img');
                 if (eyeIcon) {
-                    eyeIcon.src = isPasswordVisible ? '../../assets/images/visibility-off-btn.svg' : '../../assets/images/visibility-on-btn.svg';
-                    eyeIcon.alt = isPasswordVisible ? 'Hide Password' : 'Show Password';
+                    if (isDark) {
+                        eyeIcon.src = isPasswordVisible 
+                            ? '../../assets/images/visibility-off-btn-dark.svg' 
+                            : '../../assets/images/visibility-on-btn-dark.svg';
+                    } else {
+                        eyeIcon.src = isPasswordVisible 
+                            ? '../../assets/images/visibility-off-btn.svg' 
+                            : '../../assets/images/visibility-on-btn.svg';
+                    }
                 }
             });
         }

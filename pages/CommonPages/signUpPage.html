@@ -15,11 +15,11 @@
             rel="stylesheet">
 
         <style>
-            /* Additional styling unique to page */
             .c-navbar-more {
                 display: flex;
             }
 
+            /* Additional styling unique to page */
             .auth-container {
                 display: flex;
                 align-items: center;
@@ -98,6 +98,7 @@
             }
 
             .auth-password-wrapper input {
+                appearance: none;
                 padding-right: 3rem;
                 flex: 1;
             }
@@ -119,10 +120,6 @@
                 width: 18px;
                 height: 18px;
                 object-fit: contain;
-            }
-
-            .auth-password-wrapper img:hover {
-                opacity: 0.5;
             }
 
             .forgot-pw-link {
@@ -214,25 +211,10 @@
             }
 
             /* Select dropdown styles */
-            .input-select-group {
-                position: relative;
-            }
-
             .input-select-wrapper {
                 position: relative;
                 display: flex;
                 align-items: center;
-            }
-
-            .input-select-wrapper img {
-                position: absolute;
-                right: 0.75rem;
-                top: 50%;
-                transform: translateY(-50%);
-                pointer-events: none;
-                width: 18px;
-                height: 18px;
-                object-fit: contain;
             }
 
             /* Tablet Styles */
@@ -259,19 +241,9 @@
                     padding-right: 2.5rem;
                 }
 
-                .auth-password-wrapper img {
-                    width: 18px;
-                    height: 18px;
-                }
-
                 .error-message-wrapper img {
                     width: 18px;
                     height: 18px;
-                }
-
-                .input-select-wrapper img {
-                    width: 14px;
-                    height: 14px;
                 }
 
                 .auth-form {
@@ -320,12 +292,12 @@
                     <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                     <div class="c-text">ReLeaf</div>
                 </a>
-            </section>        
+            </section>  
             <section class="c-navbar-more">
                 <button id="themeToggle2">
                     <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                 </button>
-            </section>  
+            </section>      
         </header>
 
         <hr>
@@ -353,7 +325,7 @@
                         <label for="loginPassword">Password</label>
                         <section class="auth-password-wrapper">
                             <input class="c-input" type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
-                            <button id="toggleButton" type="button"> 
+                            <button id="showPw1" type="button"> 
                                 <img src="../../assets/images/visibility-on-btn.svg" alt="Show Password">
                             </button>   
                         </section>
@@ -402,10 +374,10 @@
                     </section>
 
                     <!-- Location -->
-                    <section class="auth-input-group input-select-group">
+                    <section class="auth-input-group">
                         <label for="registerLocation">Location</label>
                         <div class="input-select-wrapper">
-                            <select id="registerLocation" name="location" class="c-input c-input-select" required>
+                            <select class="c-input c-input-select" id="registerLocation" name="location" required>
                                 <option value="" disabled selected>Select your location</option>
                                 <option value="malaysia">Malaysia</option>
                                 <option value="singapore">Singapore</option>
@@ -430,7 +402,6 @@
                                 <option value="kedah">Kedah</option>
                                 <option value="perlis">Perlis</option> -->
                             </select>
-                            <img src="../../assets/images/dropdown-icon-light.svg" alt="Dropdown Icon">
                         </div>
                     </section>
 
@@ -439,7 +410,7 @@
                         <label for="registerPassword">Password</label>
                         <section class="auth-password-wrapper">
                             <input class="c-input" type="password" id="registerPassword" name="password" placeholder="Enter your password (min 8 characters)" required>
-                            <button id="toggleButton1" type="button"> 
+                            <button id="showPw2" type="button"> 
                                 <img src="../../assets/images/visibility-on-btn.svg" alt="Show Password">
                             </button>   
                         </section>
@@ -450,7 +421,7 @@
                         <label for="registerConfirmPassword">Confirm Password</label>
                         <section class="auth-password-wrapper">
                             <input class="c-input" type="password" id="registerConfirmPassword" name="confirm-password" placeholder="Re-enter your password" required>
-                            <button id="toggleButton2" type="button"> 
+                            <button id="showPw3" type="button"> 
                                 <img src="../../assets/images/visibility-on-btn.svg" alt="Show Password">
                             </button>   
                         </section>

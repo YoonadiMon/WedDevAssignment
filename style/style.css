@@ -504,8 +504,8 @@ c.btn-small:hover {
     border: 1px solid var(--Gray);
     border-radius: 6px;
     font-size: 1rem;
-    color: var(--Black);
-    background-color: var(--White);
+    color: var(--text-color);
+    background-color: var(--bg-color);
 }
 
 .c-input:focus {
@@ -524,7 +524,7 @@ c.btn-small:hover {
     border: 1px solid var(--Gray);
     border-radius: 6px;
     font-size: 0.875rem;
-    color: var(--Black);
+    color: var(--text-color);
 }
 
 .c-input-textarea {
@@ -535,6 +535,15 @@ c.btn-small:hover {
 .c-input-select {
     appearance: none; /* removes browser default */
     cursor: pointer;
+    background-image: url(../assets/images/dropdown-icon-light.svg);
+    background-size: 1.5rem;
+    padding-right: 2.5rem;
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+}
+
+.dark-mode .c-input-select {
+    background-image: url(../assets/images/dropdown-icon-dark.svg);
 }
 
 /* Sizes */
