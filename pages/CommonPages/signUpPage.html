@@ -98,28 +98,40 @@
             }
 
             .auth-password-wrapper input {
-                appearance: none;
                 padding-right: 3rem;
                 flex: 1;
             }
 
-            .auth-password-wrapper button {
-                position: absolute;
-                right: 0.5rem;
+            .auth-password-wrapper .password-toggle-btn {
                 background: transparent;
                 border: none;
-                padding: 0.25rem;
                 cursor: pointer;
+                padding: 0.25rem;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: opacity 0.2s ease;
             }
 
-            .auth-password-wrapper img {
+            .password-toggle-btn img {
                 width: 18px;
                 height: 18px;
-                object-fit: contain;
+                transition: all 0.2s ease;
+            }
+
+            .password-toggle-btn img {
+                content: url('../../assets/images/visibility-on-btn.svg');
+            }
+
+            .dark-mode .password-toggle-btn img {
+                content: url('../../assets/images/visibility-on-btn-dark.svg');
+            }
+
+            .password-toggle-btn.showing img {
+                content: url('../../assets/images/visibility-off-btn.svg');
+            }
+
+            .dark-mode .password-toggle-btn.showing img {
+                content: url('../../assets/images/visibility-off-btn-dark.svg');
             }
 
             .forgot-pw-link {
@@ -241,6 +253,11 @@
                     padding-right: 2.5rem;
                 }
 
+                .password-toggle-btn img {
+                    width: 18px;
+                    height: 18px;
+                }
+
                 .error-message-wrapper img {
                     width: 18px;
                     height: 18px;
@@ -325,7 +342,7 @@
                         <label for="loginPassword">Password</label>
                         <section class="auth-password-wrapper">
                             <input class="c-input" type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
-                            <button id="showPw1" type="button"> 
+                            <button class= "password-toggle-btn" id="showPw1" type="button"> 
                                 <img src="../../assets/images/visibility-on-btn.svg" alt="Show Password">
                             </button>   
                         </section>

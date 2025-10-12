@@ -49,31 +49,24 @@ document.addEventListener('DOMContentLoaded', function() {
     initializePage();
 });
 
+
 // Password visibility
-document.addEventListener('DOMContentLoaded', function() {
-    // All toggle buttons 
+document.addEventListener('DOMContentLoaded', function() {    
+    // Toggle password visibility functionality
     const toggleButtons = [
         { buttonId: 'showPw1', passwordId: 'loginPassword' },
         { buttonId: 'showPw2', passwordId: 'registerPassword' },
         { buttonId: 'showPw3', passwordId: 'registerConfirmPassword' }
     ];
-    
-    const isDark = document.body.classList.contains('dark-mode');
-    toggleButtons.forEach(toggle => {
-        const toggleButton = document.getElementById(toggle.buttonId);
-        const eyeIcon = toggleButton?.querySelector('img');
-        if (eyeIcon) {
-            eyeIcon.src = isDark 
-                ? '../../assets/images/visibility-on-btn-dark.svg' 
-                : '../../assets/images/visibility-on-btn.svg';
-        }
-    });
 
     toggleButtons.forEach(toggle => {
         const toggleButton = document.getElementById(toggle.buttonId);
         const passwordInput = document.getElementById(toggle.passwordId);
         
         if (toggleButton && passwordInput) {
+            // Add the class to all toggle buttons
+            toggleButton.classList.add('password-toggle-btn');
+            
             toggleButton.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -82,19 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const isPasswordVisible = passwordInput.type === 'password';
                 passwordInput.type = isPasswordVisible ? 'text' : 'password';
                 
-                // Update the eye icon
-                const eyeIcon = toggleButton.querySelector('img');
-                if (eyeIcon) {
-                    if (isDark) {
-                        eyeIcon.src = isPasswordVisible 
-                            ? '../../assets/images/visibility-off-btn-dark.svg' 
-                            : '../../assets/images/visibility-on-btn-dark.svg';
-                    } else {
-                        eyeIcon.src = isPasswordVisible 
-                            ? '../../assets/images/visibility-off-btn.svg' 
-                            : '../../assets/images/visibility-on-btn.svg';
-                    }
-                }
+                toggleButton.classList.toggle('showing', isPasswordVisible);
             });
         }
     });
