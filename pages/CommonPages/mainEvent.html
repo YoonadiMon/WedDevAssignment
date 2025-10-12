@@ -173,7 +173,8 @@
                 cursor: pointer;
                 text-decoration: none;
                 color: inherit;
-                display: block;
+                display: flex;
+                flex-direction: column;
             }
 
             .event-card:hover {
@@ -187,10 +188,14 @@
                 height: 180px;
                 object-fit: cover;
                 background: var(--LightGreen);
+                flex-shrink: 0;
             }
 
             .event-card-content {
                 padding: 1.25rem;
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
             }
 
             .event-card-date {
@@ -224,6 +229,7 @@
                 line-height: 1.5;
                 margin-bottom: 1rem;
                 overflow: hidden;
+                flex-grow: 1;
             }
 
             .event-card-footer {
@@ -232,6 +238,7 @@
                 align-items: center;
                 padding-top: 0.75rem;
                 border-top: 1px solid var(--Gray);
+                margin-top: auto;
             }
 
             .event-card-attendees {
