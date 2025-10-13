@@ -42,106 +42,109 @@
                 margin-bottom: 20px;
             }
 
-          .help-section h2 {
+            .help-section h2 {
               font-size: 24px;
               margin-bottom: 15px;
               font-weight: 400;
-          }
+            }
 
-          .help-section p {
-              color: var(--Gray);
-              margin-bottom: 25px;
-              line-height: 1.6;
-              max-width: 800px;
-              margin-left: auto;
-              margin-right: auto;
-          }
+            .help-section p {
+                color: var(--Gray);
+                margin-bottom: 25px;
+                line-height: 1.6;
+                max-width: 800px;
+                margin-left: auto;
+                margin-right: auto;
+            }
 
-          .open-ticket-btn {
-              background-color: var(--MainGreen);
-              color: white;
-              border: none;
-              padding: 12px 30px;
-              font-size: 16px;
-              border-radius: 4px;
-              cursor: pointer;
-              transition: background-color 0.3s;
-          }
+            .open-ticket-btn {
+                background-color: var(--MainGreen);
+                color: white;
+                border: none;
+                padding: 12px 30px;
+                font-size: 16px;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
 
-          .open-ticket-btn:hover {
-              background-color: var(--MainGreen);
-          }
+            .open-ticket-btn:hover {
+                background-color: var(--MainGreen);
+            }
 
-          .tickets-section {
-              background-color: var(--DarkerGray);
-              border-radius: 8px;
-              padding: 30px;
-              margin-bottom: 30px;
-          }
+            .tickets-section {
+                background-color: var(--DarkerGray);
+                border-radius: 8px;
+                padding: 30px;
+                margin-bottom: 30px;
+            }
 
-          .tickets-header {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 30px;
-          }
+            .tickets-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+            }
 
-          .tickets-header h3 {
-              font-size: 22px;
-              font-weight: 400;
-              color: var(--White);
-          }
+            .tickets-header h3 {
+                font-size: 22px;
+                font-weight: 400;
+                color: var(--White);
+            }
 
-          .add-new-btn {
-              background-color: var(--MainGreen);
-              color: var(--White);
-              border: none;
-              padding: 10px 20px;
-              font-size: 14px;
-              border-radius: 20px;
-              cursor: pointer;
-              display: flex;
-              align-items: center;
-              gap: 8px;
-              transition: background-color 0.3s;
-          }
+            a {
+                text-decoration: none;
+            }
+            .add-new-btn {
+                background-color: var(--MainGreen);
+                color: var(--White);
+                border: none;
+                padding: 10px 20px;
+                font-size: 14px;
+                border-radius: 20px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: background-color 0.3s;
+            }
 
-          .add-new-btn:hover {
-              background-color: var(--LightGreen);
-              color: var(--Black);
-          }
+            .add-new-btn:hover {
+                background-color: var(--LightGreen);
+                color: var(--Black);
+            }
 
-          .tickets-table {
-              width: 100%;
-              border-collapse: collapse;
-          }
+            .tickets-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
 
-          .tickets-table thead {
-              border-bottom: 1px solid var(--DarkGray);
-          }
+            .tickets-table thead {
+                border-bottom: 1px solid var(--DarkGray);
+            }
 
-          .tickets-table th {
-              padding: 15px;
-              text-align: left;
-              font-weight: 400;
-              color: var(--Gray);
-              font-size: 14px;
-          }
+            .tickets-table th {
+                padding: 15px;
+                text-align: left;
+                font-weight: 400;
+                color: var(--Gray);
+                font-size: 14px;
+            }
 
-          .tickets-table tbody tr {
-              border-bottom: 1px solid var(--DarkGray);
-          }
+            .tickets-table tbody tr {
+                border-bottom: 1px solid var(--DarkGray);
+            }
 
-          .tickets-table td {
-              padding: 20px 15px;
-              color: var(--White);
-          }
+            .tickets-table td {
+                padding: 20px 15px;
+                color: var(--White);
+            }
 
-          .no-tickets {
-              text-align: center;
-              padding: 40px;
-              color: var(--Gray);
-          }
+            .no-tickets {
+                text-align: center;
+                padding: 40px;
+                color: var(--Gray);
+            }
         </style>
     </head>
 
@@ -243,7 +246,10 @@
             <div class="tickets-section">
                 <div class="tickets-header">
                     <h3>Your Support Tickets</h3>
-                    <button class="add-new-btn">Add New +</button>
+                    <a link href="../../pages/MemberPages/mCreateTicket.html">
+                        <button class="add-new-btn">Add New +</button>
+                    </a>
+                    
                 </div>
 
                 <table class="tickets-table">
