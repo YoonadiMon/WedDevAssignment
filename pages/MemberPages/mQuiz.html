@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>memberTempPage: Change Title As Needed</title>
+        <title>Environmental Quiz - ReLeaf</title>
         <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
 
         <link rel="stylesheet" href="../../style/style.css">
@@ -13,6 +13,189 @@
         <link
             href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
             rel="stylesheet">
+        <style>
+            .quiz-container {
+                max-width: 800px;
+                margin: 2rem auto;
+                padding: 2rem;
+                background: var(--bg-color);
+                border-radius: 16px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            }
+
+            .quiz-header {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+            .quiz-progress {
+                width: 100%;
+                height: 8px;
+                background: var(--Gray);
+                border-radius: 4px;
+                margin: 1rem 0;
+                overflow: hidden;
+            }
+
+            .quiz-progress-bar {
+                height: 100%;
+                background: linear-gradient(90deg, var(--MainGreen), var(--btn-color-hover));
+                transition: width 0.3s ease;
+            }
+
+            .quiz-question {
+                margin: 2rem 0;
+            }
+
+            .quiz-question h3 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+                color: var(--text-heading);
+            }
+
+            .quiz-options {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .quiz-option {
+                padding: 1.25rem;
+                background: var(--sec-bg-color);
+                border: 2px solid transparent;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 1rem;
+            }
+
+            .quiz-option:hover {
+                border-color: var(--MainGreen);
+                transform: translateX(8px);
+            }
+
+            .quiz-option.selected {
+                background: var(--MainGreen);
+                color: var(--White);
+                border-color: var(--MainGreen);
+            }
+
+            .quiz-option.correct {
+                background: var(--MainGreen);
+                color: var(--White);
+                border-color: var(--MainGreen);
+            }
+
+            .quiz-option.incorrect {
+                background: var(--Red);
+                color: var(--White);
+                border-color: var(--Red);
+            }
+
+            .quiz-option.disabled {
+                cursor: not-allowed;
+                opacity: 0.6;
+            }
+
+            .quiz-controls {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 2rem;
+                gap: 1rem;
+            }
+
+            .quiz-start, .quiz-results {
+                text-align: center;
+            }
+
+            .quiz-start h2, .quiz-results h2 {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+                color: var(--text-heading);
+            }
+
+            .quiz-start p, .quiz-results p {
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+                color: var(--text-color);
+                line-height: 1.6;
+            }
+
+            .quiz-stats {
+                display: flex;
+                justify-content: center;
+                gap: 2rem;
+                margin: 2rem 0;
+                flex-wrap: wrap;
+            }
+
+            .quiz-stat {
+                padding: 1.5rem;
+                background: var(--sec-bg-color);
+                border-radius: 12px;
+                min-width: 150px;
+            }
+
+            .quiz-stat-value {
+                font-size: 2.5rem;
+                font-weight: 700;
+                color: var(--MainGreen);
+                display: block;
+            }
+
+            .quiz-stat-label {
+                font-size: 0.9rem;
+                color: var(--text-color);
+                margin-top: 0.5rem;
+            }
+
+            .quiz-score-message {
+                font-size: 1.3rem;
+                font-weight: 600;
+                margin: 1.5rem 0;
+                padding: 1rem;
+                background: var(--LightGreen);
+                border-radius: 8px;
+                color: var(--text-heading);
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            .quiz-feedback {
+                margin-top: 1rem;
+                padding: 1rem;
+                background: var(--sec-bg-color);
+                border-radius: 8px;
+                font-size: 0.95rem;
+                color: var(--text-color);
+            }
+
+            @media (max-width: 760px) {
+                .quiz-container {
+                    padding: 1.5rem;
+                    margin: 1rem;
+                }
+
+                .quiz-question h3 {
+                    font-size: 1.25rem;
+                }
+
+                .quiz-controls {
+                    flex-direction: column;
+                }
+
+                .quiz-stats {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+
+                .quiz-stat {
+                    min-width: 100%;
+                }
+            }
+        </style>
     </head>
 
     <body>
@@ -28,15 +211,12 @@
                 </a>
             </section>
 
-            <!-- Menu Links -->
-
             <!-- Menu Links Mobile -->
             <nav class="c-navbar-side">
                 <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
                 <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
                     id="menuBtn">
                 <div id="sidebarNav" class="c-navbar-side-menu">
-
                     <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
                         class="close-btn">
                     <div class="c-navbar-side-items">
@@ -44,19 +224,16 @@
                             <button id="themeToggle1">
                                 <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                             </button>
-
                             <div class="c-chatbox" id="chatboxMobile">
                                 <a href="../../pages/MemberPages/mChat.html">
                                     <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                                 </a>
                                 <span class="c-notification-badge" id="chatBadgeMobile"></span>
                             </div>
-
                             <a href="../../pages/MemberPages/mSetting.html">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a>
                         </section>
-
                         <a href="../../pages/MemberPages/memberIndex.html">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.html">Event</a>
@@ -64,7 +241,6 @@
                         <a href="../../pages/CommonPages/aboutUs.html">About</a>
                     </div>
                 </div>
-
             </nav>
 
             <!-- Menu Links Desktop + Tablet -->
@@ -85,51 +261,85 @@
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                     <span class="c-notification-badge" id="chatBadgeDesktop"></span>
                 </a>
-
-
                 <a href="../../pages/MemberPages/mSetting.html">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a>
             </section>
-        
         </header>
 
         <hr>
 
         <!-- Main Content -->
         <main>
-            <!-- Content Placeholder -->
-            <section class="content" id="content">
-                <p> Welcome to ReLeaf. Your content will appear here.</p>
-            </section>
-
-            <!-- Search & Results -->
-            <section class="search-container" id="searchContainer" style="display: none;">
-                <!-- Tabs -->
-                <div class="tabs" id="tabs">
-                    <div class="tab active" data-type="all">All</div>
-                    <div class="tab" data-type="profiles">Profiles</div>
-                    <div class="tab" data-type="blogs">Blogs</div>
-                    <div class="tab" data-type="events">Events</div>
-                    <div class="tab" data-type="trades">Trades</div>
+            <div class="quiz-container">
+                <!-- Start Screen -->
+                <div id="startScreen" class="quiz-start">
+                    <h2 class="c-heading-2">Environmental Awareness Quiz</h2>
+                    <p>Test your knowledge about environmental conservation and sustainability! This quiz contains 5 questions about important environmental topics.</p>
+                    <button class="c-btn c-btn-primary c-btn-big" onclick="startQuiz()">Start Quiz</button>
                 </div>
 
-                <!-- Results -->
-                <div class="results" id="results"></div>
-            </section>
+                <!-- Quiz Screen -->
+                <div id="quizScreen" class="hidden">
+                    <div class="quiz-header">
+                        <div class="c-text-label">Question <span id="currentQuestion">1</span> of <span id="totalQuestions">5</span></div>
+                        <div class="quiz-progress">
+                            <div id="progressBar" class="quiz-progress-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h3 id="questionText"></h3>
+                        <div id="optionsContainer" class="quiz-options"></div>
+                        <div id="feedback" class="quiz-feedback hidden"></div>
+                    </div>
+
+                    <div class="quiz-controls">
+                        <button class="c-btn c-btn-secondary" onclick="previousQuestion()" id="prevBtn" disabled>Previous</button>
+                        <button class="c-btn c-btn-primary" onclick="nextQuestion()" id="nextBtn" disabled>Next</button>
+                    </div>
+                </div>
+
+                <!-- Results Screen -->
+                <div id="resultsScreen" class="quiz-results hidden">
+                    <h2 class="c-heading-2">Quiz Complete!</h2>
+                    <div class="quiz-score-message" id="scoreMessage"></div>
+                    
+                    <div class="quiz-stats">
+                        <div class="quiz-stat">
+                            <span class="quiz-stat-value" id="scoreValue">0</span>
+                            <div class="quiz-stat-label">Score</div>
+                        </div>
+                        <div class="quiz-stat">
+                            <span class="quiz-stat-value" id="correctValue">0</span>
+                            <div class="quiz-stat-label">Correct Answers</div>
+                        </div>
+                        <div class="quiz-stat">
+                            <span class="quiz-stat-value" id="percentageValue">0%</span>
+                            <div class="quiz-stat-label">Percentage</div>
+                        </div>
+                    </div>
+
+                    <p>Thank you for taking the quiz! Every small step towards environmental awareness makes a difference.</p>
+                    
+                    <div class="quiz-controls">
+                        <button class="c-btn c-btn-primary c-btn-big" onclick="restartQuiz()">Retake Quiz</button>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <hr>
+        
         <!-- Footer -->
         <footer>
-            <!-- Column 1 -->
             <section class="c-footer-info-section">
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
                 <div class="c-text c-text-center">
-                    “Relief for the Planet, One Leaf at a Time.”
+                    "Relief for the Planet, One Leaf at a Time."
                     <br>
-                    “Together, We Can ReLeaf the Earth.”
+                    "Together, We Can ReLeaf the Earth."
                 </div>
                 <div class="c-text c-text-label">
                     +60 12 345 6789
@@ -139,7 +349,6 @@
                 </div>
             </section>
             
-            <!-- Column 2 -->
             <section class="c-footer-links-section">
                 <div>
                     <b>My Account</b><br>
@@ -164,5 +373,178 @@
 
         <script>const isAdmin = false;</script>
         <script src="../../javascript/mainScript.js"></script>
+        
+        <script>
+            // Quiz Data
+            const quizData = [
+                {
+                    question: "What percentage of Earth's oxygen is produced by the ocean?",
+                    options: ["30%", "50%", "70%", "90%"],
+                    correct: 1,
+                    feedback: "The ocean produces over 50% of the world's oxygen through phytoplankton!"
+                },
+                {
+                    question: "Which of these materials takes the longest to decompose?",
+                    options: ["Paper bag (1 month)", "Plastic bottle (450 years)", "Glass bottle (1 million years)", "Aluminum can (200 years)"],
+                    correct: 2,
+                    feedback: "Glass bottles can take up to 1 million years to decompose, making recycling essential!"
+                },
+                {
+                    question: "What is the most effective way to reduce your carbon footprint?",
+                    options: ["Recycling", "Using public transport", "Eating less meat", "Turning off lights"],
+                    correct: 2,
+                    feedback: "Animal agriculture is responsible for 14-18% of global greenhouse gas emissions."
+                },
+                {
+                    question: "How many trees does it take to absorb one ton of CO2 per year?",
+                    options: ["10 trees", "31 trees", "50 trees", "100 trees"],
+                    correct: 1,
+                    feedback: "On average, 31 trees are needed to absorb one ton of CO2 annually!"
+                },
+                {
+                    question: "What is the primary cause of coral reef bleaching?",
+                    options: ["Pollution", "Ocean warming", "Overfishing", "Tourism"],
+                    correct: 1,
+                    feedback: "Rising ocean temperatures due to climate change cause corals to expel their algae, leading to bleaching."
+                }
+            ];
+
+            let currentQuestionIndex = 0;
+            let selectedAnswers = [];
+            let score = 0;
+
+            function startQuiz() {
+                document.getElementById('startScreen').classList.add('hidden');
+                document.getElementById('quizScreen').classList.remove('hidden');
+                currentQuestionIndex = 0;
+                selectedAnswers = new Array(quizData.length).fill(null);
+                score = 0;
+                loadQuestion();
+            }
+
+            function loadQuestion() {
+                const question = quizData[currentQuestionIndex];
+                document.getElementById('questionText').textContent = question.question;
+                document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+                document.getElementById('totalQuestions').textContent = quizData.length;
+                
+                const progress = ((currentQuestionIndex + 1) / quizData.length) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+
+                const optionsContainer = document.getElementById('optionsContainer');
+                optionsContainer.innerHTML = '';
+                
+                question.options.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'quiz-option';
+                    optionDiv.textContent = option;
+                    
+                    if (selectedAnswers[currentQuestionIndex] === index) {
+                        optionDiv.classList.add('selected');
+                    }
+                    
+                    optionDiv.onclick = () => selectOption(index);
+                    optionsContainer.appendChild(optionDiv);
+                });
+
+                document.getElementById('feedback').classList.add('hidden');
+                document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+                document.getElementById('nextBtn').disabled = selectedAnswers[currentQuestionIndex] === null;
+                
+                if (currentQuestionIndex === quizData.length - 1) {
+                    document.getElementById('nextBtn').textContent = 'Finish';
+                } else {
+                    document.getElementById('nextBtn').textContent = 'Next';
+                }
+            }
+
+            function selectOption(index) {
+                selectedAnswers[currentQuestionIndex] = index;
+                const options = document.querySelectorAll('.quiz-option');
+                options.forEach((opt, i) => {
+                    opt.classList.remove('selected');
+                    if (i === index) {
+                        opt.classList.add('selected');
+                    }
+                });
+                
+                document.getElementById('nextBtn').disabled = false;
+                showFeedback();
+            }
+
+            function showFeedback() {
+                const question = quizData[currentQuestionIndex];
+                const feedback = document.getElementById('feedback');
+                const selected = selectedAnswers[currentQuestionIndex];
+                
+                if (selected !== null) {
+                    feedback.textContent = question.feedback;
+                    feedback.classList.remove('hidden');
+                }
+            }
+
+            function nextQuestion() {
+                // Check if an answer is selected before proceeding
+                if (selectedAnswers[currentQuestionIndex] === null) {
+                    return;
+                }
+                
+                if (currentQuestionIndex < quizData.length - 1) {
+                    currentQuestionIndex++;
+                    loadQuestion();
+                } else {
+                    // This is the last question, show results
+                    showResults();
+                }
+            }
+
+            function previousQuestion() {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    loadQuestion();
+                }
+            }
+
+            function showResults() {
+                score = 0;
+                selectedAnswers.forEach((answer, index) => {
+                    if (answer === quizData[index].correct) {
+                        score++;
+                    }
+                });
+
+                const percentage = Math.round((score / quizData.length) * 100);
+                
+                document.getElementById('quizScreen').classList.add('hidden');
+                document.getElementById('resultsScreen').classList.remove('hidden');
+                
+                document.getElementById('scoreValue').textContent = score + '/' + quizData.length;
+                document.getElementById('correctValue').textContent = score;
+                document.getElementById('percentageValue').textContent = percentage + '%';
+                
+                let message = '';
+                if (percentage === 100) {
+                    message = "Perfect! You're an environmental champion! 🌟";
+                } else if (percentage >= 80) {
+                    message = "Excellent work! You have great environmental knowledge! 🌱";
+                } else if (percentage >= 60) {
+                    message = "Good job! Keep learning about our planet! 🌍";
+                } else if (percentage >= 40) {
+                    message = "Not bad! There's always room to learn more! 🌿";
+                } else {
+                    message = "Keep exploring! Every step towards knowledge counts! 🌳";
+                }
+                
+                document.getElementById('scoreMessage').textContent = message;
+            }
+
+            function restartQuiz() {
+                document.getElementById('resultsScreen').classList.add('hidden');
+                document.getElementById('startScreen').classList.remove('hidden');
+                currentQuestionIndex = 0;
+                selectedAnswers = [];
+                score = 0;
+            }
+        </script>
     </body>
 </html>
