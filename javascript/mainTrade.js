@@ -1,3 +1,6 @@
+// View configuration - change this to switch between admin and member views
+const AdminView = true; // Set to true for admin view, false for member view
+
 // Mock data for listings
 const mockListings = [
     {
@@ -18,7 +21,8 @@ const mockListings = [
         userName: "Sarah Green",
         userRating: 4.8,
         userTradeCount: 12,
-        location: "Kuala Lumpur"
+        location: "Kuala Lumpur",
+        reported: false
     },
     {
         listingId: "L002",
@@ -38,7 +42,8 @@ const mockListings = [
         userName: "Mike Garden",
         userRating: 4.9,
         userTradeCount: 8,
-        location: "Penang"
+        location: "Penang",
+        reported: false
     },
     {
         listingId: "L003",
@@ -55,7 +60,26 @@ const mockListings = [
         userName: "Emma Harvest",
         userRating: 4.7,
         userTradeCount: 15,
-        location: "Johor Bahru"
+        location: "Johor Bahru",
+        reported: true
+    },
+    {
+        listingId: "L004",
+        memberId: "M004",
+        title: "Handmade Ceramic Plant Pots",
+        description: "Set of 3 beautiful handmade ceramic pots in different sizes. Each piece is unique with natural glaze patterns.",
+        tags: "pots, ceramic, handmade, decor",
+        imageUrl: "https://placehold.co/600x400",
+        category: "decor",
+        dateListed: "2025-01-05",
+        status: "active",
+        itemType: "item",
+        condition: "good",
+        userName: "Pottery Artist",
+        userRating: 4.6,
+        userTradeCount: 5,
+        location: "Selangor",
+        reported: false
     }
 ];
 
@@ -67,8 +91,18 @@ function openListingModal(listingId) {
     const modal = document.getElementById('listingModal');
     const modalContent = document.getElementById('modalContent');
     
-    // Populate modal content
-    modalContent.innerHTML = `
+    // Populate modal content based on user type
+    modalContent.innerHTML = AdminView ? 
+        getAdminModalContent(listing) : 
+        getMemberModalContent(listing);
+    
+    // Show modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function getMemberModalContent(listing) {
+    return `
         <div class="modal-header">
             <div class="modal-image">
                 ${listing.imageUrl ? 
@@ -152,10 +186,104 @@ function openListingModal(listingId) {
             </button>
         </div>
     `;
-    
-    // Show modal
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+}
+
+function getAdminModalContent(listing) {
+    return `
+        <div class="modal-header">
+            <div class="modal-image">
+                ${listing.imageUrl ? 
+                    `<img src="${listing.imageUrl}" alt="${listing.title}">` :
+                    `📷 Image Coming Soon`
+                }
+                ${listing.reported ? '<div class="admin-badge">REPORTED</div>' : ''}
+            </div>
+            <div class="modal-info">
+                <h2>${listing.title}</h2>
+                <div class="modal-category">${formatCategory(listing.category)}</div>
+                <div class="modal-description">${listing.description}</div>
+            </div>
+        </div>
+        
+        <div class="modal-details-grid">
+            <div class="detail-item">
+                <div class="detail-label">Listing ID</div>
+                <div class="detail-value">${listing.listingId}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Member ID</div>
+                <div class="detail-value">${listing.memberId}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Condition</div>
+                <div class="detail-value">${formatCondition(listing.condition)}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Listed</div>
+                <div class="detail-value">${formatDate(listing.dateListed)}</div>
+            </div>
+            ${listing.itemType === 'plant' ? `
+                <div class="detail-item">
+                    <div class="detail-label">Species</div>
+                    <div class="detail-value">${listing.species}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Growth Stage</div>
+                    <div class="detail-value">${listing.growthStage}</div>
+                </div>
+                ${listing.careInstructions ? `
+                    <div class="detail-item" style="grid-column: 1 / -1;">
+                        <div class="detail-label">Care Instructions</div>
+                        <div class="detail-value">${listing.careInstructions}</div>
+                    </div>
+                ` : ''}
+            ` : `
+                ${listing.brand ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Brand</div>
+                        <div class="detail-value">${listing.brand}</div>
+                    </div>
+                ` : ''}
+                ${listing.dimensions ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Dimensions</div>
+                        <div class="detail-value">${listing.dimensions}</div>
+                    </div>
+                ` : ''}
+                ${listing.usageHistory ? `
+                    <div class="detail-item" style="grid-column: 1 / -1;">
+                        <div class="detail-label">Usage History</div>
+                        <div class="detail-value">${listing.usageHistory}</div>
+                    </div>
+                ` : ''}
+            `}
+        </div>
+        
+        <div class="modal-user-info">
+            <div class="user-avatar-large">
+                ${listing.userName.split(' ').map(n => n[0]).join('')}
+            </div>
+            <div class="user-details">
+                <h4>${listing.userName}</h4>
+                <p>${listing.location || 'Malaysia'}</p>
+                <div class="user-rating">
+                    <span class="stars">★★★★★</span>
+                    <span>${listing.userRating} • ${listing.userTradeCount} trades</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="delete-btn" onclick="deleteListing('${listing.listingId}')">
+                Delete Listing
+            </button>
+            ${listing.reported ? `
+                <button class="save-btn" onclick="resolveReport('${listing.listingId}')">
+                    Resolve Report
+                </button>
+            ` : ''}
+        </div>
+    `;
 }
 
 function closeModal() {
@@ -186,6 +314,45 @@ function saveListing(listingId) {
         alert(`"${listing.title}" has been saved to your favorites!`);
         // In real app, this would add to saved listings
     }
+}
+
+// Admin functions
+function deleteListing(listingId) {
+    if (confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+        const index = mockListings.findIndex(l => l.listingId === listingId);
+        if (index !== -1) {
+            mockListings.splice(index, 1);
+            closeModal();
+            applyFilters();
+            alert('Listing deleted successfully.');
+        }
+    }
+}
+
+function resolveReport(listingId) {
+    const listing = mockListings.find(l => l.listingId === listingId);
+    if (listing) {
+        listing.reported = false;
+        closeModal();
+        applyFilters();
+        alert('Report resolved successfully.');
+    }
+}
+
+function toggleAdminView(viewType) {
+    const allBtn = document.querySelector('[data-view="all"]');
+    const reportedBtn = document.querySelector('[data-view="reported"]');
+    const adminStatus = document.getElementById('adminStatus');
+    
+    // Update active button
+    allBtn.classList.toggle('active', viewType === 'all');
+    reportedBtn.classList.toggle('active', viewType === 'reported');
+    
+    // Update status text
+    adminStatus.textContent = viewType === 'all' ? 'Viewing all listings' : 'Viewing reported listings';
+    
+    // Apply filters
+    applyFilters();
 }
 
 function formatCategory(category) {
@@ -237,8 +404,38 @@ function resetFilters() {
     document.getElementById('sortFilter').value = 'newest';
     document.getElementById('searchInput').value = '';
     
-    // Re-render listings
-    renderListings(mockListings);
+    // Reset admin view if applicable
+    if (AdminView) {
+        toggleAdminView('all');
+    } else {
+        // Re-render listings
+        applyFilters();
+    }
+}
+
+// Initialize admin controls
+function initAdminControls() {
+    if (AdminView) {
+        // Show admin controls
+        const adminControls = document.getElementById('adminControls');
+        if (adminControls) {
+            adminControls.style.display = 'flex';
+        }
+        
+        // Hide create listing button
+        const createListingBtn = document.getElementById('createListingBtn');
+        if (createListingBtn) {
+            createListingBtn.style.display = 'none';
+        }
+        
+        // Add event listeners for admin view toggle
+        document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const viewType = this.getAttribute('data-view');
+                toggleAdminView(viewType);
+            });
+        });
+    }
 }
 
 // Main initialization
@@ -254,6 +451,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let currentCategory = 'all';
     let currentSearch = '';
+    let currentAdminView = 'all';
+    
+    // Initialize admin controls
+    initAdminControls();
     
     // Modal close functionality
     modalClose.addEventListener('click', closeModal);
@@ -292,10 +493,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Initial render
-    renderListings(mockListings);
+    applyFilters();
     
     function applyFilters() {
         let filteredListings = mockListings.filter(listing => {
+            // Admin view filter
+            if (AdminView && currentAdminView === 'reported') {
+                if (!listing.reported) return false;
+            }
+            
             // Category filter
             const categoryMatch = currentCategory === 'all' || listing.category === currentCategory;
             
@@ -344,6 +550,7 @@ document.addEventListener('DOMContentLoaded', function() {
         listingsGrid.innerHTML = listings.map(listing => `
             <div class="listing-card ${listing.itemType === 'plant' ? 'plant-special' : 'item-special'}" 
                     onclick="openListingModal('${listing.listingId}')">
+                ${AdminView && listing.reported ? '<div class="admin-badge">REPORTED</div>' : ''}
                 <div class="listing-image">
                     ${listing.imageUrl ? 
                         `<img src="${listing.imageUrl}" alt="${listing.title}" style="width: 100%; height: 100%; object-fit: cover;">` :
@@ -363,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="detail-badge">${formatCondition(listing.condition)}</span>
                         ${listing.itemType === 'plant' ? 
                             `<span class="detail-badge">${listing.species}</span>
-                                <span class="detail-badge">${listing.growthStage}</span>` :
+                             <span class="detail-badge">${listing.growthStage}</span>` :
                             `<span class="detail-badge">${formatCategory(listing.category)}</span>`
                         }
                     </div>

@@ -123,6 +123,7 @@
             transition: all 0.3s ease;
             cursor: pointer;
             border: 1px solid var(--border-color);
+            position: relative;
         }
 
         .listing-card:hover {
@@ -499,6 +500,68 @@
             background: var(--btn-color-hover);
         }
 
+        /* Admin-specific styles */
+        .admin-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: var(--sec-bg-color);
+            border-radius: 8px;
+            border-left: 4px solid var(--MainGreen);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-toggle-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .view-toggle-btn.active {
+            background: var(--MainGreen);
+            color: var(--White);
+            border-color: var(--MainGreen);
+        }
+
+        .delete-btn {
+            background: #dc2626;
+            color: var(--White);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+
+        .admin-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc2626;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            z-index: 2;
+        }
+
         @media (max-width: 768px) {
             .modal-header {
                 grid-template-columns: 1fr;
@@ -515,6 +578,12 @@
             .save-btn, .trade-btn {
                 width: 100%;
             }
+            
+            .admin-controls {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -522,77 +591,9 @@
 <body>
     <div id="cover" class="" onclick="hideMenu()"></div>
 
-    <!-- Logo + Name & Navbar -->
-    <header>
-        <!-- Logo + Name -->
-        <section class="c-logo-section">
-            <a href="../../pages/MemberPages/memberIndex.html" class="c-logo-link">
-                <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
-                <div class="c-text">ReLeaf</div>
-            </a>
-        </section>
-
-        <!-- Menu Links Mobile -->
-        <nav class="c-navbar-side">
-            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
-                id="menuBtn">
-            <div id="sidebarNav" class="c-navbar-side-menu">
-
-                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
-                    class="close-btn">
-                <div class="c-navbar-side-items">
-                    <section class="c-navbar-side-more">
-                        <button id="themeToggle1">
-                            <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
-                        </button>
-
-                        <div class="c-chatbox" id="chatboxMobile">
-                            <a href="../../pages/MemberPages/mChat.html">
-                                <img src="../../assets/images/chat-light.svg" alt="Chatbox">
-                            </a>
-                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
-                        </div>
-
-                        <a href="../../pages/MemberPages/mSetting.html">
-                            <img src="../../assets/images/setting-light.svg" alt="Settings">
-                        </a>
-                    </section>
-
-                    <a href="../../pages/MemberPages/memberIndex.html">Home</a>
-                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                    <a href="../../pages/CommonPages/mainEvent.html">Event</a>
-                    <a href="../../pages/CommonPages/mainTrade.html" class="active">Trade</a>
-                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
-                </div>
-            </div>
-
-        </nav>
-
-        <!-- Menu Links Desktop + Tablet -->
-        <nav class="c-navbar-desktop">
-            <a href="../../pages/MemberPages/memberIndex.html">Home</a>
-            <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-            <a href="../../pages/CommonPages/mainEvent.html">Event</a>
-            <a href="../../pages/CommonPages/mainTrade.html" class="active">Trade</a>
-            <a href="../../pages/CommonPages/aboutUs.html">About</a>
-        </nav>
-        <section class="c-navbar-more">
-            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-            
-            <button id="themeToggle2">
-                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
-            </button>
-            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
-                <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
-            </a>
-
-            <a href="../../pages/MemberPages/mSetting.html">
-                <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
-            </a>
-        </section>
-    
+    <!-- Dynamic Header based on user type -->
+    <header id="main-header">
+        <!-- Header content will be populated by JavaScript based on user type -->
     </header>
 
     <hr>
@@ -604,9 +605,20 @@
             <div class="trade-header">
                 <h1>Trade Marketplace</h1>
                 <p>Exchange items and plants with fellow ReLeaf community members. Sustainable trading for a greener future.</p>
-                <a link href="../../pages/MemberPages/addTrade.html">
+                <a link href="../../pages/MemberPages/addTrade.html" id="createListingLink">
                     <button class="c-btn c-btn-primary" id="createListingBtn">Create New Listing</button>
                 </a>
+            </div>
+
+            <!-- Admin Controls -->
+            <div class="admin-controls" id="adminControls" style="display: none;">
+                <div class="view-toggle">
+                    <button class="view-toggle-btn active" data-view="all">All Listings</button>
+                    <button class="view-toggle-btn" data-view="reported">Reported Listings</button>
+                </div>
+                <div>
+                    <span id="adminStatus">Viewing all listings</span>
+                </div>
             </div>
 
             <!-- Category Tabs -->
@@ -748,7 +760,7 @@
     </footer>
 
     <script>
-        const isAdmin = false;
+        const isAdmin = true;
     </script>
     <script src="../../javascript/mainTrade.js"></script>
     <script src="../../javascript/mainScript.js"></script>
