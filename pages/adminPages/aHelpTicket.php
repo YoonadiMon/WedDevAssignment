@@ -1,5 +1,85 @@
 <?php
+session_start();
 include("../../php/dbConn.php");
+
+// For demo purposes, set admin user ID (in real app, this would come from session)
+$_SESSION['admin_id'] = 1;
+$admin_id = $_SESSION['admin_id'];
+
+// Handle mark solved action
+if (isset($_POST['mark_solved']) && isset($_POST['ticket_id'])) {
+    $ticket_id = mysqli_real_escape_string($connection, $_POST['ticket_id']);
+    
+    // Check if admin can modify this ticket
+    $check_query = "SELECT adminAssignedID, status FROM tbltickets WHERE ticketID = '$ticket_id'";
+    $check_result = mysqli_query($connection, $check_query);
+    
+    if ($check_result && mysqli_num_rows($check_result) > 0) {
+        $ticket_data = mysqli_fetch_assoc($check_result);
+        $assigned_admin = $ticket_data['adminAssignedID'];
+        $current_status = $ticket_data['status'];
+        
+        // Check if admin can modify (either not assigned or assigned to this admin)
+        if ($assigned_admin == NULL || $assigned_admin == $admin_id) {
+            // Update ticket status to solved and assign admin if not already assigned
+            $update_query = "UPDATE tbltickets SET 
+                            status = 'solved', 
+                            adminAssignedID = '$admin_id',
+                            updatedAt = NOW(),
+                            lastReplyAt = NOW()
+                            WHERE ticketID = '$ticket_id'";
+            
+            if (mysqli_query($connection, $update_query)) {
+                $success_message = "Ticket #$ticket_id marked as solved successfully!";
+                
+                // If ticket was not assigned, update adminAssignedID
+                if ($assigned_admin == NULL) {
+                    $assign_query = "UPDATE tbltickets SET adminAssignedID = '$admin_id' WHERE ticketID = '$ticket_id'";
+                    mysqli_query($connection, $assign_query);
+                }
+            } else {
+                $error_message = "Error updating ticket: " . mysqli_error($connection);
+            }
+        } else {
+            $error_message = "Cannot modify ticket #$ticket_id. It is assigned to another admin.";
+        }
+    } else {
+        $error_message = "Ticket not found.";
+    }
+}
+
+// Handle reopen action
+if (isset($_POST['reopen_ticket']) && isset($_POST['ticket_id'])) {
+    $ticket_id = mysqli_real_escape_string($connection, $_POST['ticket_id']);
+    
+    // Check if admin can modify this ticket
+    $check_query = "SELECT adminAssignedID FROM tbltickets WHERE ticketID = '$ticket_id'";
+    $check_result = mysqli_query($connection, $check_query);
+    
+    if ($check_result && mysqli_num_rows($check_result) > 0) {
+        $ticket_data = mysqli_fetch_assoc($check_result);
+        $assigned_admin = $ticket_data['adminAssignedID'];
+        
+        // Check if admin can modify (either not assigned or assigned to this admin)
+        if ($assigned_admin == NULL || $assigned_admin == $admin_id) {
+            // Update ticket status to open
+            $update_query = "UPDATE tbltickets SET 
+                            status = 'open', 
+                            updatedAt = NOW()
+                            WHERE ticketID = '$ticket_id'";
+            
+            if (mysqli_query($connection, $update_query)) {
+                $success_message = "Ticket #$ticket_id reopened successfully!";
+            } else {
+                $error_message = "Error reopening ticket: " . mysqli_error($connection);
+            }
+        } else {
+            $error_message = "Cannot modify ticket #$ticket_id. It is assigned to another admin.";
+        }
+    } else {
+        $error_message = "Ticket not found.";
+    }
+}
 
 // Fetch all tickets from database
 $query = "SELECT * FROM tbltickets ORDER BY createdAt DESC";
@@ -80,6 +160,16 @@ foreach ($tickets as $ticket) {
         .admin-welcome p {
             color: var(--Gray);
             font-size: 14px;
+        }
+        
+        .success-message {
+            display: flex;
+            justify-content: space-between;
+            background: var(--sec-bg-color); 
+            color: white; 
+            padding: 12px; 
+            border-radius: 4px; 
+            margin-bottom: 20px;
         }
 
         .stats-overview {
@@ -518,6 +608,22 @@ foreach ($tickets as $ticket) {
                 </div>
             </div>
 
+            <!-- Success/Error Messages -->
+            <?php if (isset($success_message)): ?>
+                <div id="mssg" class="message success-message">
+                    <?php echo $success_message; ?>
+                    <button onclick="hideMssg()">
+                        <b>X</b>
+                    </button>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($error_message)): ?>
+                <div class="message error-message" style="background: #f44336; color: white; padding: 12px; border-radius: 4px; margin-bottom: 20px;">
+                    <?php echo $error_message; ?>
+                </div>
+            <?php endif; ?>
+
             <!-- Stats Overview -->
             <div class="stats-overview">
                 <div class="stat-card">
@@ -579,7 +685,10 @@ foreach ($tickets as $ticket) {
                             <p>No tickets found in the database</p>
                         </div>
                     <?php else: ?>
-                        <?php foreach ($tickets as $ticket): ?>
+                        <?php foreach ($tickets as $ticket): 
+                            $canModify = ($ticket['adminAssignedID'] == NULL || $ticket['adminAssignedID'] == $admin_id);
+                            $isSolved = ($ticket['status'] === 'solved');
+                        ?>
                             <div class="ticket-item <?php echo $ticket['isUnread'] ? 'unread' : ''; ?>" data-ticket-id="<?php echo $ticket['ticketID']; ?>">
                                 <div class="ticket-avatar">
                                     <?php 
@@ -609,13 +718,30 @@ foreach ($tickets as $ticket) {
                                         <span class="ticket-priority priority-<?php echo $ticket['priority']; ?>"><?php echo formatPriority($ticket['priority']); ?></span>
                                         <span class="ticket-id">#<?php echo $ticket['ticketID']; ?></span>
                                         <span class="ticket-time"><?php echo formatTime($ticket['createdAt']); ?></span>
+                                        <?php if ($ticket['adminAssignedID']): ?>
+                                            <span class="ticket-assigned">Assigned to Admin #<?php echo $ticket['adminAssignedID']; ?></span>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 <div class="ticket-actions">
-                                    <button class="c-btn c-btn-primary c-btn-sm" 
-                                            onclick="toggleTicketStatus(<?php echo $ticket['ticketID']; ?>, event)">
-                                        <?php echo $ticket['status'] === 'solved' ? 'Reopen' : 'Mark Solved'; ?>
-                                    </button>
+                                    <?php if ($canModify): ?>
+                                        <form method="POST" style="display: inline;">
+                                            <input type="hidden" name="ticket_id" value="<?php echo $ticket['ticketID']; ?>">
+                                            <?php if ($isSolved): ?>
+                                                <button type="submit" name="reopen_ticket" class="c-btn c-btn-primary c-btn-sm">
+                                                    Reopen
+                                                </button>
+                                            <?php else: ?>
+                                                <button type="submit" name="mark_solved" class="c-btn c-btn-primary c-btn-sm">
+                                                    Mark Solved
+                                                </button>
+                                            <?php endif; ?>
+                                        </form>
+                                    <?php else: ?>
+                                        <button class="c-btn c-btn-disabled c-btn-sm" disabled title="Assigned to another admin">
+                                            Assigned to Other
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>

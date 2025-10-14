@@ -8,124 +8,103 @@ document.addEventListener('DOMContentLoaded', function() {
         filter.addEventListener('change', applyFilters);
     });
     
-    function applyFilters() {
-        const category = categoryFilter.value;
-        const priority = priorityFilter.value;
-        const status = statusFilter.value;
-        
-        const ticketItems = document.querySelectorAll('.ticket-item');
-        let visibleCount = 0;
-        
-        ticketItems.forEach(item => {
-            // Get actual data from the ticket item
-            const itemCategory = item.querySelector('.ticket-category').textContent.toLowerCase().replace(/\s+/g, '');
-            const itemPriority = item.querySelector('.ticket-priority').textContent.toLowerCase();
-            
-            // Get status from data attribute or button text
-            const ticketId = item.getAttribute('data-ticket-id');
-            const statusButton = item.querySelector('.c-btn');
-            const itemStatus = statusButton.textContent.includes('Reopen') ? 'solved' : 
-                            statusButton.textContent.includes('In Progress') ? 'in_progress' : 'open';
-            
-            // Normalize values for comparison
-            const normalizedCategory = itemCategory === 'others' ? 'other' : itemCategory;
-            const normalizedPriority = itemPriority === 'urgent' ? 'urgent' : 
-                                    itemPriority === 'high' ? 'high' :
-                                    itemPriority === 'medium' ? 'medium' : 'low';
-            
-            const categoryMatch = category === 'all' || normalizedCategory === category;
-            const priorityMatch = priority === 'all' || normalizedPriority === priority;
-            const statusMatch = status === 'all' || itemStatus === status;
-            
-            if (categoryMatch && priorityMatch && statusMatch) {
-                item.style.display = 'flex';
-                visibleCount++;
-            } else {
-                item.style.display = 'none';
-            }
-        });
-        
-        // Update badge count
-        const badge = document.querySelector('.section-header .badge');
-        if (badge) {
-            badge.textContent = visibleCount;
-        }
-        
-        // Show empty state if no tickets visible
-        const ticketsList = document.getElementById('helpTicketsList');
-        let emptyState = ticketsList.querySelector('.empty-state');
-        
-        if (visibleCount === 0) {
-            if (!emptyState) {
-                ticketsList.innerHTML = `
-                    <div class="empty-state">
-                        <p>No tickets found matching your filters</p>
-                        <button class="c-btn c-btn-primary" onclick="resetFilters()">Reset Filters</button>
-                    </div>
-                `;
-            }
-        } else {
-            // Remove empty state if it exists and we have visible tickets
-            if (emptyState) {
-                emptyState.remove();
-            }
-        }
-    }
-    
     // Initialize filters on page load
     applyFilters();
 });
 
-function showNotification(message) {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #4CAF50;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 4px;
-        z-index: 1000;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    `;
-    notification.textContent = message;
-    document.body.appendChild(notification);
+// Define applyFilters in global scope
+function applyFilters() {
+    const categoryFilter = document.getElementById('categoryFilter');
+    const priorityFilter = document.getElementById('priorityFilter');
+    const statusFilter = document.getElementById('statusFilter');
     
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-function toggleTicketStatus(ticketId, event) {
-    event.stopPropagation();
+    const category = categoryFilter ? categoryFilter.value : 'all';
+    const priority = priorityFilter ? priorityFilter.value : 'all';
+    const status = statusFilter ? statusFilter.value : 'all';
     
-    // In a real application, you would make an AJAX call to update the database
-    const button = event.target;
-    const isCurrentlySolved = button.textContent.includes('Reopen');
+    const ticketItems = document.querySelectorAll('.ticket-item');
+    let visibleCount = 0;
     
-    if (isCurrentlySolved) {
-        button.textContent = 'Mark Solved';
-        showNotification(`Ticket #${ticketId} reopened`);
-    } else {
-        button.textContent = 'Reopen';
-        showNotification(`Ticket #${ticketId} marked as solved`);
+    ticketItems.forEach(item => {
+        // Get actual data from the ticket item
+        const itemCategory = item.querySelector('.ticket-category').textContent.toLowerCase().replace(/\s+/g, '');
+        const itemPriority = item.querySelector('.ticket-priority').textContent.toLowerCase();
+        
+        // Get status from button text or form
+        const statusButton = item.querySelector('.c-btn');
+        let itemStatus = 'open';
+        if (statusButton) {
+            if (statusButton.textContent.includes('Reopen')) {
+                itemStatus = 'solved';
+            } else if (statusButton.textContent.includes('In Progress')) {
+                itemStatus = 'in_progress';
+            }
+        }
+        
+        // Normalize values for comparison
+        const normalizedCategory = itemCategory === 'others' ? 'other' : itemCategory;
+        const normalizedPriority = itemPriority === 'urgent' ? 'urgent' : 
+                                 itemPriority === 'high' ? 'high' :
+                                 itemPriority === 'medium' ? 'medium' : 'low';
+        
+        const categoryMatch = category === 'all' || normalizedCategory === category;
+        const priorityMatch = priority === 'all' || normalizedPriority === priority;
+        const statusMatch = status === 'all' || itemStatus === status;
+        
+        if (categoryMatch && priorityMatch && statusMatch) {
+            item.style.display = 'flex';
+            visibleCount++;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    // Update badge count
+    const badge = document.querySelector('.section-header .badge');
+    if (badge) {
+        badge.textContent = visibleCount;
     }
     
-    // Reapply filters to update the display
-    applyFilters();
+    // Show empty state if no tickets visible
+    const ticketsList = document.getElementById('helpTicketsList');
+    if (!ticketsList) return;
+    
+    let emptyState = ticketsList.querySelector('.empty-state');
+    
+    if (visibleCount === 0 && ticketItems.length > 0) {
+        if (!emptyState) {
+            const emptyStateDiv = document.createElement('div');
+            emptyStateDiv.className = 'empty-state';
+            emptyStateDiv.innerHTML = `
+                <p>No tickets found matching your filters</p>
+                <button class="c-btn c-btn-primary" onclick="resetFilters()">Reset Filters</button>
+            `;
+            ticketsList.appendChild(emptyStateDiv);
+        }
+    } else {
+        // Remove empty state if it exists and we have visible tickets
+        if (emptyState) {
+            emptyState.remove();
+        }
+    }
 }
 
 function resetFilters() {
-    document.getElementById('categoryFilter').value = 'all';
-    document.getElementById('priorityFilter').value = 'all';
-    document.getElementById('statusFilter').value = 'all';
+    const categoryFilter = document.getElementById('categoryFilter');
+    const priorityFilter = document.getElementById('priorityFilter');
+    const statusFilter = document.getElementById('statusFilter');
     
-    // Reapply filters
-    const applyFilters = window.applyFilters;
-    if (typeof applyFilters === 'function') {
-        applyFilters();
-    }
+    if (categoryFilter) categoryFilter.value = 'all';
+    if (priorityFilter) priorityFilter.value = 'all';
+    if (statusFilter) statusFilter.value = 'all';
+    
+    // Reapply filters to show all tickets
+    applyFilters();
 }
 
-window.applyFilters = applyFilters;
+function hideMssg() {
+    const mssg = document.getElementById('mssg');
+    if (mssg) {
+        mssg.style.display = 'none';
+    }
+}
