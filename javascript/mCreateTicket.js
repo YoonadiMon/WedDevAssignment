@@ -119,7 +119,7 @@
                 // Simulate form submission
                 setTimeout(function() {
                     alert('Your support ticket has been submitted successfully! Our team will get back to you soon.');
-                    window.location.href = '../../pages/MemberPages/mContactSupport.html';
+                    window.location.href = '../../pages/MemberPages/mContactSupport.php';
                 }, 1500);
             });
         });
