@@ -3,7 +3,7 @@
 include("../../php/dbConn.php");
 
 // Assuming current user ID is 6 (as per requirements)
-$currentUserID = 5;
+$currentUserID = 6;
 
 // Query to fetch tickets for the current user
 $query = "SELECT * FROM tbltickets WHERE userID = $currentUserID ORDER BY ticketID DESC";
@@ -305,7 +305,7 @@ $ticketCount = mysqli_num_rows($result);
                 <div class="help-icon">?</div>
                 <h2>Need some help?</h2>
                 <p>Our team is happy to help or answer any question you may have. All you need to do is to create a support ticket, ask your question and our team will respond as soon as possible.</p>
-                <a link href="../../pages/MemberPages/mCreateTicket.html">
+                <a link href="../../pages/MemberPages/mCreateTicket.php">
                     <button class="open-ticket-btn">Open a support ticket</button>
                 </a>
             </div>
@@ -314,7 +314,7 @@ $ticketCount = mysqli_num_rows($result);
             <div class="tickets-section">
                 <div class="tickets-header">
                     <h3>Your Support Tickets</h3>
-                    <a link href="../../pages/MemberPages/mCreateTicket.html">
+                    <a link href="../../pages/MemberPages/mCreateTicket.php">
                         <button class="add-new-btn">Add New +</button>
                     </a>
                     

@@ -1,3 +1,54 @@
+<?php
+include("../../php/dbConn.php");
+
+// Initialize variables
+$success_message = "";
+$error_message = "";
+$currentUserID = 6; // Assuming current user ID is 6
+
+// Process form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Get form data
+    $subject = mysqli_real_escape_string($connection, $_POST['subject']);
+    $category = mysqli_real_escape_string($connection, $_POST['category']);
+    $priority = mysqli_real_escape_string($connection, $_POST['priority']);
+    $email = mysqli_real_escape_string($connection, $_POST['email']);
+    $description = mysqli_real_escape_string($connection, $_POST['description']);
+    
+    // Get username (you might want to get this from session or database)
+    $username = "User" . $currentUserID; // Default username
+    
+    // Set default values
+    $status = "Open";
+    $isUnread = 1;
+    $current_time = date("Y-m-d H:i:s");
+    
+    // Insert ticket into database
+    $query = "INSERT INTO tbltickets (subject, category, priority, status, description, userID, username, userEmail, isUnread, createdAt, updatedAt) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    
+    $stmt = mysqli_prepare($connection, $query);
+    
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, "sssssisssss", 
+            $subject, $category, $priority, $status, $description, 
+            $currentUserID, $username, $email, $isUnread, $current_time, $current_time);
+        
+        if (mysqli_stmt_execute($stmt)) {
+            $success_message = "Ticket submitted successfully! We'll get back to you soon.";
+            
+            // Clear form fields
+            $_POST = array();
+        } else {
+            $error_message = "Error submitting ticket: " . mysqli_error($connection);
+        }
+        
+        mysqli_stmt_close($stmt);
+    } else {
+        $error_message = "Database error: " . mysqli_error($connection);
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -238,6 +289,25 @@
             color: var(--MainGreen);
         }
 
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -336,32 +406,47 @@
     <main>
         <div class="support-ticket-container">
             <!-- Back Button -->
-            <a href="../../pages/MemberPages/mContactSupport.php" class="back-button">
+            <a href="mContactSupport.php" class="back-button">
                 ← Back to Support
             </a>
+
+            <!-- Success/Error Messages -->
+            <?php if ($success_message): ?>
+                <div class="alert alert-success">
+                    <?php echo htmlspecialchars($success_message); ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($error_message): ?>
+                <div class="alert alert-error">
+                    <?php echo htmlspecialchars($error_message); ?>
+                </div>
+            <?php endif; ?>
 
             <!-- Ticket Form Section -->
             <div class="ticket-form-section">
                 <h2>Create Support Ticket</h2>
                 
-                <form id="supportTicketForm">
+                <form id="supportTicketForm" method="POST" action="">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="ticketSubject">Subject *</label>
-                            <input type="text" id="ticketSubject" name="subject" required placeholder="Brief description of your issue">
+                            <input type="text" id="ticketSubject" name="subject" required 
+                                   placeholder="Brief description of your issue"
+                                   value="<?php echo isset($_POST['subject']) ? htmlspecialchars($_POST['subject']) : ''; ?>">
                         </div>
                         
                         <div class="form-group">
                             <label for="ticketCategory">Category *</label>
                             <select id="ticketCategory" name="category" required>
                                 <option value="">Select a category</option>
-                                <option value="technical">Technical Issue</option>
-                                <option value="account">Account Problem</option>
-                                <option value="billing">Billing & Payment</option>
-                                <option value="feature">Feature Request</option>
-                                <option value="bug">Bug Report</option>
-                                <option value="general">General Inquiry</option>
-                                <option value="other">Other</option>
+                                <option value="technical" <?php echo (isset($_POST['category']) && $_POST['category'] == 'technical') ? 'selected' : ''; ?>>Technical Issue</option>
+                                <option value="account" <?php echo (isset($_POST['category']) && $_POST['category'] == 'account') ? 'selected' : ''; ?>>Account Problem</option>
+                                <option value="billing" <?php echo (isset($_POST['category']) && $_POST['category'] == 'billing') ? 'selected' : ''; ?>>Billing & Payment</option>
+                                <option value="feature" <?php echo (isset($_POST['category']) && $_POST['category'] == 'feature') ? 'selected' : ''; ?>>Feature Request</option>
+                                <option value="bug" <?php echo (isset($_POST['category']) && $_POST['category'] == 'bug') ? 'selected' : ''; ?>>Bug Report</option>
+                                <option value="general" <?php echo (isset($_POST['category']) && $_POST['category'] == 'general') ? 'selected' : ''; ?>>General Inquiry</option>
+                                <option value="other" <?php echo (isset($_POST['category']) && $_POST['category'] == 'other') ? 'selected' : ''; ?>>Other</option>
                             </select>
                         </div>
                     </div>
@@ -371,10 +456,10 @@
                             <label for="ticketPriority">Priority *</label>
                             <select id="ticketPriority" name="priority" required>
                                 <option value="">Select priority</option>
-                                <option value="low">Low</option>
-                                <option value="medium">Medium</option>
-                                <option value="high">High</option>
-                                <option value="urgent">Urgent</option>
+                                <option value="Low" <?php echo (isset($_POST['priority']) && $_POST['priority'] == 'Low') ? 'selected' : ''; ?>>Low</option>
+                                <option value="Medium" <?php echo (isset($_POST['priority']) && $_POST['priority'] == 'Medium') ? 'selected' : ''; ?>>Medium</option>
+                                <option value="High" <?php echo (isset($_POST['priority']) && $_POST['priority'] == 'High') ? 'selected' : ''; ?>>High</option>
+                                <option value="Urgent" <?php echo (isset($_POST['priority']) && $_POST['priority'] == 'Urgent') ? 'selected' : ''; ?>>Urgent</option>
                             </select>
                             <div class="priority-indicator" id="priorityIndicator">
                                 <!-- Priority indicator will be shown here -->
@@ -383,13 +468,16 @@
                         
                         <div class="form-group">
                             <label for="ticketEmail">Contact Email *</label>
-                            <input type="email" id="ticketEmail" name="email" required placeholder="your@email.com">
+                            <input type="email" id="ticketEmail" name="email" required 
+                                   placeholder="your@email.com"
+                                   value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="ticketDescription">Description *</label>
-                        <textarea id="ticketDescription" name="description" required placeholder="Please provide detailed information about your issue..."></textarea>
+                        <textarea id="ticketDescription" name="description" required 
+                                  placeholder="Please provide detailed information about your issue..."><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
                     </div>
 
                     <div class="form-group">
@@ -406,7 +494,7 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="button" class="cancel-btn" onclick="window.location.href='../../pages/MemberPages/mContactSupport.php'">Cancel</button>
+                        <button type="button" class="cancel-btn" onclick="window.location.href='mContactSupport.php'">Cancel</button>
                         <button type="submit" class="submit-btn" id="submitBtn">Submit Ticket</button>
                     </div>
                 </form>
@@ -486,9 +574,128 @@
     </footer>
 
     <script>
-        const isAdmin = false;        
+        const isAdmin = false;
+        
+        // Priority indicator functionality
+        document.getElementById('ticketPriority').addEventListener('change', function() {
+            const priority = this.value;
+            const indicator = document.getElementById('priorityIndicator');
+            
+            if (priority) {
+                let text = '';
+                let className = '';
+                
+                switch(priority) {
+                    case 'Low':
+                        text = '🟢 Low priority - We\'ll respond within 3-5 business days';
+                        className = 'priority-low';
+                        break;
+                    case 'Medium':
+                        text = '🟡 Medium priority - We\'ll respond within 1-2 business days';
+                        className = 'priority-medium';
+                        break;
+                    case 'High':
+                        text = '🔴 High priority - We\'ll respond within 24 hours';
+                        className = 'priority-high';
+                        break;
+                    case 'Urgent':
+                        text = '🚨 Urgent priority - We\'ll respond as soon as possible';
+                        className = 'priority-high';
+                        break;
+                }
+                
+                indicator.innerHTML = `<span class="${className}">${text}</span>`;
+            } else {
+                indicator.innerHTML = '';
+            }
+        });
+
+        // File upload functionality
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const attachmentsPreview = document.getElementById('attachmentsPreview');
+
+        fileUploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = 'var(--MainGreen)';
+            fileUploadArea.style.backgroundColor = 'var(--sec-bg-color)';
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.style.borderColor = 'var(--border-color)';
+            fileUploadArea.style.backgroundColor = '';
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = 'var(--border-color)';
+            fileUploadArea.style.backgroundColor = '';
+            
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            for (let file of files) {
+                // Check file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File size too large. Maximum size is 10MB.');
+                    continue;
+                }
+                
+                // Check file type
+                const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'application/msword'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('File type not supported. Please upload PDF, JPG, PNG, or DOC files.');
+                    continue;
+                }
+                
+                addAttachmentPreview(file);
+            }
+        }
+
+        function addAttachmentPreview(file) {
+            const attachmentItem = document.createElement('div');
+            attachmentItem.className = 'attachment-item';
+            
+            attachmentItem.innerHTML = `
+                <span class="attachment-name">${file.name}</span>
+                <button type="button" class="remove-attachment" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            attachmentsPreview.appendChild(attachmentItem);
+        }
+
+        // Form validation
+        document.getElementById('supportTicketForm').addEventListener('submit', function(e) {
+            const subject = document.getElementById('ticketSubject').value.trim();
+            const description = document.getElementById('ticketDescription').value.trim();
+            
+            if (!subject || !description) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Disable submit button to prevent double submission
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = 'Submitting...';
+        });
     </script>
-    <script src="../../javascript/mCreateTicket.js"></script>
     <script src="../../javascript/mainScript.js"></script>
 </body>
 </html>
+<?php
+// Close database connection
+if (isset($connection)) {
+    mysqli_close($connection);
+}
+?>

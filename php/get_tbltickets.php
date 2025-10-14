@@ -38,7 +38,6 @@
             <th>User Email</th>
             <th>Admin Assigned ID</th>
             <th>Is Unread</th>
-            <th>Type</th>
             <th>Created At</th>
             <th>Updated At</th>
             <th>Last Reply At</th>
@@ -60,7 +59,6 @@
                 <td><?php echo $row["userEmail"]; ?></td>
                 <td><?php echo $row["adminAssignedID"]; ?></td>
                 <td><?php echo $row["isUnread"]; ?></td>
-                <td><?php echo $row["type"]; ?></td>
                 <td><?php echo $row["createdAt"]; ?></td>
                 <td><?php echo $row["updatedAt"]; ?></td>
                 <td><?php echo $row["lastReplyAt"]; ?></td>
