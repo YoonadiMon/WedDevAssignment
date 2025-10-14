@@ -1,3 +1,15 @@
+<?php
+session_start();
+
+$showWelcomePopup = false;
+$userName = '';
+if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
+    $showWelcomePopup = true;
+    $userName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : $_SESSION['username'];
+    unset($_SESSION['login_success']); // Clear the flag
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -291,6 +303,52 @@
         </style>
     </head>
     <body>
+        <?php if ($showWelcomePopup): ?>
+        <!-- Welcome Popup -->
+        <div class="welcome-overlay" id="welcomeOverlay">
+            <div class="welcome-popup">
+                <h2 class="welcome-title">Welcome Back!</h2>
+                <p class="welcome-message">
+                    Hello, <span class="welcome-username"><?php echo htmlspecialchars($userName); ?></span><br>
+                    Great to see you again! 🌱
+                </p>
+                <button class="welcome-close-btn" onclick="closeWelcomePopup()">
+                    Get Started
+                </button>
+            </div>
+        </div>
+
+        <script>
+            // Show welcome popup on page load
+            window.addEventListener('DOMContentLoaded', function() {
+                const welcomeOverlay = document.getElementById('welcomeOverlay');
+                if (welcomeOverlay) {
+                    setTimeout(() => {
+                        welcomeOverlay.classList.add('show');
+                    }, 100);
+                }
+            });
+
+            function closeWelcomePopup() {
+                const welcomeOverlay = document.getElementById('welcomeOverlay');
+                if (welcomeOverlay) {
+                    welcomeOverlay.classList.remove('show');
+                    setTimeout(() => {
+                        welcomeOverlay.style.display = 'none';
+                    }, 300);
+                }
+            }
+
+            document.addEventListener('click', function(e) {
+                const welcomeOverlay = document.getElementById('welcomeOverlay');
+                if (e.target === welcomeOverlay) {
+                    closeWelcomePopup();
+                }
+            });
+        </script>
+        <?php endif; ?>
+
+
         <div id="cover" class="" onclick="hideMenu()"></div>
         
         <!-- Logo + Name & Navbar -->

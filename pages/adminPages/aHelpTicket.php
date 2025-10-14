@@ -540,7 +540,7 @@ foreach ($tickets as $ticket) {
     <header>
         <!-- Logo + Name -->
         <section class="c-logo-section">
-            <a href="../../pages/adminPages/adminIndex.html" class="c-logo-link">
+            <a href="../../pages/adminPages/adminIndex.php" class="c-logo-link">
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
             </a>
@@ -563,7 +563,7 @@ foreach ($tickets as $ticket) {
                         </a>
                     </section>
 
-                    <a href="../../pages/adminPages/adminIndex.html">Dashboard</a>
+                    <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                     <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.html">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
@@ -576,7 +576,7 @@ foreach ($tickets as $ticket) {
 
         <!-- Menu Links Desktop + Tablet -->
         <nav class="c-navbar-desktop">
-            <a href="../../pages/adminPages/adminIndex.html">Dashboard</a>
+            <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
             <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.html">Event</a>
             <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
@@ -791,7 +791,7 @@ foreach ($tickets as $ticket) {
         <section class="c-footer-links-section">
             <div>
                 <b>Admin Panel</b><br>
-                <a href="../../pages/adminPages/adminIndex.html">Dashboard</a><br>
+                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a><br>
                 <a href="../../pages/adminPages/adminTickets.html">Support Tickets</a><br>
                 <a href="../../pages/adminPages/adminUsers.html">User Management</a>
             </div>
