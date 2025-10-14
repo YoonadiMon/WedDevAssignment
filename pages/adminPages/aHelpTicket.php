@@ -1,3 +1,43 @@
+<?php
+include("../../php/dbConn.php");
+
+// Fetch all tickets from database
+$query = "SELECT * FROM tbltickets ORDER BY createdAt DESC";
+$result = mysqli_query($connection, $query);
+
+$tickets = [];
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $tickets[] = $row;
+    }
+}
+
+// Count tickets by status for stats
+$stats = [
+    'open' => 0,
+    'pending' => 0,
+    'urgent' => 0,
+    'resolved' => 0
+];
+
+foreach ($tickets as $ticket) {
+    switch ($ticket['status']) {
+        case 'open':
+            $stats['open']++;
+            break;
+        case 'in_progress':
+            $stats['pending']++;
+            break;
+        case 'solved':
+            $stats['resolved']++;
+            break;
+    }
+    
+    if ($ticket['priority'] === 'urgent') {
+        $stats['urgent']++;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -122,13 +162,13 @@
 
         .tickets-list {
             max-height: 600px;
-            overflow-y: auto;
+            height: fit-content;
+            overflow-x: hidden;
         }
 
         .ticket-item {
             padding: 20px;
             border-bottom: 1px solid var(--border-color);
-            /* cursor: pointer; */
             transition: background-color 0.3s;
             display: flex;
             align-items: flex-start;
@@ -177,6 +217,7 @@
         }
 
         .ticket-preview {
+            max-width: 60%;
             color: var(--Gray);
             font-size: 14px;
             line-height: 1.4;
@@ -248,10 +289,6 @@
                 flex-direction: column;
                 gap: 10px;
             }
-
-            /* .ticket-actions {
-                align-self: flex-end;
-            } */
 
             .filters {
                 flex-wrap: wrap;
@@ -376,19 +413,12 @@
                 text-align: center;
             }
 
-            /* Hide less important info on mobile */
             .section-actions .c-text-helper,
             .ticket-time {
                 display: none;
             }
-
-            /* Make admin actions button full width on mobile */
-            /* .admin-actions .c-btn {
-                width: 100%;
-            } */
         }
 
-        /* Additional mobile optimization for even smaller screens */
         @media (max-width: 480px) {
             .admin-tickets-container {
                 padding: 10px;
@@ -406,7 +436,6 @@
 
             .ticket-priority,
             .ticket-category {
-                
                 align-self: flex-start;
             }
         }
@@ -425,8 +454,6 @@
                 <div class="c-text">ReLeaf</div>
             </a>
         </section>
-
-        <!-- Menu Links -->
 
         <!-- Menu Links Mobile -->
         <nav class="c-navbar-side">
@@ -450,7 +477,7 @@
                     <a href="../../pages/CommonPages/mainEvent.html">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
                     <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
-                    <a href="../../pages/adminPages/aHelpTicket.html">Help</a>
+                    <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                 </div>
             </div>
 
@@ -463,7 +490,7 @@
             <a href="../../pages/CommonPages/mainEvent.html">Event</a>
             <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
             <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
-            <a href="../../pages/adminPages/aHelpTicket.html">Help</a>
+            <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
         </nav>          
         <section class="c-navbar-more">
             <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
@@ -488,37 +515,34 @@
                     <p>Time to help the people who need us most</p>
                     <p><em>Click on a conversation to get started</em></p>
                 </div>
-                <!-- <div class="admin-actions">
-                    <button class="c-btn c-btn-primary">Export Reports</button>
-                </div> -->
             </div>
 
             <!-- Stats Overview -->
             <div class="stats-overview">
                 <div class="stat-card">
-                    <div class="stat-number stat-open">5</div>
+                    <div class="stat-number stat-open"><?php echo $stats['open']; ?></div>
                     <div class="stat-label">Open Tickets</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number stat-pending">24</div>
+                    <div class="stat-number stat-pending"><?php echo $stats['pending']; ?></div>
                     <div class="stat-label">In Progress</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number stat-urgent">12</div>
+                    <div class="stat-number stat-urgent"><?php echo $stats['urgent']; ?></div>
                     <div class="stat-label">Urgent</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number stat-resolved">156</div>
-                    <div class="stat-label">Resolved Today</div>
+                    <div class="stat-number stat-resolved"><?php echo $stats['resolved']; ?></div>
+                    <div class="stat-label">Resolved</div>
                 </div>
             </div>
 
             <!-- Help Tickets Section -->
             <div class="tickets-section">
                 <div class="section-header">
-                    <h2>Help Tickets: All Open <span class="badge">5</span></h2>
+                    <h2>Help Tickets: All Tickets <span class="badge"><?php echo count($tickets); ?></span></h2>
                     <div class="section-actions">
-                        <span class="c-text-helper">Overview by 3 days</span>
+                        <span class="c-text-helper">Total: <?php echo count($tickets); ?> tickets</span>
                     </div>
                 </div>
 
@@ -549,7 +573,52 @@
                 </div>
 
                 <div class="tickets-list" id="helpTicketsList">
-                    <!-- Tickets will be populated by JavaScript -->
+                    <?php if (empty($tickets)): ?>
+                        <div class="empty-state">
+                            <p>No tickets found in the database</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($tickets as $ticket): ?>
+                            <div class="ticket-item <?php echo $ticket['isUnread'] ? 'unread' : ''; ?>" data-ticket-id="<?php echo $ticket['ticketID']; ?>">
+                                <div class="ticket-avatar">
+                                    <?php 
+                                    // Get initials from username
+                                    $initials = '';
+                                    if (!empty($ticket['username'])) {
+                                        $names = explode(' ', $ticket['username']);
+                                        $initials = substr($names[0], 0, 1);
+                                        if (count($names) > 1) {
+                                            $initials .= substr($names[1], 0, 1);
+                                        }
+                                    } else {
+                                        $initials = 'U';
+                                    }
+                                    echo strtoupper($initials);
+                                    ?>
+                                </div>
+                                <div class="ticket-content">
+                                    <div class="ticket-header">
+                                        <div>
+                                            <div class="ticket-title"><?php echo htmlspecialchars($ticket['subject']); ?></div>
+                                            <div class="ticket-preview"><?php echo htmlspecialchars($ticket['description']); ?></div>
+                                        </div>
+                                    </div>
+                                    <div class="ticket-meta">
+                                        <span class="ticket-category"><?php echo formatCategory($ticket['category']); ?></span>
+                                        <span class="ticket-priority priority-<?php echo $ticket['priority']; ?>"><?php echo formatPriority($ticket['priority']); ?></span>
+                                        <span class="ticket-id">#<?php echo $ticket['ticketID']; ?></span>
+                                        <span class="ticket-time"><?php echo formatTime($ticket['createdAt']); ?></span>
+                                    </div>
+                                </div>
+                                <div class="ticket-actions">
+                                    <button class="c-btn c-btn-primary c-btn-sm" 
+                                            onclick="toggleTicketStatus(<?php echo $ticket['ticketID']; ?>, event)">
+                                        <?php echo $ticket['status'] === 'solved' ? 'Reopen' : 'Mark Solved'; ?>
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -617,94 +686,7 @@
     <script>
         const isAdmin = true;
         
-        // Mock data for tickets
-        const mockTickets = [
-            {
-                id: "TK-649",
-                title: "How to edit a blog?",
-                preview: "I created a blog post but I can't find the edit button. Can you help me locate it?",
-                category: "general",
-                priority: "medium",
-                status: "open",
-                userId: "USR-001",
-                userName: "John Doe",
-                userEmail: "john@example.com",
-                createdAt: "2024-01-15T10:30:00Z",
-                updatedAt: "2024-01-15T10:30:00Z",
-                unread: true,
-                type: "help"
-            },
-            {
-                id: "TK-650",
-                title: "New email creation issue",
-                preview: "I'm trying to update my email address but getting an error message...",
-                category: "account",
-                priority: "high",
-                status: "open",
-                userId: "USR-002",
-                userName: "Sarah Wilson",
-                userEmail: "sarah@example.com",
-                createdAt: "2024-01-15T09:15:00Z",
-                updatedAt: "2024-01-15T09:15:00Z",
-                unread: true,
-                type: "help"
-            },
-            {
-                id: "TK-651",
-                title: "New contact inquiry",
-                preview: "I have questions about your premium membership features and pricing...",
-                category: "other",
-                priority: "low",
-                status: "open",
-                userId: "USR-003",
-                userName: "Mike Chen",
-                userEmail: "mike@example.com",
-                createdAt: "2024-01-15T08:45:00Z",
-                updatedAt: "2024-01-15T08:45:00Z",
-                unread: false,
-                type: "help"
-            },
-            {
-                id: "TK-652",
-                title: "Payment failed for subscription",
-                preview: "My credit card payment keeps failing even though the card is valid...",
-                category: "billing",
-                priority: "urgent",
-                status: "in_progress",
-                userId: "USR-004",
-                userName: "Emma Davis",
-                userEmail: "emma@example.com",
-                createdAt: "2024-01-15T07:20:00Z",
-                updatedAt: "2024-01-15T10:10:00Z",
-                unread: false,
-                type: "help"
-            },
-            {
-                id: "TK-653",
-                title: "Feature request: Dark mode",
-                preview: "Would love to have a dark mode option for the application...",
-                category: "feature",
-                priority: "low",
-                status: "open",
-                userId: "USR-005",
-                userName: "Alex Kim",
-                userEmail: "alex@example.com",
-                createdAt: "2024-01-14T16:30:00Z",
-                updatedAt: "2024-01-14T16:30:00Z",
-                unread: true,
-                type: "help"
-            }
-        ];
-
         document.addEventListener('DOMContentLoaded', function() {
-            const helpTicketsList = document.getElementById('helpTicketsList');
-            
-            // Filter tickets by type
-            const helpTickets = mockTickets.filter(ticket => ticket.type === 'help');
-            
-            // Render help tickets
-            renderTickets(helpTickets, helpTicketsList);
-            
             // Add filter functionality
             const categoryFilter = document.getElementById('categoryFilter');
             const priorityFilter = document.getElementById('priorityFilter');
@@ -719,99 +701,41 @@
                 const priority = priorityFilter.value;
                 const status = statusFilter.value;
                 
-                const filteredTickets = helpTickets.filter(ticket => {
-                    return (category === 'all' || ticket.category === category) &&
-                           (priority === 'all' || ticket.priority === priority) &&
-                           (status === 'all' || ticket.status === status);
+                const ticketItems = document.querySelectorAll('.ticket-item');
+                
+                ticketItems.forEach(item => {
+                    const itemCategory = item.querySelector('.ticket-category').textContent.toLowerCase();
+                    const itemPriority = item.querySelector('.ticket-priority').textContent.toLowerCase();
+                    const itemStatus = item.querySelector('.c-btn').textContent.includes('Reopen') ? 'solved' : 'open';
+                    
+                    const categoryMatch = category === 'all' || itemCategory.includes(category);
+                    const priorityMatch = priority === 'all' || itemPriority.includes(priority);
+                    const statusMatch = status === 'all' || itemStatus === status;
+                    
+                    if (categoryMatch && priorityMatch && statusMatch) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
                 });
                 
-                renderTickets(filteredTickets, helpTicketsList);
-            }
-            
-            function renderTickets(tickets, container) {
-                if (tickets.length === 0) {
-                    container.innerHTML = `
+                // Show empty state if no tickets visible
+                const visibleTickets = document.querySelectorAll('.ticket-item[style="display: flex"]');
+                const emptyState = document.querySelector('.empty-state');
+                
+                if (visibleTickets.length === 0 && !emptyState) {
+                    const ticketsList = document.getElementById('helpTicketsList');
+                    ticketsList.innerHTML = `
                         <div class="empty-state">
                             <p>No tickets found matching your filters</p>
                             <button class="c-btn c-btn-primary" onclick="resetFilters()">Reset Filters</button>
                         </div>
                     `;
-                    return;
                 }
-                
-                container.innerHTML = tickets.map(ticket => `
-                    <div class="ticket-item ${ticket.unread ? 'unread' : ''}">
-                        <div class="ticket-avatar">
-                            ${ticket.userName.split(' ').map(n => n[0]).join('')}
-                        </div>
-                        <div class="ticket-content">
-                            <div class="ticket-header">
-                                <div>
-                                    <div class="ticket-title">${ticket.title}</div>
-                                    <div class="ticket-preview">${ticket.preview}</div>
-                                </div>
-                            </div>
-                            <div class="ticket-meta">
-                                <span class="ticket-category">${formatCategory(ticket.category)}</span>
-                                <span class="ticket-priority priority-${ticket.priority}">${formatPriority(ticket.priority)}</span>
-                                <span class="ticket-id">${ticket.id}</span>
-                                <span class="ticket-time">${formatTime(ticket.createdAt)}</span>
-                            </div>
-                        </div>
-                        <div class="ticket-actions">
-                            <button class="c-btn c-btn-primary c-btn-sm" 
-                                    onclick="toggleTicketStatus('${ticket.id}', event)">
-                                ${ticket.status === 'solved' ? 'Reopen' : 'Mark Solved'}
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            function formatCategory(category) {
-                const categories = {
-                    'technical': 'Technical',
-                    'account': 'Account',
-                    'billing': 'Billing',
-                    'feature': 'Feature',
-                    'bug': 'Bug',
-                    'general': 'General',
-                    'other': 'Others'
-                };
-                return categories[category] || category;
-            }
-            
-            function formatPriority(priority) {
-                const priorities = {
-                    'low': 'Low',
-                    'medium': 'Medium',
-                    'high': 'High',
-                    'urgent': 'Urgent'
-                };
-                return priorities[priority] || priority;
-            }
-            
-            function formatTime(timestamp) {
-                const now = new Date();
-                const ticketTime = new Date(timestamp);
-                const diffHours = Math.floor((now - ticketTime) / (1000 * 60 * 60));
-                
-                if (diffHours < 1) return 'Just now';
-                if (diffHours < 24) return `${diffHours}h ago`;
-                
-                const diffDays = Math.floor(diffHours / 24);
-                return `${diffDays}d ago`;
             }
         });
         
-        // Global functions
-        // function openTicket(ticketId) {
-        //     alert(`Opening ticket: ${ticketId}\n\nIn a real application, this would open the ticket details page.`);
-        //     // window.location.href = `adminTicketDetail.html?id=${ticketId}`;
-        // }
-        
         function showNotification(message) {
-            // Create a simple toast notification
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
@@ -831,28 +755,79 @@
                 notification.remove();
             }, 3000);
         }
+        
         function toggleTicketStatus(ticketId, event) {
             event.stopPropagation();
             
-            const ticket = mockTickets.find(t => t.id === ticketId);
-            if (ticket) {
-                ticket.status = ticket.status === 'solved' ? 'open' : 'solved';
-                ticket.updatedAt = new Date().toISOString();
-                
-                const action = ticket.status === 'solved' ? 'solved' : 'reopened';
-                showNotification(`Ticket ${ticketId} ${action}`);
+            // In a real application, you would make an AJAX call to update the database
+            const button = event.target;
+            const isCurrentlySolved = button.textContent.includes('Reopen');
+            
+            if (isCurrentlySolved) {
+                button.textContent = 'Mark Solved';
+                showNotification(`Ticket #${ticketId} reopened`);
+            } else {
+                button.textContent = 'Reopen';
+                showNotification(`Ticket #${ticketId} marked as solved`);
             }
+            
+            // For now, we'll just update the UI
+            // In production, you would make an AJAX call to update the database
+            // updateTicketStatus(ticketId, isCurrentlySolved ? 'open' : 'solved');
         }
 
         function resetFilters() {
             document.getElementById('categoryFilter').value = 'all';
             document.getElementById('priorityFilter').value = 'all';
             document.getElementById('statusFilter').value = 'all';
-            document.querySelectorAll('.filter-select').forEach(filter => {
-                filter.dispatchEvent(new Event('change'));
+            document.querySelectorAll('.ticket-item').forEach(item => {
+                item.style.display = 'flex';
             });
         }
     </script>
     <script src="../../javascript/mainScript.js"></script>
 </body>
 </html>
+
+<?php
+// Helper functions
+function formatCategory($category) {
+    $categories = [
+        'technical' => 'Technical',
+        'account' => 'Account',
+        'billing' => 'Billing',
+        'feature' => 'Feature',
+        'bug' => 'Bug',
+        'general' => 'General',
+        'other' => 'Others'
+    ];
+    return $categories[$category] ?? $category;
+}
+
+function formatPriority($priority) {
+    $priorities = [
+        'low' => 'Low',
+        'medium' => 'Medium',
+        'high' => 'High',
+        'urgent' => 'Urgent'
+    ];
+    return $priorities[$priority] ?? $priority;
+}
+
+function formatTime($timestamp) {
+    $now = new DateTime();
+    $ticketTime = new DateTime($timestamp);
+    $interval = $now->diff($ticketTime);
+    
+    if ($interval->y > 0) return $interval->y . 'y ago';
+    if ($interval->m > 0) return $interval->m . 'mo ago';
+    if ($interval->d > 0) return $interval->d . 'd ago';
+    if ($interval->h > 0) return $interval->h . 'h ago';
+    if ($interval->i > 0) return $interval->i . 'm ago';
+    
+    return 'Just now';
+}
+
+// Close database connection
+mysqli_close($connection);
+?>

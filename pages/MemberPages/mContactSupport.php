@@ -37,12 +37,13 @@ $ticketCount = mysqli_num_rows($result);
             .support-container {
                 max-width: 1200px;
                 margin: 0 auto;
+                padding: 0 15px;
             }
 
             .help-section {
                 background-color: var(--bg-color);
                 border-radius: 8px;
-                padding: 20px 10px 15px 10px;
+                padding: 20px 15px;
                 text-align: center;
                 margin-bottom: 20px;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -85,6 +86,8 @@ $ticketCount = mysqli_num_rows($result);
                 border-radius: 4px;
                 cursor: pointer;
                 transition: background-color 0.3s;
+                width: 100%;
+                max-width: 250px;
             }
 
             .open-ticket-btn:hover {
@@ -94,21 +97,25 @@ $ticketCount = mysqli_num_rows($result);
             .tickets-section {
                 background-color: var(--DarkerGray);
                 border-radius: 8px;
-                padding: 30px;
+                padding: 20px 15px;
                 margin-bottom: 30px;
+                overflow-x: auto;
             }
 
             .tickets-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 30px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                gap: 15px;
             }
 
             .tickets-header h3 {
                 font-size: 22px;
                 font-weight: 400;
                 color: var(--White);
+                margin: 0;
             }
 
             a {
@@ -126,6 +133,7 @@ $ticketCount = mysqli_num_rows($result);
                 align-items: center;
                 gap: 8px;
                 transition: background-color 0.3s;
+                white-space: nowrap;
             }
 
             .add-new-btn:hover {
@@ -133,9 +141,11 @@ $ticketCount = mysqli_num_rows($result);
                 color: var(--Black);
             }
 
+            /* Desktop table styles */
             .tickets-table {
                 width: 100%;
                 border-collapse: collapse;
+                min-width: 800px;
             }
 
             .tickets-table thead {
@@ -143,7 +153,7 @@ $ticketCount = mysqli_num_rows($result);
             }
 
             .tickets-table th {
-                padding: 15px;
+                padding: 15px 10px;
                 text-align: left;
                 font-weight: 400;
                 color: var(--Gray);
@@ -161,7 +171,7 @@ $ticketCount = mysqli_num_rows($result);
             }
 
             .tickets-table td {
-                padding: 20px 15px;
+                padding: 15px 10px;
                 color: var(--White);
             }
 
@@ -212,6 +222,137 @@ $ticketCount = mysqli_num_rows($result);
             .priority-low {
                 color: #4CAF50;
                 font-weight: 500;
+            }
+
+            /* Mobile card styles */
+            .tickets-cards {
+                display: none;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .ticket-card {
+                background-color: var(--DarkGray);
+                border-radius: 8px;
+                padding: 20px;
+                cursor: pointer;
+                transition: background-color 0.2s;
+                border: 1px solid var(--Gray);
+            }
+
+            .ticket-card:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+
+            .ticket-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 15px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .ticket-id {
+                font-weight: 600;
+                color: var(--White);
+                font-size: 16px;
+            }
+
+            .ticket-status {
+                margin-left: auto;
+            }
+
+            .ticket-subject {
+                font-size: 18px;
+                font-weight: 500;
+                color: var(--White);
+                margin-bottom: 10px;
+                width: 100%;
+            }
+
+            .ticket-details {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                margin-top: 15px;
+            }
+
+            .ticket-detail {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .detail-label {
+                font-size: 12px;
+                color: var(--Gray);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .detail-value {
+                font-size: 14px;
+                color: var(--White);
+            }
+
+            /* Responsive styles */
+            @media (max-width: 920px) {
+                .tickets-table {
+                    display: none;
+                }
+                
+                .tickets-cards {
+                    display: flex;
+                }
+                
+                .tickets-section {
+                    padding: 15px 10px;
+                }
+                
+                .tickets-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                
+                .tickets-header h3 {
+                    font-size: 20px;
+                }
+                
+                .help-section {
+                    padding: 15px 10px;
+                }
+                
+                .help-icon {
+                    width: 60px;
+                    height: 60px;
+                    font-size: 36px;
+                }
+                
+                .help-section h2 {
+                    font-size: 20px;
+                }
+                
+                .ticket-details {
+                    grid-template-columns: 1fr;
+                    gap: 10px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .ticket-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                
+                .ticket-status {
+                    margin-left: 0;
+                }
+                
+                .open-ticket-btn, .add-new-btn {
+                    width: 100%;
+                    justify-content: center;
+                }
             }
         </style>
     </head>
@@ -298,7 +439,7 @@ $ticketCount = mysqli_num_rows($result);
         <hr>
 
         <!-- Main Content -->
-        <main>
+        <main class="support-container">
             <!-- Content Section -->
             <!-- Help Section -->
             <div class="help-section">
@@ -320,6 +461,7 @@ $ticketCount = mysqli_num_rows($result);
                     
                 </div>
 
+                <!-- Desktop Table View -->
                 <table class="tickets-table">
                     <thead>
                         <tr>
@@ -334,7 +476,10 @@ $ticketCount = mysqli_num_rows($result);
                     </thead>
                     <tbody>
                         <?php if ($ticketCount > 0): ?>
-                            <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                            <?php 
+                            // Reset pointer to beginning for table
+                            mysqli_data_seek($result, 0);
+                            while ($row = mysqli_fetch_assoc($result)): ?>
                                 <tr onclick="window.location.href='mTicketDetails.php?id=<?php echo $row['ticketID']; ?>'">
                                     <td>#<?php echo $row["ticketID"]; ?></td>
                                     <td><?php echo htmlspecialchars($row["subject"]); ?></td>
@@ -366,6 +511,58 @@ $ticketCount = mysqli_num_rows($result);
                         <?php endif; ?>
                     </tbody>
                 </table>
+
+                <!-- Mobile Card View -->
+                <div class="tickets-cards">
+                    <?php if ($ticketCount > 0): ?>
+                        <?php 
+                        // Reset pointer to beginning for cards
+                        mysqli_data_seek($result, 0);
+                        while ($row = mysqli_fetch_assoc($result)): ?>
+                            <div class="ticket-card" onclick="window.location.href='mTicketDetails.php?id=<?php echo $row['ticketID']; ?>'">
+                                <div class="ticket-header">
+                                    <div class="ticket-id">#<?php echo $row["ticketID"]; ?></div>
+                                    <div class="ticket-status">
+                                        <span class="status-badge status-<?php echo strtolower($row["status"]); ?>">
+                                            <?php echo $row["status"]; ?>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="ticket-subject"><?php echo htmlspecialchars($row["subject"]); ?></div>
+                                <div class="ticket-details">
+                                    <div class="ticket-detail">
+                                        <span class="detail-label">Category</span>
+                                        <span class="detail-value"><?php echo htmlspecialchars($row["category"]); ?></span>
+                                    </div>
+                                    <div class="ticket-detail">
+                                        <span class="detail-label">Priority</span>
+                                        <span class="detail-value priority-<?php echo strtolower($row["priority"]); ?>">
+                                            <?php echo $row["priority"]; ?>
+                                        </span>
+                                    </div>
+                                    <div class="ticket-detail">
+                                        <span class="detail-label">Created</span>
+                                        <span class="detail-value"><?php echo date("M j, Y", strtotime($row["createdAt"])); ?></span>
+                                    </div>
+                                    <div class="ticket-detail">
+                                        <span class="detail-label">Last Reply</span>
+                                        <span class="detail-value">
+                                            <?php 
+                                            if (!empty($row["lastReplyAt"]) && $row["lastReplyAt"] != "0000-00-00 00:00:00") {
+                                                echo date("M j, Y", strtotime($row["lastReplyAt"]));
+                                            } else {
+                                                echo "No replies yet";
+                                            }
+                                            ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <div class="no-tickets">No support tickets yet</div>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <!-- Search & Results -->

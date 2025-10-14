@@ -118,7 +118,7 @@ function loadHeader() {
                         <a href="../../pages/CommonPages/mainEvent.html">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
                         <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
-                        <a href="../../pages/adminPages/aHelpTicket.html">Help</a>
+                        <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     </div>
                 </div>
             </nav>
@@ -130,7 +130,7 @@ function loadHeader() {
                 <a href="../../pages/CommonPages/mainEvent.html">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
                 <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
-                <a href="../../pages/adminPages/aHelpTicket.html">Help</a>
+                <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             </nav>          
             <section class="c-navbar-more">
                 <input type="text" placeholder="Search..." id="searchBar" class="search-bar">

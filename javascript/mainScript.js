@@ -188,7 +188,7 @@ function renderResults(type, query) {
                 .filter((t) => match(t.TicketID)|| match(t.MemberID) || match(t.Subject))
                 .map(
                     (t) => `
-                    <div class="result-item clickable" onclick="window.location.href='../../pages/adminPages/aHelpTicket.html?ticketId=${t.TicketID}'">
+                    <div class="result-item clickable" onclick="window.location.href='../../pages/adminPages/aHelpTicket.php?ticketId=${t.TicketID}'">
                         <div>
                             <h4>${t.Subject} #${t.TicketID}</h4>
                             <p>Status: ${t.Status}</p>
