@@ -562,6 +562,44 @@
             z-index: 2;
         }
 
+        .admin-badge.reported-badge {
+            position: static;
+            margin-top: 10px;
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .modal-actions .report-btn {
+            background-color: #ffc107;
+            color: #212529;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .modal-actions .report-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            min-width: 120px;
+        }
+
         @media (max-width: 768px) {
             .modal-header {
                 grid-template-columns: 1fr;

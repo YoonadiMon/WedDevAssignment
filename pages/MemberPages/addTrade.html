@@ -543,6 +543,12 @@
                                maxlength="200">
                         <div class="character-count" id="tagsCount">0/200</div>
                     </div>
+
+                    <!-- <div class="form-group">
+                        <label for="listingLocation" class="required">Location</label>
+                        <input type="text" id="listingLocation" name="location" required 
+                               placeholder="e.g., Kuala Lumpur, Penang, Johor Bahru">
+                    </div> -->
                 </div>
 
                 <!-- Specific Details Section -->
@@ -566,13 +572,11 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="tradePreference">Trade Preference</label>
-                            <select id="tradePreference" name="tradePreference">
-                                <option value="">Open to anything</option>
-                                <option value="plants">Plants only</option>
-                                <option value="tools">Tools only</option>
-                                <option value="specific">Specific items</option>
-                            </select>
+                            <label for="lookingFor">Looking For (Trade Preferences)</label>
+                            <textarea id="lookingFor" name="lookingFor" 
+                                      placeholder="What specific items are you looking to trade for? e.g., gardening tools, specific plants, etc."
+                                      maxlength="200"></textarea>
+                            <div class="character-count" id="lookingForCount">0/200</div>
                         </div>
                     </div>
 
@@ -742,6 +746,8 @@
             const tagsInput = document.getElementById('listingTags');
             const careInput = document.getElementById('plantCare');
             const usageInput = document.getElementById('itemUsage');
+            const lookingForInput = document.getElementById('lookingFor');
+
             
             // Initialize character counters
             setupCharacterCounter(titleInput, 'titleCount', 100);
@@ -749,6 +755,7 @@
             setupCharacterCounter(tagsInput, 'tagsCount', 200);
             setupCharacterCounter(careInput, 'careCount', 300);
             setupCharacterCounter(usageInput, 'usageCount', 200);
+            setupCharacterCounter(lookingForInput, 'lookingForCount', 200);
             
             // Show/hide plant or item specific fields
             listingType.addEventListener('change', function() {
@@ -916,24 +923,85 @@
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                // Basic validation
                 if (!validateForm()) {
                     return;
                 }
-                
+
                 // Disable submit button
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Creating Listing...';
+
+                // Get current user data (you'll need to implement this based on your auth system)
+                const currentUser = getCurrentUser(); // This should get user data from your session/token
                 
-                // Simulate form submission
+                // Create listing object matching mockListings structure
+                const listingData = {
+                    listingId: generateListingId(), // You'll need to implement this
+                    memberId: currentUser.userId, // From logged in user
+                    title: form.title.value,
+                    description: form.description.value,
+                    tags: form.tags.value,
+                    category: form.category.value,
+                    dateListed: new Date().toISOString().split('T')[0],
+                    status: "active",
+                    itemType: form.listingType.value,
+                    condition: form.condition.value,
+                    location: form.location.value,
+                    lookingFor: form.lookingFor.value, // New field
+                    userName: currentUser.fullName, // From tblusers
+                    userRating: currentUser.rating || 0, // You might need to calculate this
+                    userTradeCount: currentUser.tradeCount || 0, // From user history
+                    reported: false
+                };
+
+                // Add type-specific fields
+                if (form.listingType.value === 'plant') {
+                    listingData.species = form.species.value;
+                    listingData.growthStage = form.growthStage.value;
+                    listingData.careInstructions = form.careInstructions.value;
+                } else if (form.listingType.value === 'item') {
+                    listingData.brand = form.brand.value;
+                    listingData.dimensions = form.dimensions.value;
+                    listingData.usageHistory = form.usageHistory.value;
+                }
+
+                // Handle file uploads and get imageUrl
+                // You'll need to implement file upload logic here
+
+                // Save to localStorage or send to backend
+                saveListing(listingData);
+                
                 setTimeout(function() {
-                    alert('Your listing has been created successfully! It will be visible in the marketplace shortly.');
+                    alert('Your listing has been created successfully!');
                     window.location.href = '../../pages/CommonPages/mainTrade.html';
                 }, 2000);
             });
+
+            function getCurrentUser() {
+                // This should return the logged in user's data
+                // For now, return mock data - replace with actual user session data
+                return {
+                    userId: "M001", // This should come from your auth system
+                    fullName: "Current User", // From tblusers.fullName
+                    rating: 4.5, // Calculate from user's trade history
+                    tradeCount: 0 // Count from user's previous trades
+                };
+            }
+
+            function generateListingId() {
+                return 'L' + Date.now().toString().slice(-6);
+            }
+
+            function saveListing(listingData) {
+                // Save to localStorage or send to your backend
+                const existingListings = JSON.parse(localStorage.getItem('listings') || '[]');
+                existingListings.push(listingData);
+                localStorage.setItem('listings', JSON.stringify(existingListings));
+            }
             
             function validateForm() {
                 const listingTypeValue = listingType.value;
+                const location = document.getElementById('listingLocation').value;
                 
                 if (!listingTypeValue) {
                     alert('Please select what type of item you are listing.');
@@ -941,6 +1009,12 @@
                     return false;
                 }
                 
+                if (!location) {
+                    alert('Please enter your location.');
+                    document.getElementById('listingLocation').focus();
+                    return false;
+                }
+
                 if (listingTypeValue === 'plant') {
                     const species = document.getElementById('plantSpecies').value;
                     const growthStage = document.getElementById('plantGrowthStage').value;
