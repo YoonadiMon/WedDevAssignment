@@ -1,9 +1,28 @@
+<?php
+// Database connection and query for current user's tickets
+include("../../php/dbConn.php");
+
+// Assuming current user ID is 6 (as per requirements)
+$currentUserID = 5;
+
+// Query to fetch tickets for the current user
+$query = "SELECT * FROM tbltickets WHERE userID = $currentUserID ORDER BY ticketID DESC";
+$result = mysqli_query($connection, $query);
+
+// Error handling
+if (!$result) {
+    die("Query failed: " . mysqli_error($connection));
+}
+
+// Count the number of tickets
+$ticketCount = mysqli_num_rows($result);
+?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>memberTempPage: Change Title As Needed</title>
+        <title>Contact Support - ReLeaf</title>
         <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
 
         <link rel="stylesheet" href="../../style/style.css">
@@ -133,6 +152,12 @@
 
             .tickets-table tbody tr {
                 border-bottom: 1px solid var(--DarkGray);
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+
+            .tickets-table tbody tr:hover {
+                background-color: rgba(255, 255, 255, 0.05);
             }
 
             .tickets-table td {
@@ -144,6 +169,49 @@
                 text-align: center;
                 padding: 40px;
                 color: var(--Gray);
+            }
+            
+            .status-badge {
+                display: inline-block;
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 500;
+            }
+            
+            .status-open {
+                background-color: #4CAF50;
+                color: white;
+            }
+            
+            .status-pending {
+                background-color: #FF9800;
+                color: white;
+            }
+            
+            .status-resolved {
+                background-color: #2196F3;
+                color: white;
+            }
+            
+            .status-closed {
+                background-color: #9E9E9E;
+                color: white;
+            }
+            
+            .priority-high {
+                color: #F44336;
+                font-weight: 500;
+            }
+            
+            .priority-medium {
+                color: #FF9800;
+                font-weight: 500;
+            }
+            
+            .priority-low {
+                color: #4CAF50;
+                font-weight: 500;
             }
         </style>
     </head>
@@ -255,20 +323,50 @@
                 <table class="tickets-table">
                     <thead>
                         <tr>
+                            <th>Ticket ID</th>
+                            <th>Subject</th>
+                            <th>Category</th>
+                            <th>Priority</th>
                             <th>Status</th>
                             <th>Created</th>
                             <th>Last Reply</th>
-                            <th>Category</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td colspan="4" class="no-tickets">No support tickets yet</td>
-                        </tr>
+                        <?php if ($ticketCount > 0): ?>
+                            <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                                <tr onclick="window.location.href='mTicketDetails.php?id=<?php echo $row['ticketID']; ?>'">
+                                    <td>#<?php echo $row["ticketID"]; ?></td>
+                                    <td><?php echo htmlspecialchars($row["subject"]); ?></td>
+                                    <td><?php echo htmlspecialchars($row["category"]); ?></td>
+                                    <td class="priority-<?php echo strtolower($row["priority"]); ?>">
+                                        <?php echo $row["priority"]; ?>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-<?php echo strtolower($row["status"]); ?>">
+                                            <?php echo $row["status"]; ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo date("M j, Y", strtotime($row["createdAt"])); ?></td>
+                                    <td>
+                                        <?php 
+                                        if (!empty($row["lastReplyAt"]) && $row["lastReplyAt"] != "0000-00-00 00:00:00") {
+                                            echo date("M j, Y", strtotime($row["lastReplyAt"]));
+                                        } else {
+                                            echo "No replies yet";
+                                        }
+                                        ?>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="7" class="no-tickets">No support tickets yet</td>
+                            </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
-        </div>
 
             <!-- Search & Results -->
             <section class="search-container" id="searchContainer" style="display: none;">
@@ -294,9 +392,9 @@
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
                 <div class="c-text c-text-center">
-                    “Relief for the Planet, One Leaf at a Time.”
+                    "Relief for the Planet, One Leaf at a Time."
                     <br>
-                    “Together, We Can ReLeaf the Earth.”
+                    "Together, We Can ReLeaf the Earth."
                 </div>
                 <div class="c-text c-text-label">
                     +60 12 345 6789
@@ -333,3 +431,7 @@
         <script src="../../javascript/mainScript.js"></script>
     </body>
 </html>
+<?php
+// Close the database connection
+mysqli_close($connection);
+?>
