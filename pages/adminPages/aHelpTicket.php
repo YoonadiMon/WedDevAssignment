@@ -161,8 +161,7 @@ foreach ($tickets as $ticket) {
         }
 
         .tickets-list {
-            max-height: 600px;
-            height: fit-content;
+            width: 100%;
             overflow-x: hidden;
         }
 
@@ -173,6 +172,8 @@ foreach ($tickets as $ticket) {
             display: flex;
             align-items: flex-start;
             gap: 15px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .ticket-item:hover, .ticket-item.unread:hover {
@@ -352,9 +353,9 @@ foreach ($tickets as $ticket) {
                 padding: 10px;
             }
 
-            .tickets-list {
+            /* .tickets-list {
                 max-height: 500px;
-            }
+            } */
 
             .ticket-item {
                 padding: 15px;
@@ -685,106 +686,8 @@ foreach ($tickets as $ticket) {
 
     <script>
         const isAdmin = true;
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add filter functionality
-            const categoryFilter = document.getElementById('categoryFilter');
-            const priorityFilter = document.getElementById('priorityFilter');
-            const statusFilter = document.getElementById('statusFilter');
-            
-            [categoryFilter, priorityFilter, statusFilter].forEach(filter => {
-                filter.addEventListener('change', applyFilters);
-            });
-            
-            function applyFilters() {
-                const category = categoryFilter.value;
-                const priority = priorityFilter.value;
-                const status = statusFilter.value;
-                
-                const ticketItems = document.querySelectorAll('.ticket-item');
-                
-                ticketItems.forEach(item => {
-                    const itemCategory = item.querySelector('.ticket-category').textContent.toLowerCase();
-                    const itemPriority = item.querySelector('.ticket-priority').textContent.toLowerCase();
-                    const itemStatus = item.querySelector('.c-btn').textContent.includes('Reopen') ? 'solved' : 'open';
-                    
-                    const categoryMatch = category === 'all' || itemCategory.includes(category);
-                    const priorityMatch = priority === 'all' || itemPriority.includes(priority);
-                    const statusMatch = status === 'all' || itemStatus === status;
-                    
-                    if (categoryMatch && priorityMatch && statusMatch) {
-                        item.style.display = 'flex';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-                
-                // Show empty state if no tickets visible
-                const visibleTickets = document.querySelectorAll('.ticket-item[style="display: flex"]');
-                const emptyState = document.querySelector('.empty-state');
-                
-                if (visibleTickets.length === 0 && !emptyState) {
-                    const ticketsList = document.getElementById('helpTicketsList');
-                    ticketsList.innerHTML = `
-                        <div class="empty-state">
-                            <p>No tickets found matching your filters</p>
-                            <button class="c-btn c-btn-primary" onclick="resetFilters()">Reset Filters</button>
-                        </div>
-                    `;
-                }
-            }
-        });
-        
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #4CAF50;
-                color: white;
-                padding: 12px 20px;
-                border-radius: 4px;
-                z-index: 1000;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            `;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-        
-        function toggleTicketStatus(ticketId, event) {
-            event.stopPropagation();
-            
-            // In a real application, you would make an AJAX call to update the database
-            const button = event.target;
-            const isCurrentlySolved = button.textContent.includes('Reopen');
-            
-            if (isCurrentlySolved) {
-                button.textContent = 'Mark Solved';
-                showNotification(`Ticket #${ticketId} reopened`);
-            } else {
-                button.textContent = 'Reopen';
-                showNotification(`Ticket #${ticketId} marked as solved`);
-            }
-            
-            // For now, we'll just update the UI
-            // In production, you would make an AJAX call to update the database
-            // updateTicketStatus(ticketId, isCurrentlySolved ? 'open' : 'solved');
-        }
-
-        function resetFilters() {
-            document.getElementById('categoryFilter').value = 'all';
-            document.getElementById('priorityFilter').value = 'all';
-            document.getElementById('statusFilter').value = 'all';
-            document.querySelectorAll('.ticket-item').forEach(item => {
-                item.style.display = 'flex';
-            });
-        }
     </script>
+    <script src="../../javascript/aHelpTicket.js"></script>
     <script src="../../javascript/mainScript.js"></script>
 </body>
 </html>
