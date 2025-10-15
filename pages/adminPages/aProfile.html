@@ -1,0 +1,640 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReLeaf - Admin Profile</title>
+    <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
+    <link rel="stylesheet" href="../../style/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+    <style>
+        /* mProfile styling */
+        .mprofile-container {
+            max-width: 1000px;
+            margin: 32px auto;
+            padding: 28px 36px;
+            box-sizing: border-box;
+            background: transparent;
+        }
+
+        .mprofile-container main {
+            display: flex;
+            gap: 48px;
+            align-items: flex-start;
+            margin-top: 26px;
+        }
+
+        .mprofile-container .left {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .mprofile-container .avatar {
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background: var(--bg-color-light, #f8fafc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 3px solid var(--border-color);
+            box-shadow: 0 6px 20px var(--shadow-color);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .dark-mode .mprofile-container .avatar {
+            background: var(--bg-color-dark-2);
+            border-color: var(--border-color);
+        }
+
+        .mprofile-container .avatar:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 30px var(--shadow-color);
+        }
+
+        .mprofile-container .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 50%;
+        }
+
+        .mprofile-container .change-wrap {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .mprofile-container .btn-change {
+            background: linear-gradient(135deg, var(--MainGreen), var(--btn-color-hover));
+            color: var(--White);
+            border-radius: 25px;
+            padding: 12px 20px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(67, 177, 130, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .mprofile-container .btn-change:hover {
+            background: linear-gradient(135deg, var(--btn-color-hover), var(--MainGreen));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 177, 130, 0.4);
+        }
+
+        .mprofile-container .btn-change:active {
+            transform: translateY(0);
+        }
+
+        .mprofile-container .right {
+            flex: 1;
+        }
+
+        .mprofile-container h1 {
+            font-size: 32px;
+            margin: 0 0 24px 0;
+            font-weight: 700;
+            color: var(--text-heading);
+            background: linear-gradient(135deg, var(--MainGreen), var(--btn-color-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .mprofile-container .form-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .mprofile-container .label {
+            width: 120px;
+            color: var(--text-heading);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .mprofile-container .input,
+        .mprofile-container textarea,
+        .mprofile-container select {
+            flex: 1;
+            max-width: 500px;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .mprofile-container .input::placeholder,
+        .mprofile-container textarea::placeholder {
+            color: var(--text-color-2);
+            font-style: italic;
+        }
+
+        .mprofile-container .input:focus,
+        .mprofile-container textarea:focus,
+        .mprofile-container select:focus {
+            outline: none;
+            border-color: var(--MainGreen);
+            background: var(--bg-color-light-3, var(--bg-color));
+            box-shadow: 0 0 0 3px rgba(67, 177, 130, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .dark-mode .mprofile-container .input:focus,
+        .dark-mode .mprofile-container textarea:focus,
+        .dark-mode .mprofile-container select:focus {
+            background: var(--bg-color-dark-4);
+            border-color: var(--MainGreen);
+        }
+
+        .mprofile-container .input:hover,
+        .mprofile-container textarea:hover,
+        .mprofile-container select:hover {
+            border-color: var(--MainGreen);
+            background: var(--bg-color-light-2, var(--bg-color));
+            transform: translateY(-1px);
+        }
+
+        .dark-mode .mprofile-container .input:hover,
+        .dark-mode .mprofile-container textarea:hover,
+        .dark-mode .mprofile-container select:hover {
+            background: var(--bg-color-dark-2);
+            border-color: var(--MainGreen);
+        }
+
+        .mprofile-container textarea {
+            min-height: 80px;
+            max-width: 500px;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .mprofile-container .small {
+            width: 160px;
+        }
+
+        .mprofile-container .save-wrap {
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 32px;
+            padding-left: 40px;
+        }
+
+        .mprofile-container .btn-save {
+            background: linear-gradient(135deg, var(--MainGreen), var(--btn-color-hover));
+            color: var(--White);
+            border: none;
+            font-weight: 700;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(67, 177, 130, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin-left: 120px;
+        }
+
+        .mprofile-container .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(67, 177, 130, 0.4);
+        }
+
+        .mprofile-container .btn-save:active {
+            transform: translateY(0);
+        }
+
+        .mprofile-container .btn-save::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .mprofile-container .btn-save:hover::before {
+            left: 100%;
+        }
+
+        .mprofile-container .hint {
+            font-size: 13px;
+            color: var(--text-color-2);
+            margin-top: 6px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .mprofile-container .toast {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 28px;
+            background: var(--bg-color-dark-3, #0f172a);
+            color: var(--White);
+            padding: 12px 20px;
+            border-radius: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .mprofile-container .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(-8px);
+        }
+
+        /* Bio Form Row (with counter inside) */
+        .mprofile-container .form-row.bio-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .mprofile-container .bio-input-wrapper {
+            flex: 1;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .mprofile-container .bio-input-wrapper textarea {
+            width: 100%;
+            min-height: 80px;
+            resize: vertical;
+            padding: 12px 16px 32px 16px;
+        }
+
+        /* Bio Word Counter Style */
+        .mprofile-container #bioCounter {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 12px;
+            color: var(--text-color-2);
+            transition: color 0.3s ease, opacity 0.3s ease;
+            opacity: 0.7;
+            pointer-events: none;
+            background: var(--bg-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .mprofile-container textarea:focus~#bioCounter {
+            opacity: 1;
+            color: var(--MainGreen);
+        }
+
+        .dark-mode .mprofile-container #bioCounter {
+            color: var(--text-color-2);
+            background: var(--bg-color-dark);
+        }
+
+        .mprofile-container #bioCounter.limit {
+            color: #dc2626 !important;
+            font-weight: 600;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .mprofile-container .form-row.bio-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .mprofile-container .bio-input-wrapper {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .mprofile-container #bioCounter {
+                font-size: 11px;
+                bottom: 6px;
+                right: 8px;
+            }
+        }
+
+        /* Enhanced mobile responsiveness */
+        @media (max-width: 880px) {
+            .mprofile-container {
+                margin: 16px auto;
+                padding: 20px 24px;
+            }
+
+            .mprofile-container main {
+                flex-direction: column;
+                align-items: center;
+                gap: 32px;
+            }
+
+            .mprofile-container .left {
+                width: 100%;
+            }
+
+            .mprofile-container .right {
+                width: 100%;
+            }
+
+            .mprofile-container .label {
+                width: 110px;
+            }
+
+            .mprofile-container h1 {
+                font-size: 28px;
+                text-align: center;
+            }
+
+            .mprofile-container .avatar {
+                width: 140px;
+                height: 140px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .mprofile-container .form-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .mprofile-container .label {
+                width: 100%;
+            }
+
+            .mprofile-container .input,
+            .mprofile-container textarea,
+            .mprofile-container select {
+                width: 100%;
+            }
+
+            .mprofile-container .small {
+                width: 100%;
+            }
+
+            .mprofile-container .save-wrap {
+                padding-left: 0;
+            }
+
+            .mprofile-container .btn-save {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        /* Additional dark mode specific styles */
+        .dark-mode .mprofile-container .input,
+        .dark-mode .mprofile-container textarea,
+        .dark-mode .mprofile-container select {
+            background: var(--bg-color-dark);
+            border-color: var(--border-color);
+            color: var(--text-color-3);
+        }
+
+        .dark-mode .mprofile-container .input::placeholder,
+        .dark-mode .mprofile-container textarea::placeholder {
+            color: var(--text-color-2);
+        }
+
+        .dark-mode .mprofile-container select option {
+            background: var(--bg-color-dark);
+            color: var(--text-color-3);
+            padding: 8px 12px;
+        }
+
+        .dark-mode .mprofile-container select option:hover {
+            background: var(--bg-color-dark-4);
+        }
+
+        .dark-mode .mprofile-container select option:checked {
+            background: var(--MainGreen);
+            color: var(--White);
+        }
+
+        .dark-mode .mprofile-container textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .dark-mode .mprofile-container textarea::-webkit-scrollbar-track {
+            background: var(--bg-color-dark-2);
+            border-radius: 4px;
+        }
+
+        .dark-mode .mprofile-container textarea::-webkit-scrollbar-thumb {
+            background: var(--text-color-2);
+            border-radius: 4px;
+        }
+
+        .dark-mode .mprofile-container textarea::-webkit-scrollbar-thumb:hover {
+            background: var(--MainGreen);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cover" class="" onclick="hideMenu()"></div>
+
+    <!-- Logo + Name & Navbar -->
+    <header>
+        <!-- Logo + Name -->
+        <section class="c-logo-section">
+            <a href="../../pages/adminPages/adminIndex.html" class="c-logo-link">
+                <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                <div class="c-text">ReLeaf</div>
+            </a>
+        </section>
+
+        <!-- Menu Links -->
+
+        <!-- Menu Links Mobile -->
+        <nav class="c-navbar-side">
+            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
+            <div id="sidebarNav" class="c-navbar-side-menu">
+                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
+                <div class="c-navbar-side-items">
+                    <section class="c-navbar-side-more">
+                        <button id="themeToggle1">
+                            <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                        </button>
+                        <a href="../../pages/adminPages/aProfile.html">
+                            <img src="../../assets/images/profile-light.svg" alt="Profile">
+                        </a>
+                    </section>
+
+                    <a href="../../pages/adminPages/adminIndex.html">Dashboard</a>
+                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                    <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                    <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                    <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                    <a href="../../pages/adminPages/aHelpTicket.html">Help</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Menu Links Desktop + Tablet -->
+        <nav class="c-navbar-desktop">
+            <a href="../../pages/adminPages/adminIndex.html">Dashboard</a>
+            <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+            <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+            <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+            <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+            <a href="../../pages/adminPages/aHelpTicket.html">Help</a>
+        </nav>
+        <section class="c-navbar-more">
+            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+            <button id="themeToggle2">
+                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+            </button>
+            <a href="../../pages/adminPages/aProfile.html">
+                <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
+            </a>
+        </section>
+    </header>
+    <hr>
+
+    <!-- Main Content -->
+    <main>
+        <div class="results" id="results"></div>
+
+        <div class="mprofile-container">
+            <main>
+                <div class="left">
+                    <!-- avatar content -->
+                    <div class="avatar" id="avatar">
+                        <img id="avatarImg" src="" alt="avatar" style="display:none">
+                    </div>
+
+                    <div class="change-wrap">
+                        <button id="changeBtn" class="btn-change">🎨 New Style</button>
+                        <div class="hint" id="fileHint">Generated avatar</div>
+                    </div>
+                </div>
+
+                <div class="right">
+                    <!-- form content -->
+                    <h1>Editing Profile</h1>
+
+                    <div class="form-row">
+                        <div class="label">Full Name:</div>
+                        <input id="fullName" class="input" type="text" placeholder="Enter your full name" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Username:</div>
+                        <input id="username" class="input" type="text" placeholder="Enter your username" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Email:</div>
+                        <input id="email" class="input" type="email" placeholder="Enter your email address" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Gender:</div>
+                        <select id="gender" class="input">
+                            <option value="">Select gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Old Password:</div>
+                        <input id="old-password" class="input" type="password" placeholder="Enter your current password" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">New Password:</div>
+                        <input id="password" class="input small" type="password" placeholder="Enter new password" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Confirm Password:</div>
+                        <input id="confirmPassword" class="input small" type="password" placeholder="Confirm new password" />
+                    </div>
+
+                    <div class="form-row bio-row">
+                        <div class="label">Bio:</div>
+                        <div class="bio-input-wrapper">
+                            <textarea id="bio" class="input" placeholder="Tell us about yourself..."></textarea>
+                            <div id="bioCounter" class="bio-counter">0 / 500 words</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="label">Country:</div>
+                        <select id="country" class="input">
+                            <option value="">Select country</option>
+                            <option value="Malaysia">Malaysia</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="Indonesia">Indonesia</option>
+                            <option value="Thailand">Thailand</option>
+                            <option value="Philippines">Philippines</option>
+                            <option value="United States">United States</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Canada">Canada</option>
+                            <option value="China">China</option>
+                            <option value="Japan">Japan</option>
+                            <option value="South Korea">South Korea</option>
+                            <option value="India">India</option>
+                            <option value="Germany">Germany</option>
+                            <option value="France">France</option>
+                        </select>
+                    </div>
+
+                    <div class="save-wrap">
+                        <button id="saveBtn" class="btn-save">Save Changes</button>
+                    </div>
+                </div>
+            </main>
+            <div id="toast" class="toast" role="status" aria-live="polite"></div>
+        </div>
+    </main>
+
+    <script>const isAdmin = true;</script>
+    <script src="../../javascript/mainScript.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="../../javascript/aDashboard.js"></script>
+    <script src="../../javascript/aProfile.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,548 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Read Blog</title>
+    <link rel="icon" type="image/png" href="../../assets/images/Logo.png" />
+
+    <link rel="stylesheet" href="../../style/style.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet" />
+</head>
+
+<style>
+    /* read blog page styling */
+
+    /* Blog Header */
+    .read-blog-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .blog-meta {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .blog-category {
+        background-color: var(--MainGreen);
+        color: var(--white);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .blog-date {
+        color: var(--text-color-2);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .blog-author {
+        color: var(--text-color-2);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .blog-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--text-heading);
+        line-height: 1.2;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        width: fit-content;
+    }
+
+    .blog-excerpt {
+        font-size: 1.125rem;
+        color: var(--text-color-2);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Blog Image */
+    .blog-image-container {
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .blog-image {
+        width: 100%;
+        max-width: 700px;
+        height: 400px;
+        background: linear-gradient(135deg, var(--LightGreen), var(--MainGreen));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px var(--shadow-color);
+    }
+
+    /* Blog Content */
+    .blog-content {
+        font-size: 1.125rem;
+        line-height: 1.8;
+        color: var(--text-color);
+        margin: 2rem 0;
+    }
+
+    .blog-content h2 {
+        font-size: 1.875rem;
+        font-weight: 700;
+        margin: 2rem 0 1rem;
+        color: var(--text-heading);
+    }
+
+    .blog-content h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 1.5rem 0 0.75rem;
+        color: var(--text-heading);
+    }
+
+    .blog-content p {
+        margin-bottom: 1.5rem;
+    }
+
+    .blog-content ul,
+    .blog-content ol {
+        margin: 1rem 0 1.5rem 2rem;
+    }
+
+    .blog-content li {
+        margin-bottom: 0.5rem;
+    }
+
+    .blog-content blockquote {
+        background-color: var(--bg-color-light-3);
+        border-left: 4px solid var(--MainGreen);
+        padding: 1.5rem;
+        margin: 2rem 0;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+        color: var(--text-color-2);
+    }
+
+
+    /* Navigation - Only Next Blog */
+    .blog-navigation {
+        margin: 3rem 0;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .nav-btn {
+        flex: 0 1 300px;
+        padding: 1rem;
+        background-color: var(--bg-color-light);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        text-align: center;
+        text-decoration: none;
+        color: var(--text-color);
+        transition: all 0.3s ease;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        width: fit-content;
+    }
+
+    .nav-btn:hover {
+        background-color: var(--MainGreen);
+        color: var(--white);
+        transform: translateY(-2px);
+    }
+
+    .nav-btn-title {
+        font-size: 0.875rem;
+        color: var(--text-color-2);
+        margin-bottom: 0.5rem;
+    }
+
+    .nav-btn:hover .nav-btn-title {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .nav-btn-text {
+        font-weight: 600;
+    }
+
+    /* Loading Animation */
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--border-color);
+        border-radius: 50%;
+        border-top-color: var(--MainGreen);
+        animation: spin 1s ease-in-out infinite;
+        margin: 0 auto 1rem;
+    }
+
+    /* Header Navigation Styles */
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background-color: var(--bg-color);
+        gap: 1rem;
+    }
+
+    /* Back button integrated with logo section */
+    .back-to-blogs {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        background-color: transparent;
+        text-decoration: none;
+        margin-right: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .back-to-blogs img {
+        width: 35px;
+        height: 35px;
+        transition: all 0.3s ease;
+
+    }
+
+
+    .back-to-blogs:hover {
+        background-color: var(--bg-color-light-3);
+    }
+
+    .back-to-blogs:hover img {
+        opacity: 1;
+        transform: translateX(-2px);
+    }
+
+    .c-logo-section {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Notification badge */
+    .c-notification-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translate(50%, -50%);
+        background-color: var(--Red);
+        color: var(--White);
+        font-size: 0.7rem;
+        font-weight: bold;
+        border-radius: 999px;
+        /* pill/round shape */
+        min-width: 18px;
+        /* small numbers still look round */
+        height: 18px;
+        padding: 0 5px;
+        /* allow horizontal growth */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        /* prevents wrapping */
+        z-index: 2;
+    }
+
+    /* Ensure badge stays pinned in sidebar */
+    .c-navbar-side .c-notification-badge {
+        top: 6px;
+        right: 5px;
+    }
+
+    /* Dark Mode Adjustments */
+
+    .dark-mode .back-to-blogs:hover {
+        background-color: var(--bg-color-dark-3);
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        main {
+            padding: 1rem;
+        }
+
+        .blog-title {
+            font-size: 2rem;
+        }
+
+        .blog-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .blog-image {
+            height: 250px;
+            font-size: 1.25rem;
+        }
+
+        .blog-content {
+            font-size: 1rem;
+        }
+
+        .blog-content h2 {
+            font-size: 1.5rem;
+        }
+
+        .blog-content h3 {
+            font-size: 1.25rem;
+        }
+
+        .blog-navigation {
+            justify-content: center;
+        }
+
+        .nav-btn {
+            flex: 1;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .blog-title {
+            font-size: 1.75rem;
+        }
+
+
+
+        .tags-list {
+            gap: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.75rem;
+        }
+    }
+
+    /* Dark mode specific adjustments */
+
+
+    .dark-mode .nav-btn {
+        background-color: var(--bg-color-dark);
+    }
+
+    .dark-mode .blog-image {
+        background: linear-gradient(135deg,
+                var(--MainGreen),
+                var(--btn-color-hover));
+    }
+
+    .dark-mode .blog-content blockquote {
+        background-color: var(--bg-color-dark-4);
+    }
+</style>
+
+<body>
+    <div id="cover" class="" onclick="hideMenu()"></div>
+
+
+
+    <!-- Logo + Name & Navbar -->
+    <header>
+        <!-- Logo + Name -->
+        <section class="c-logo-section">
+            <a href="../CommonPages/mainBlog.html" class="back-to-blogs" title="Back to Blogs">
+                <img src="../../assets/images/icon-back-light.svg" alt="Back" />
+            </a>
+            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo" />
+            <div class="c-text">ReLeaf</div>
+        </section>
+
+        <!-- Menu Links -->
+
+        <!-- Menu Links Mobile -->
+        <nav class="c-navbar-side">
+
+            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
+                id="menuBtn">
+            <div id="sidebarNav" class="c-navbar-side-menu">
+
+                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
+                    class="close-btn">
+                <div class="c-navbar-side-items">
+                    <section class="c-navbar-side-more">
+                        <button id="themeToggle1">
+                            <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                        </button>
+
+                        <div class="c-chatbox" id="chatboxMobile">
+                            <a href="../../pages/MemberPages/mChat.html">
+                                <img src="../../assets/images/chat-light.svg" alt="Chatbox">
+                            </a>
+                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                        </div>
+
+                        <a href="../../pages/MemberPages/mSetting.html">
+                            <img src="../../assets/images/setting-light.svg" alt="Settings">
+                        </a>
+                    </section>
+
+                    <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                    <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                    <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                </div>
+            </div>
+
+        </nav>
+
+        <!-- Menu Links Desktop + Tablet -->
+
+        <section class="c-navbar-more">
+
+
+            <button id="themeToggle2">
+                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+            </button>
+            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+            </a>
+
+
+            <a href="../../pages/MemberPages/mSetting.html">
+                <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
+            </a>
+        </section>
+
+    </header>
+
+
+
+
+
+
+    <hr />
+
+    <!-- Loading State -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Loading blog post...</p>
+    </div>
+
+    <!-- Main Content -->
+    <main id="mainContent" style="display: none">
+        <!-- Blog Header -->
+        <article class="read-blog-header">
+            <div class="blog-meta">
+                <span class="blog-category" id="blogCategory">Loading...</span>
+                <span class="blog-date" id="blogDate">Loading...</span>
+                <span class="blog-author" id="blogAuthor">By ReLeaf Team</span>
+            </div>
+            <h1 class="blog-title" id="blogTitle">Loading...</h1>
+            <p class="blog-excerpt" id="blogExcerpt">Loading...</p>
+        </article>
+
+        <!-- Blog Image -->
+        <div class="blog-image-container">
+            <div class="blog-image" id="blogImage">Blog Image</div>
+        </div>
+
+        <!-- Blog Content -->
+        <div class="blog-content" id="blogContent">
+            <p>Loading content...</p>
+        </div>
+
+
+
+
+        <!-- Navigation - Only Next Blog -->
+        <div class="blog-navigation">
+            <a href="#" class="nav-btn" id="nextBlog" style="display: none">
+                <div class="nav-btn-title">Next</div>
+                <div class="nav-btn-text">Next Blog Post</div>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <!-- Column 1 -->
+        <section class="c-footer-info-section">
+            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo" />
+            <div class="c-text">ReLeaf</div>
+            <div class="c-text c-text-center">
+                "Relief for the Planet, One Leaf at a Time."
+                <br />
+                "Together, We Can ReLeaf the Earth."
+            </div>
+            <div class="c-text c-text-label">+60 12 345 6789</div>
+            <div class="c-text">abc@gmail.com</div>
+        </section>
+
+        <!-- Column 2 -->
+        <section class="c-footer-links-section">
+            <div>
+                <b>My Account</b><br />
+                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br />
+                <a href="../../pages/MemberPages/mChat.html">My Chat</a><br />
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+            </div>
+            <div>
+                <b>Helps</b><br />
+                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br />
+                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br />
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+            </div>
+            <div>
+                <b>Community</b><br />
+                <a href="../../pages/CommonPages/mainEvent.html">Events</a><br />
+                <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br />
+                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+            </div>
+        </section>
+    </footer>
+
+    <script>
+        const isAdmin = false;
+    </script>
+    <script src="../../javascript/mainScript.js"></script>
+    <script src="../../javascript/readBlog.js"></script>
+</body>
+
+</html>
