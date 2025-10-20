@@ -133,6 +133,18 @@ foreach ($tickets as $ticket) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
     <style>
+        /* Add this to your CSS to ensure nothing is blocking clicks */
+        .ticket-item {
+            cursor: pointer;
+            pointer-events: auto !important;
+            z-index: 1 !important;
+            position: relative !important;
+        }
+
+        .ticket-item * {
+            pointer-events: auto !important;
+        }
+
         .admin-tickets-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -813,8 +825,26 @@ foreach ($tickets as $ticket) {
     <script>
         const isAdmin = true;
     </script>
-    <script src="../../javascript/aHelpTicket.js"></script>
     <script src="../../javascript/mainScript.js"></script>
+    <script src="../../javascript/aHelpTickets.js"></script>
+    <!-- <script>
+        // Temporary debug function
+        function debugTickets() {
+            console.log('=== DEBUG TICKETS ===');
+            const tickets = document.querySelectorAll('.ticket-item');
+            console.log('Tickets found:', tickets.length);
+            tickets.forEach((ticket, i) => {
+                console.log(`Ticket ${i}:`, {
+                    id: ticket.getAttribute('data-ticket-id'),
+                    hasClickableClass: ticket.classList.contains('clickable'),
+                    hasActions: ticket.querySelector('.ticket-actions') !== null,
+                    canModify: ticket.querySelector('.ticket-actions .c-btn:not(.c-btn-disabled)') !== null
+                });
+            });
+        }
+        // Run debug after page loads
+        setTimeout(debugTickets, 3000);
+    </script> -->
 </body>
 </html>
 

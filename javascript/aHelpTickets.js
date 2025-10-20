@@ -1,18 +1,103 @@
+// Add more specific CSS
+const clickableStyle = document.createElement('style');
+clickableStyle.textContent = `
+    .ticket-item.clickable {
+        cursor: pointer !important;
+        position: relative;
+    }
+    .ticket-item.clickable:hover {
+        background-color: #f0f9ff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-left: 3px solid var(--MainGreen);
+    }
+    .ticket-item.not-clickable {
+        cursor: not-allowed !important;
+        opacity: 0.7;
+    }
+    
+    /* Force pointer events for clickable items */
+    .ticket-item.clickable * {
+        pointer-events: none;
+    }
+    .ticket-item.clickable .ticket-actions,
+    .ticket-item.clickable .ticket-actions * {
+        pointer-events: auto !important;
+    }
+`;
+document.head.appendChild(clickableStyle);
+
+// Function to initialize ticket clickability
+function makeTicketsClickable() {
+    
+    const ticketItems = document.querySelectorAll('.ticket-item');
+    
+    ticketItems.forEach((item, index) => {
+        const ticketId = item.getAttribute('data-ticket-id');
+        const canModify = item.querySelector('.ticket-actions .c-btn:not(.c-btn-disabled)') !== null;
+        
+        if (canModify) {
+            // Add clickable class
+            item.classList.add('clickable');
+            
+            // Add direct click handler
+            item.onclick = function(e) {
+                // Check if click was on a button or form
+                if (e.target.closest('button') || e.target.closest('form') || e.target.closest('.ticket-actions')) {
+                    return;
+                }
+                
+                // console.log('Navigating to ticket:', ticketId);
+                window.location.href = `../../pages/commonPages/ticketThread.php?ticket_id=${ticketId}&from=admin`;
+            };
+            
+            // Add hover styles directly
+            item.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = '#f0f9ff';
+                this.style.cursor = 'pointer';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = '';
+            });
+            
+        } else {
+            item.classList.add('not-clickable');
+            item.style.cursor = 'not-allowed';
+            item.style.opacity = '0.7';
+        }
+    });
+}
+
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Add filter functionality
+    makeTicketsClickable();
+    
+    // Also initialize filters
     const categoryFilter = document.getElementById('categoryFilter');
     const priorityFilter = document.getElementById('priorityFilter');
     const statusFilter = document.getElementById('statusFilter');
     
     [categoryFilter, priorityFilter, statusFilter].forEach(filter => {
-        filter.addEventListener('change', applyFilters);
+        if (filter) {
+            filter.addEventListener('change', applyFilters);
+        }
     });
     
-    // Initialize filters on page load
     applyFilters();
 });
 
-// Define applyFilters in global scope
+// Fallback initialization
+window.addEventListener('load', function() {
+    setTimeout(makeTicketsClickable, 100);
+});
+
+// Also initialize after a short delay as backup
+setTimeout(function() {
+    makeTicketsClickable();
+}, 2000);
+
+// Re-initialize after filters are applied
 function applyFilters() {
     const categoryFilter = document.getElementById('categoryFilter');
     const priorityFilter = document.getElementById('priorityFilter');
@@ -87,6 +172,9 @@ function applyFilters() {
             emptyState.remove();
         }
     }
+    
+    // Re-initialize tickets after filtering
+    setTimeout(makeTicketsClickable, 100);
 }
 
 function resetFilters() {
@@ -98,7 +186,6 @@ function resetFilters() {
     if (priorityFilter) priorityFilter.value = 'all';
     if (statusFilter) statusFilter.value = 'all';
     
-    // Reapply filters to show all tickets
     applyFilters();
 }
 

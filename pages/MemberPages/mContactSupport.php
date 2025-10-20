@@ -3,7 +3,7 @@
 include("../../php/dbConn.php");
 
 // Assuming current user ID is 6 (as per requirements)
-$currentUserID = 6;
+$currentUserID = 4;
 
 // Query to fetch tickets for the current user
 $query = "SELECT * FROM tbltickets WHERE userID = $currentUserID ORDER BY ticketID DESC";
@@ -480,7 +480,7 @@ $ticketCount = mysqli_num_rows($result);
                             // Reset pointer to beginning for table
                             mysqli_data_seek($result, 0);
                             while ($row = mysqli_fetch_assoc($result)): ?>
-                                <tr onclick="window.location.href='mTicketDetails.php?id=<?php echo $row['ticketID']; ?>'">
+                                <tr onclick="window.location.href='../../pages/CommonPages/ticketThread.php?ticket_id=<?php echo $row['ticketID']; ?>&from=member'">
                                     <td>#<?php echo $row["ticketID"]; ?></td>
                                     <td><?php echo htmlspecialchars($row["subject"]); ?></td>
                                     <td><?php echo htmlspecialchars($row["category"]); ?></td>
@@ -519,7 +519,9 @@ $ticketCount = mysqli_num_rows($result);
                         // Reset pointer to beginning for cards
                         mysqli_data_seek($result, 0);
                         while ($row = mysqli_fetch_assoc($result)): ?>
-                            <div class="ticket-card" onclick="window.location.href='mTicketDetails.php?id=<?php echo $row['ticketID']; ?>'">
+                            <!-- <div class="ticket-card" onclick="window.location.href='mTicketDetails.php?id= 
+                            <?php echo $row['ticketID']; ?>'">-->
+                            <div class="ticket-card" onclick="window.location.href='../../pages/CommonPages/ticketThread.php?ticket_id=<?php echo $row['ticketID']; ?>&from=member'">
                                 <div class="ticket-header">
                                     <div class="ticket-id">#<?php echo $row["ticketID"]; ?></div>
                                     <div class="ticket-status">
