@@ -579,13 +579,48 @@ mysqli_close($connection);
                         <label for="registerCountry">Country</label>
                         <div class="input-select-wrapper">
                             <select class="c-input c-input-select" id="registerCountry" name="country" required>
-                                <option value="" disabled <?php echo (!isset($_POST['register']) || empty($_POST['country'])) ? 'selected' : ''; ?>>Select your Country</option>
-                                <option value="malaysia" <?php echo (isset($_POST['register']) && $_POST['country'] == 'Malaysia') ? 'selected' : ''; ?>>Malaysia</option>
-                                <option value="singapore" <?php echo (isset($_POST['register']) && $_POST['country'] == 'Singapore') ? 'selected' : ''; ?>>Singapore</option>
-                                <option value="indonesia" <?php echo (isset($_POST['register']) && $_POST['country'] == 'Indonesia') ? 'selected' : ''; ?>>Indonesia</option>
-                                <option value="thailand" <?php echo (isset($_POST['register']) && $_POST['country'] == 'Thailand') ? 'selected' : ''; ?>>Thailand</option>
-                                <option value="united-kingdom" <?php echo (isset($_POST['register']) && $_POST['country'] == 'United-Kingdom') ? 'selected' : ''; ?>>United Kingdom</option>
-                                <option value="united-states" <?php echo (isset($_POST['register']) && $_POST['country'] == 'United-States') ? 'selected' : ''; ?>>United States</option>
+                                <option value="" disabled selected>Select your Country</option>
+                                <?php 
+                                // Full list of countries
+                                $countries = [
+                                    'Malaysia',
+                                    'Singapore',
+                                    'China',
+                                    'Hong Kong',
+                                    'Taiwan',
+                                    'Philippines',
+                                    'Australia',
+                                    'Japan',
+                                    'South Korea',
+                                    'Indonesia',
+                                    'Thailand',
+                                    'Vietnam',
+                                    'India',
+                                    'Sri Lanka',
+                                    'Pakistan',
+                                    'Bangladesh',
+                                    'United States',
+                                    'Canada',
+                                    'United Kingdom',
+                                    'Germany',
+                                    'France',
+                                    'Italy',
+                                    'Spain',
+                                    'Netherlands',
+                                    'Brazil',
+                                    'Mexico',
+                                    'Russia',
+                                    'South Africa',
+                                    'Egypt',
+                                    'Saudi Arabia',
+                                    'United Arab Emirates',
+                                    'New Zealand'
+                                ];
+
+                                foreach ($countries as $country) {
+                                    echo "<option value=\"$country\">$country</option>";
+                                }
+                                ?>
                             </select>
                         </div>
                     </section>
@@ -632,7 +667,6 @@ mysqli_close($connection);
 
         <script src="../../javascript/mainScript.js"></script>
         <script>
-            // Page switching functionality (Client-side only for better UX)
             document.addEventListener('DOMContentLoaded', function() {
                 const loginSection = document.getElementById('login');
                 const signUpSection = document.getElementById('signUp');
