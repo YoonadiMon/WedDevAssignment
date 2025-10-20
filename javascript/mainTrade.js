@@ -25,6 +25,8 @@ function openListingModal(listingId) {
 }
 
 function getMemberModalContent(listing) {
+    const isOwner = currentUserId == listing.userID;
+    
     return `
         <div class="modal-header">
             <div class="modal-image">
@@ -39,6 +41,7 @@ function getMemberModalContent(listing) {
                     ${listing.category}
                 </div>
                 <div class="modal-description">${listing.description}</div>
+                ${isOwner ? '<div class="owner-badge">Your Listing</div>' : ''}
             </div>
         </div>
         
@@ -113,12 +116,21 @@ function getMemberModalContent(listing) {
         </div>
         
         <div class="modal-actions">
-            <button class="trade-btn" onclick="startTrade(${listing.listingID})">
-                Start Trade Conversation
-            </button>
-            <button class="report-btn" onclick="reportListing(${listing.listingID})">
-                Report Listing
-            </button>
+            ${isOwner ? `
+                <button class="edit-btn" onclick="editListing(${listing.listingID})">
+                    Edit Listing
+                </button>
+                <button class="delete-btn" onclick="deleteOwnListing(${listing.listingID})">
+                    Delete Listing
+                </button>
+            ` : `
+                <button class="trade-btn" onclick="startTrade(${listing.listingID})">
+                    Start Trade Conversation
+                </button>
+                <button class="report-btn" onclick="reportListing(${listing.listingID})">
+                    Report Listing
+                </button>
+            `}
         </div>
     `;
 }
@@ -272,14 +284,34 @@ function reportListing(listingId) {
 // Admin functions
 function deleteListing(listingId) {
     if (confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
-        // In real app, this would make an AJAX call to delete from database
-        const index = listingsData.findIndex(l => l.listingID == listingId);
-        if (index !== -1) {
-            listingsData.splice(index, 1);
-            closeModal();
-            applyFilters();
-            alert('Listing deleted successfully.');
-        }
+        // Make AJAX call to update status to 'inactive' in database
+        fetch('../../php/deleteListingAdmin.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `listingID=${listingId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update local data
+                const index = listingsData.findIndex(l => l.listingID == listingId);
+                if (index !== -1) {
+                    listingsData.splice(index, 1);
+                }
+                
+                closeModal();
+                applyFilters();
+                alert('Listing deleted successfully.');
+            } else {
+                alert('Error deleting listing: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting listing. Please try again.');
+        });
     }
 }
 
@@ -431,10 +463,14 @@ function renderListings(listings) {
         return;
     }
     
-    listingsGrid.innerHTML = listings.map(listing => `
+    listingsGrid.innerHTML = listings.map(listing => {
+        const isOwner = currentUserId == listing.userID;
+        
+        return `
         <div class="listing-card ${listing.itemType === 'Plant' ? 'plant-special' : 'item-special'}" 
                 onclick="openListingModal(${listing.listingID})">
             ${isAdmin && listing.reported == 1 ? '<div class="admin-badge">REPORTED</div>' : ''}
+            ${isOwner ? '<div class="owner-badge">Your Listing</div>' : ''}
             <div class="listing-image">
                 ${listing.imageUrl ? 
                     `<img src="${listing.imageUrl}" alt="${listing.title}" style="width: 100%; height: 100%; object-fit: cover;">` :
@@ -470,7 +506,8 @@ function renderListings(listings) {
                 </div>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Main initialization
@@ -543,3 +580,65 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial render
     applyFilters();
 });
+
+function editListing(listingId) {
+    // Redirect to edit listing page
+    alert(`Redirecting to edit listing page for ID: ${listingId}`);
+    // window.location.href = `../../pages/MemberPages/editTrade.php?id=${listingId}`;
+}
+
+function deleteOwnListing(listingId) {
+    if (confirm('Are you sure you want to delete your listing? This action cannot be undone.')) {
+        // Make AJAX call to update status to 'inactive' in database
+        fetch('../../php/removeUserTradeListings.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `listingID=${listingId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update local data
+                const listing = listingsData.find(l => l.listingID == listingId);
+                if (listing) {
+                    listing.status = 'inactive';
+                }
+                
+                closeModal();
+                applyFilters();
+                alert('Your listing has been deleted successfully.');
+            } else {
+                alert('Error deleting listing: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting listing. Please try again.');
+        });
+    }
+}
+
+// Update the startTrade function to prevent trading with yourself
+function startTrade(listingId) {
+    const listing = listingsData.find(l => l.listingID == listingId);
+    if (listing) {
+        // Check if user is trying to trade with themselves
+        if (currentUserId == listing.userID) {
+            alert("You cannot start a trade conversation with yourself.");
+            return;
+        }
+        
+        // Close modal first
+        closeModal();
+        
+        // Show confirmation and redirect to chat
+        const confirmTrade = confirm(`Start a trade conversation with ${listing.userName} about "${listing.title}"?`);
+        if (confirmTrade) {
+            // Redirect to chat page with the lister's ID
+            alert(`Redirecting to chat with ${listing.userName}...\n\nIn a real application, this would open the chat page with the lister.`);
+            // window.location.href = `../../pages/MemberPages/mChat.html?userId=${listing.userID}`;
+        }
+    }
+}

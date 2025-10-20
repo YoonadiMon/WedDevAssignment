@@ -6,9 +6,9 @@ $user_type = '';
 $user_id = '';
 
 // // Force reset for debugging
-unset($_SESSION['admin_id']);
-unset($_SESSION['user_id']);
-unset($_SESSION['user_type']);
+// unset($_SESSION['admin_id']);
+// unset($_SESSION['user_id']);
+// unset($_SESSION['user_type']);
 
 if (!isset($_SESSION['user_id']) && !isset($_SESSION['admin_id'])) {
     // $user_type = 'admin';
@@ -137,6 +137,49 @@ try {
         .trade-header a {
             margin-top: 20px;
             display: inline-block;
+        }
+
+        .owner-badge {
+            color: var(--White);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .modal-actions .edit-btn {
+            background-color: var(--bg-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .modal-actions .edit-btn:hover {
+            background-color: var(--btn-color-hover);
+        }
+
+        .modal-actions .delete-btn {
+            background-color: var(--Red);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .modal-actions .delete-btn:hover {
+            background-color: var(--LowRed);
         }
 
         .filters-section {
