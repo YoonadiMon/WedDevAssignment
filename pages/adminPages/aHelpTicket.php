@@ -780,12 +780,10 @@ foreach ($tickets as $ticket) {
 
     <hr>
 
-    <!-- Footer -->
-    <footer>
-        <!-- Column 1 -->
+    <!-- <footer>
         <section class="c-footer-info-section">
             <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
-            <div class="c-text">ReLeaf Admin</div>
+            <div class="c-text">ReLeaf</div>
             <div class="c-text c-text-center">
                 "Relief for the Planet, One Leaf at a Time."
                 <br>
@@ -799,28 +797,25 @@ foreach ($tickets as $ticket) {
             </div>
         </section>
         
-        <!-- Column 2 -->
         <section class="c-footer-links-section">
             <div>
                 <b>Admin Panel</b><br>
                 <a href="../../pages/adminPages/adminIndex.php">Dashboard</a><br>
-                <a href="../../pages/adminPages/adminTickets.html">Support Tickets</a><br>
-                <a href="../../pages/adminPages/adminUsers.html">User Management</a>
+                <a href="../../pages/adminPages/aHelpTicket.php">Support Tickets</a><br>
             </div>
             <div>
                 <b>Content Management</b><br>
-                <a href="../../pages/adminPages/adminEvents.html">Events</a><br>
-                <a href="../../pages/adminPages/adminBlogs.html">Blogs</a><br>
-                <a href="../../pages/adminPages/adminTrades.html">Trades</a>
+                <a href="../../pages/commonPages/mainEvent.html">Events</a><br>
+                <a href="../../pages/commonPages/mainBlog.html">Blogs</a><br>
+                <a href="../../pages/commonPages/mainTrade.php">Trades</a>
             </div>
             <div>
                 <b>System</b><br>
-                <a href="../../pages/adminPages/adminSetting.html">Settings</a><br>
-                <a href="../../pages/adminPages/adminReports.html">Reports</a><br>
+                <a href="../../pages/adminPages/aProfile.html">Profile</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
             </div>
         </section>
-    </footer>
+    </footer> -->
 
     <script>
         const isAdmin = true;

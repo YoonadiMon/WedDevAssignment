@@ -11,13 +11,13 @@ unset($_SESSION['user_id']);
 unset($_SESSION['user_type']);
 
 if (!isset($_SESSION['user_id']) && !isset($_SESSION['admin_id'])) {
-    $user_type = 'admin';
-    $user_id = 1;
-    $_SESSION['admin_id'] = $user_id;
+    // $user_type = 'admin';
+    // $user_id = 1;
+    // $_SESSION['admin_id'] = $user_id;
 
-    // $user_type = 'member';
-    // $user_id = 4;
-    // $_SESSION['user_id'] = $user_id;
+    $user_type = 'member';
+    $user_id = 4;
+    $_SESSION['user_id'] = $user_id;
 } elseif (isset($_SESSION['admin_id'])) {
     $user_type = 'admin';
     $user_id = $_SESSION['admin_id'];
@@ -1017,46 +1017,54 @@ try {
     <hr>
 
     <!-- Footer -->
-    <footer>
-        <!-- Column 1 -->
-        <section class="c-footer-info-section">
-            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
-            <div class="c-text">ReLeaf</div>
-            <div class="c-text c-text-center">
-                "Relief for the Planet, One Leaf at a Time."
-                <br>
-                "Together, We Can ReLeaf the Earth."
-            </div>
-            <div class="c-text c-text-label">
-                +60 12 345 6789
-            </div>
-            <div class="c-text">
-                abc@gmail.com
-            </div>
-        </section>
-        
-        <!-- Column 2 -->
-        <section class="c-footer-links-section">
-            <div>
-                <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
-                <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
-            </div>
-            <div>
-                <b>Helps</b><br>
-                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
-            </div>
-            <div>
-                <b>Community</b><br>
-                <a href="../../pages/CommonPages/mainEvent.html">Events</a><br>
-                <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
-                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-            </div>
-        </section>
-    </footer>
+    <?php
+    if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'member') {
+        ?>
+            <!-- Footer -->
+            <footer>
+                <!-- Column 1 -->
+                <section class="c-footer-info-section">
+                    <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                    <div class="c-text">ReLeaf</div>
+                    <div class="c-text c-text-center">
+                        "Relief for the Planet, One Leaf at a Time."
+                        <br>
+                        "Together, We Can ReLeaf the Earth."
+                    </div>
+                    <div class="c-text c-text-label">
+                        +60 12 345 6789
+                    </div>
+                    <div class="c-text">
+                        abc@gmail.com
+                    </div>
+                </section>
+                
+                <!-- Column 2 -->
+                <section class="c-footer-links-section">
+                    <div>
+                        <b>My Account</b><br>
+                        <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                        <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
+                        <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                    </div>
+                    <div>
+                        <b>Helps</b><br>
+                        <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
+                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                        <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                    </div>
+                    <div>
+                        <b>Community</b><br>
+                        <a href="../../pages/CommonPages/mainEvent.html">Events</a><br>
+                        <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                    </div>
+                </section>
+            </footer>
+        <?php
+        }
+    ?>
+    
 
     <script>
         // Pass PHP variables to JavaScript
