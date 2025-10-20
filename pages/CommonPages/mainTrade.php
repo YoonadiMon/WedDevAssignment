@@ -6,18 +6,18 @@ $user_type = '';
 $user_id = '';
 
 // // Force reset for debugging
-// unset($_SESSION['admin_id']);
-// unset($_SESSION['user_id']);
-// unset($_SESSION['user_type']);
+unset($_SESSION['admin_id']);
+unset($_SESSION['user_id']);
+unset($_SESSION['user_type']);
 
 if (!isset($_SESSION['user_id']) && !isset($_SESSION['admin_id'])) {
-    // $user_type = 'admin';
-    // $user_id = 1;
-    // $_SESSION['admin_id'] = $user_id;
+    $user_type = 'admin';
+    $user_id = 1;
+    $_SESSION['admin_id'] = $user_id;
 
-    $user_type = 'member';
-    $user_id = 4;
-    $_SESSION['user_id'] = $user_id;
+    // $user_type = 'member';
+    // $user_id = 4;
+    // $_SESSION['user_id'] = $user_id;
 } elseif (isset($_SESSION['admin_id'])) {
     $user_type = 'admin';
     $user_id = $_SESSION['admin_id'];

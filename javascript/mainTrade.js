@@ -271,10 +271,29 @@ function reportListing(listingId) {
     if (listing) {
         const reason = prompt(`Please provide a reason for reporting "${listing.title}":`);
         if (reason !== null && reason.trim() !== '') {
-            // In real app, this would make an AJAX call to update the database
-            listing.reported = 1;
-            closeModal();
-            alert('Thank you for your report. Our admin team will review this listing.');
+            // Make AJAX call to update reported status in database
+            fetch('../../php/reportListing.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `listingID=${listingId}&reason=${encodeURIComponent(reason)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update local data
+                    listing.reported = 1;
+                    closeModal();
+                    alert('Thank you for your report. Our admin team will review this listing.');
+                } else {
+                    alert('Error submitting report: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error submitting report. Please try again.');
+            });
         } else if (reason !== null) {
             alert('Please provide a reason for reporting this listing.');
         }
@@ -316,13 +335,35 @@ function deleteListing(listingId) {
 }
 
 function resolveReport(listingId) {
-    const listing = listingsData.find(l => l.listingID == listingId);
-    if (listing) {
-        // In real app, this would make an AJAX call to update the database
-        listing.reported = 0;
-        closeModal();
-        applyFilters();
-        alert('Report resolved successfully.');
+    if (confirm('Are you sure you want to resolve this report? This will mark the listing as no longer reported.')) {
+        // Make AJAX call to update reported status to 0 in database
+        fetch('../../php/resolveReport.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `listingID=${listingId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update local data
+                const listing = listingsData.find(l => l.listingID == listingId);
+                if (listing) {
+                    listing.reported = 0;
+                }
+                
+                closeModal();
+                applyFilters();
+                alert('Report resolved successfully. The listing is no longer marked as reported.');
+            } else {
+                alert('Error resolving report: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error resolving report. Please try again.');
+        });
     }
 }
 
