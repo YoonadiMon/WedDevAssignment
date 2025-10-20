@@ -1,3 +1,9 @@
+<?php
+    include("../../php/dbConn.php");
+    
+    // Set current user ID 
+    $currentUserID = 4;
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -484,14 +490,112 @@
                     <div class="step-number">3</div>
                     <div class="step-label">Media</div>
                 </div>
-                <div class="progress-step">
-                    <div class="step-number">4</div>
-                    <div class="step-label">Review</div>
-                </div>
             </div>
 
+            <!-- PHP Form Processing -->
+            <?php
+            
+            // Process form submission
+            $successMessage = "";
+            $errorMessage = "";
+            
+            if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                // Collect and sanitize form data
+                $title = mysqli_real_escape_string($connection, $_POST['title']);
+                $description = mysqli_real_escape_string($connection, $_POST['description']);
+                $tags = mysqli_real_escape_string($connection, $_POST['tags']);
+                $category = mysqli_real_escape_string($connection, $_POST['category']);
+                $itemType = mysqli_real_escape_string($connection, $_POST['listingType']);
+                $itemCondition = mysqli_real_escape_string($connection, $_POST['condition']);
+                $lookingFor = mysqli_real_escape_string($connection, $_POST['lookingFor']);
+                
+                // Handle file upload
+                $imageUrl = "../../assets/images/placeholder-image.jpg"; // Default placeholder
+                
+                // if (isset($_FILES['fileInput']) && $_FILES['fileInput']['error'] === UPLOAD_ERR_OK) {
+                //     $uploadDir = "../../assets/uploads/";
+                    
+                //     // Create uploads directory if it doesn't exist
+                //     if (!is_dir($uploadDir)) {
+                //         mkdir($uploadDir, 0755, true);
+                //     }
+                    
+                //     // Generate unique filename
+                //     $fileName = time() . '_' . uniqid() . '_' . basename($_FILES['fileInput']['name']);
+
+                //     $targetFilePath = $uploadDir . $fileName;
+
+                //     // Simple file type check
+                //     $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+                //     $imageFileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+
+                //     if (in_array($imageFileType, $allowedTypes)) {
+                //         if (move_uploaded_file($_FILES['fileInput']['tmp_name'], $targetFilePath)) {
+                //             $imageUrl = $targetFilePath;
+                //         } else {
+                //             $errorMessage .= "Failed to upload file. ";
+                //         }
+                //     } else {
+                //         $errorMessage .= "Only JPG, JPEG, PNG & GIF files are allowed. ";
+                //     }
+                // } else {
+                //     // No file uploaded or upload error
+                //     if (isset($_FILES['fileInput'])) {
+                //         $uploadError = $_FILES['fileInput']['error'];
+                //         if ($uploadError != UPLOAD_ERR_NO_FILE) {
+                //             $errorMessage .= "File upload error: " . $uploadError . ". ";
+                //         }
+                //     }
+                // }
+                
+                // Handle type-specific fields
+                $species = "";
+                $growthStage = "";
+                $careInstructions = "";
+                $brand = "";
+                $dimensions = "";
+                $usageHistory = "";
+                
+                if ($itemType == 'plant') {
+                    $species = mysqli_real_escape_string($connection, $_POST['species']);
+                    $growthStage = mysqli_real_escape_string($connection, $_POST['growthStage']);
+                    $careInstructions = mysqli_real_escape_string($connection, $_POST['careInstructions']);
+                } else if ($itemType == 'item') {
+                    $brand = mysqli_real_escape_string($connection, $_POST['brand']);
+                    $dimensions = mysqli_real_escape_string($connection, $_POST['dimensions']);
+                    $usageHistory = mysqli_real_escape_string($connection, $_POST['usageHistory']);
+                }
+                
+                // Insert into database
+                $sql = "INSERT INTO tbltrade_listings (
+                    userID, title, description, tags, imageUrl, category, dateListed, 
+                    status, itemType, itemCondition, species, growthStage, careInstructions, 
+                    brand, dimensions, usageHistory, lookingFor
+                ) VALUES (
+                    '$currentUserID', '$title', '$description', '$tags', '$imageUrl', '$category', 
+                    CURDATE(), 'active', '$itemType', '$itemCondition', '$species', '$growthStage', 
+                    '$careInstructions', '$brand', '$dimensions', '$usageHistory', '$lookingFor'
+                )";
+                
+                if (mysqli_query($connection, $sql)) {
+                    $successMessage = "Your listing has been created successfully!";
+                } else {
+                    $errorMessage = "Error: " . $sql . "<br>" . mysqli_error($connection);
+                }
+            }
+            
+            // Display success or error message
+            if (!empty($successMessage)) {
+                echo "<div style='background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px;'>$successMessage</div>";
+            }
+            
+            if (!empty($errorMessage)) {
+                echo "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px;'>$errorMessage</div>";
+            }
+            ?>
+
             <!-- Listing Form -->
-            <form id="addListingForm">
+            <form id="addListingForm" method="POST" enctype="multipart/form-data">
                 <!-- Basic Information Section -->
                 <div class="form-section">
                     <div class="section-header">
@@ -503,8 +607,8 @@
                         <label for="listingType" class="required">What are you listing?</label>
                         <select id="listingType" name="listingType" required>
                             <option value="">Select type</option>
-                            <option value="plant">Plant</option>
-                            <option value="item">Item</option>
+                            <option value="Plant" <?php if(isset($_POST['listingType']) && $_POST['listingType'] == 'Plant') echo 'selected'; ?>>Plant</option>
+                            <option value="Item" <?php if(isset($_POST['listingType']) && $_POST['listingType'] == 'Item') echo 'selected'; ?>>Item</option>
                         </select>
                     </div>
 
@@ -512,7 +616,7 @@
                         <label for="listingTitle" class="required">Listing Title</label>
                         <input type="text" id="listingTitle" name="title" required 
                                placeholder="e.g., Mature Monstera Plant, Gardening Tool Set, etc." 
-                               maxlength="100">
+                               maxlength="100" value="<?php if(isset($_POST['title'])) echo htmlspecialchars($_POST['title']); ?>">
                         <div class="character-count" id="titleCount">0/100</div>
                     </div>
 
@@ -520,12 +624,12 @@
                         <label for="listingCategory" class="required">Category</label>
                         <select id="listingCategory" name="category" required>
                             <option value="">Select a category</option>
-                            <option value="plants">Plants</option>
-                            <option value="tools">Gardening Tools</option>
-                            <option value="seeds">Seeds & Saplings</option>
-                            <option value="decor">Garden Decor</option>
-                            <option value="books">Gardening Books</option>
-                            <option value="other">Other</option>
+                            <option value="Plants" <?php if(isset($_POST['category']) && $_POST['category'] == 'Plants') echo 'selected'; ?>>Plants</option>
+                            <option value="Gardening Tools" <?php if(isset($_POST['category']) && $_POST['category'] == 'Gardening Tools') echo 'selected'; ?>>Gardening Tools</option>
+                            <option value="Seeds & Saplings" <?php if(isset($_POST['category']) && $_POST['category'] == 'Seeds & Saplings') echo 'selected'; ?>>Seeds & Saplings</option>
+                            <option value="Garden Decor" <?php if(isset($_POST['category']) && $_POST['category'] == 'Garden Decor') echo 'selected'; ?>>Garden Decor</option>
+                            <option value="Gardening Books" <?php if(isset($_POST['category']) && $_POST['category'] == 'Gardening Books') echo 'selected'; ?>>Gardening Books</option>
+                            <option value="Other" <?php if(isset($_POST['category']) && $_POST['category'] == 'Other') echo 'selected'; ?>>Other</option>
                         </select>
                     </div>
 
@@ -533,7 +637,7 @@
                         <label for="listingDescription" class="required">Description</label>
                         <textarea id="listingDescription" name="description" required 
                                   placeholder="Describe your item in detail. Include condition, size, special features, and what you're looking to trade for..."
-                                  maxlength="500"></textarea>
+                                  maxlength="500"><?php if(isset($_POST['description'])) echo htmlspecialchars($_POST['description']); ?></textarea>
                         <div class="character-count" id="descriptionCount">0/500</div>
                     </div>
 
@@ -541,15 +645,9 @@
                         <label for="listingTags">Tags</label>
                         <input type="text" id="listingTags" name="tags" 
                                placeholder="e.g., indoor plant, gardening tools, organic, vintage (separate with commas)"
-                               maxlength="200">
+                               maxlength="200" value="<?php if(isset($_POST['tags'])) echo htmlspecialchars($_POST['tags']); ?>">
                         <div class="character-count" id="tagsCount">0/200</div>
                     </div>
-
-                    <!-- <div class="form-group">
-                        <label for="listingLocation" class="required">Location</label>
-                        <input type="text" id="listingLocation" name="location" required 
-                               placeholder="e.g., Kuala Lumpur, Penang, Johor Bahru">
-                    </div> -->
                 </div>
 
                 <!-- Specific Details Section -->
@@ -564,11 +662,11 @@
                             <label for="itemCondition" class="required">Condition</label>
                             <select id="itemCondition" name="condition" required>
                                 <option value="">Select condition</option>
-                                <option value="new">New</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="good">Good</option>
-                                <option value="fair">Fair</option>
-                                <option value="poor">Poor</option>
+                                <option value="New" <?php if(isset($_POST['condition']) && $_POST['condition'] == 'New') echo 'selected'; ?>>New</option>
+                                <option value="Excellent" <?php if(isset($_POST['condition']) && $_POST['condition'] == 'Excellent') echo 'selected'; ?>>Excellent</option>
+                                <option value="Good" <?php if(isset($_POST['condition']) && $_POST['condition'] == 'Good') echo 'selected'; ?>>Good</option>
+                                <option value="Fair" <?php if(isset($_POST['condition']) && $_POST['condition'] == 'Fair') echo 'selected'; ?>>Fair</option>
+                                <option value="Poor" <?php if(isset($_POST['condition']) && $_POST['condition'] == 'Poor') echo 'selected'; ?>>Poor</option>
                             </select>
                         </div>
 
@@ -576,7 +674,7 @@
                             <label for="lookingFor">Looking For (Trade Preferences)</label>
                             <textarea id="lookingFor" name="lookingFor" 
                                       placeholder="What specific items are you looking to trade for? e.g., gardening tools, specific plants, etc."
-                                      maxlength="200"></textarea>
+                                      maxlength="200"><?php if(isset($_POST['lookingFor'])) echo htmlspecialchars($_POST['lookingFor']); ?></textarea>
                             <div class="character-count" id="lookingForCount">0/200</div>
                         </div>
                     </div>
@@ -585,19 +683,20 @@
                     <div id="plantFields" class="plant-fields" style="display: none;">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="plantSpecies" class="required">Plant Species</label>
+                                <label for="plantSpecies">Plant Species</label>
                                 <input type="text" id="plantSpecies" name="species" 
-                                       placeholder="e.g., Monstera Deliciosa, Sansevieria Trifasciata">
+                                       placeholder="e.g., Monstera Deliciosa, Sansevieria Trifasciata"
+                                       value="<?php if(isset($_POST['species'])) echo htmlspecialchars($_POST['species']); ?>">
                             </div>
                             <div class="form-group">
-                                <label for="plantGrowthStage" class="required">Growth Stage</label>
+                                <label for="plantGrowthStage">Growth Stage</label>
                                 <select id="plantGrowthStage" name="growthStage">
                                     <option value="">Select stage</option>
-                                    <option value="seedling">Seedling</option>
-                                    <option value="young">Young Plant</option>
-                                    <option value="established">Established</option>
-                                    <option value="mature">Mature</option>
-                                    <option value="cutting">Cutting/Propagation</option>
+                                    <option value="seedling" <?php if(isset($_POST['growthStage']) && $_POST['growthStage'] == 'seedling') echo 'selected'; ?>>Seedling</option>
+                                    <option value="young" <?php if(isset($_POST['growthStage']) && $_POST['growthStage'] == 'young') echo 'selected'; ?>>Young Plant</option>
+                                    <option value="established" <?php if(isset($_POST['growthStage']) && $_POST['growthStage'] == 'established') echo 'selected'; ?>>Established</option>
+                                    <option value="mature" <?php if(isset($_POST['growthStage']) && $_POST['growthStage'] == 'mature') echo 'selected'; ?>>Mature</option>
+                                    <option value="cutting" <?php if(isset($_POST['growthStage']) && $_POST['growthStage'] == 'cutting') echo 'selected'; ?>>Cutting/Propagation</option>
                                 </select>
                             </div>
                         </div>
@@ -605,7 +704,7 @@
                             <label for="plantCare">Care Instructions</label>
                             <textarea id="plantCare" name="careInstructions" 
                                       placeholder="Light requirements, watering schedule, special care tips..."
-                                      maxlength="300"></textarea>
+                                      maxlength="300"><?php if(isset($_POST['careInstructions'])) echo htmlspecialchars($_POST['careInstructions']); ?></textarea>
                             <div class="character-count" id="careCount">0/300</div>
                         </div>
                     </div>
@@ -615,18 +714,20 @@
                         <div class="form-group">
                             <label for="itemBrand">Brand/Manufacturer</label>
                             <input type="text" id="itemBrand" name="brand" 
-                                   placeholder="e.g., Fiskars, Gardena, Generic">
+                                   placeholder="e.g., Fiskars, Gardena, Generic"
+                                   value="<?php if(isset($_POST['brand'])) echo htmlspecialchars($_POST['brand']); ?>">
                         </div>
                         <div class="form-group">
                             <label for="itemDimensions">Dimensions/Size</label>
                             <input type="text" id="itemDimensions" name="dimensions" 
-                                   placeholder="e.g., 12x8 inches, Large, etc.">
+                                   placeholder="e.g., 12x8 inches, Large, etc."
+                                   value="<?php if(isset($_POST['dimensions'])) echo htmlspecialchars($_POST['dimensions']); ?>">
                         </div>
                         <div class="form-group">
                             <label for="itemUsage">Usage History</label>
                             <textarea id="itemUsage" name="usageHistory" 
                                       placeholder="How long have you used this item? Any notable wear and tear?"
-                                      maxlength="200"></textarea>
+                                      maxlength="200"><?php if(isset($_POST['usageHistory'])) echo htmlspecialchars($_POST['usageHistory']); ?></textarea>
                             <div class="character-count" id="usageCount">0/200</div>
                         </div>
                     </div>
@@ -646,7 +747,7 @@
                             <div class="file-upload-text">Drag & drop photos here or click to browse</div>
                             <div class="file-upload-hint">Supported formats: JPG, PNG, GIF • Max 5MB per file</div>
                             <button type="button" class="browse-btn">Browse Files</button>
-                            <input type="file" id="fileInput" accept="image/*" multiple>
+                            <input type="file" id="fileInput" name="fileInput" accept="image/*" multiple>
                         </div>
                         <div class="attachments-preview" id="attachmentsPreview">
                             <!-- Attachments will be listed here -->
@@ -727,8 +828,6 @@
     </footer>
 
     <script>
-        const isAdmin = false;
-        
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('addListingForm');
             const listingType = document.getElementById('listingType');
@@ -737,9 +836,7 @@
             const fileUploadArea = document.getElementById('fileUploadArea');
             const fileInput = document.getElementById('fileInput');
             const attachmentsPreview = document.getElementById('attachmentsPreview');
-            const submitBtn = document.getElementById('submitBtn');
-            
-            let attachments = [];
+            const fileUploadText = fileUploadArea.querySelector('.file-upload-text');
             
             // Character counters
             const titleInput = document.getElementById('listingTitle');
@@ -749,7 +846,6 @@
             const usageInput = document.getElementById('itemUsage');
             const lookingForInput = document.getElementById('lookingFor');
 
-            
             // Initialize character counters
             setupCharacterCounter(titleInput, 'titleCount', 100);
             setupCharacterCounter(descriptionInput, 'descriptionCount', 500);
@@ -758,140 +854,84 @@
             setupCharacterCounter(usageInput, 'usageCount', 200);
             setupCharacterCounter(lookingForInput, 'lookingForCount', 200);
             
+            // Show/hide plant or item specific fields based on initial value
+            updateFieldVisibility();
+            
             // Show/hide plant or item specific fields
             listingType.addEventListener('change', function() {
-                const type = this.value;
-                
-                plantFields.style.display = type === 'plant' ? 'block' : 'none';
-                itemFields.style.display = type === 'item' ? 'block' : 'none';
-                
-                // Update required fields
-                const plantRequired = plantFields.querySelectorAll('[required]');
-                const itemRequired = itemFields.querySelectorAll('[required]');
-                
-                if (type === 'plant') {
-                    plantRequired.forEach(field => field.required = true);
-                    itemRequired.forEach(field => field.required = false);
-                } else if (type === 'item') {
-                    plantRequired.forEach(field => field.required = false);
-                    itemRequired.forEach(field => field.required = true);
-                } else {
-                    plantRequired.forEach(field => field.required = false);
-                    itemRequired.forEach(field => field.required = false);
-                }
+                updateFieldVisibility();
             });
             
-            // File upload handling
+            function updateFieldVisibility() {
+                const type = listingType.value;
+                
+                plantFields.style.display = type === 'Plant' ? 'block' : 'none';
+                itemFields.style.display = type === 'Item' ? 'block' : 'none';
+            }
+            
+            // File upload handling - SIMPLIFIED
             fileUploadArea.addEventListener('click', function() {
                 fileInput.click();
             });
             
-            fileUploadArea.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                fileUploadArea.classList.add('dragover');
-            });
-            
-            fileUploadArea.addEventListener('dragleave', function() {
-                fileUploadArea.classList.remove('dragover');
-            });
-            
-            fileUploadArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                fileUploadArea.classList.remove('dragover');
-                
-                if (e.dataTransfer.files.length > 0) {
-                    handleFiles(e.dataTransfer.files);
-                }
-            });
-            
             fileInput.addEventListener('change', function() {
                 if (this.files.length > 0) {
-                    handleFiles(this.files);
-                }
-            });
-            
-            function handleFiles(files) {
-                for (let file of files) {
+                    const file = this.files[0];
+                    
                     // Check file size (5MB limit)
                     if (file.size > 5 * 1024 * 1024) {
                         alert('File size too large. Maximum size is 5MB.');
-                        continue;
+                        this.value = '';
+                        return;
                     }
                     
                     // Check file type
                     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
                     if (!allowedTypes.includes(file.type)) {
                         alert('File type not supported. Please upload JPG, PNG, or GIF files.');
-                        continue;
+                        this.value = '';
+                        return;
                     }
                     
-                    // Check total attachments limit
-                    if (attachments.length >= 10) {
-                        alert('Maximum 10 files allowed per listing.');
-                        break;
-                    }
-                    
-                    attachments.push(file);
-                    updateAttachmentsPreview();
+                    // Update UI to show selected file
+                    fileUploadText.textContent = `Selected: ${file.name}`;
+                    updateFilePreview(file);
                 }
-                
-                // Reset file input
-                fileInput.value = '';
-            }
+            });
             
-            function updateAttachmentsPreview() {
+            function updateFilePreview(file) {
                 attachmentsPreview.innerHTML = '';
                 
-                attachments.forEach((file, index) => {
-                    const attachmentItem = document.createElement('div');
-                    attachmentItem.className = 'attachment-item';
-                    
-                    // Create preview for images
-                    if (file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            attachmentItem.innerHTML = `
-                                <div class="attachment-info">
-                                    <div class="attachment-icon">🖼️</div>
-                                    <img src="${e.target.result}" alt="Preview" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                                    <div class="attachment-details">
-                                        <div class="attachment-name">${file.name}</div>
-                                        <div class="attachment-size">${formatFileSize(file.size)}</div>
-                                    </div>
-                                </div>
-                                <button type="button" class="remove-attachment" data-index="${index}">×</button>
-                            `;
-                            
-                            // Add event listener to remove button
-                            attachmentItem.querySelector('.remove-attachment').addEventListener('click', function() {
-                                const removeIndex = parseInt(this.getAttribute('data-index'));
-                                attachments.splice(removeIndex, 1);
-                                updateAttachmentsPreview();
-                            });
-                        };
-                        reader.readAsDataURL(file);
-                    } else {
+                const attachmentItem = document.createElement('div');
+                attachmentItem.className = 'attachment-item';
+                
+                // Create preview for images
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
                         attachmentItem.innerHTML = `
                             <div class="attachment-info">
-                                <div class="attachment-icon">📄</div>
+                                <div class="attachment-icon">🖼️</div>
+                                <img src="${e.target.result}" alt="Preview" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
                                 <div class="attachment-details">
                                     <div class="attachment-name">${file.name}</div>
                                     <div class="attachment-size">${formatFileSize(file.size)}</div>
                                 </div>
                             </div>
-                            <button type="button" class="remove-attachment" data-index="${index}">×</button>
+                            <button type="button" class="remove-attachment" id="removeFile">×</button>
                         `;
                         
                         // Add event listener to remove button
-                        attachmentItem.querySelector('.remove-attachment').addEventListener('click', function() {
-                            const removeIndex = parseInt(this.getAttribute('data-index'));
-                            attachments.splice(removeIndex, 1);
-                            updateAttachmentsPreview();
+                        attachmentItem.querySelector('#removeFile').addEventListener('click', function() {
+                            fileInput.value = '';
+                            attachmentsPreview.innerHTML = '';
+                            fileUploadText.textContent = 'Click to select a photo';
                         });
-                    }
-                    
-                    attachmentsPreview.appendChild(attachmentItem);
-                });
+                    };
+                    reader.readAsDataURL(file);
+                }
+                
+                attachmentsPreview.appendChild(attachmentItem);
             }
             
             function formatFileSize(bytes) {
@@ -920,103 +960,23 @@
                 countElement.textContent = `0/${maxLength}`;
             }
             
-            // Form submission
+            // Form validation
             form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
                 if (!validateForm()) {
-                    return;
+                    e.preventDefault();
                 }
-
-                // Disable submit button
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Creating Listing...';
-
-                // Get current user data (you'll need to implement this based on your auth system)
-                const currentUser = getCurrentUser(); // This should get user data from your session/token
-                
-                // Create listing object matching mockListings structure
-                const listingData = {
-                    listingId: generateListingId(), // You'll need to implement this
-                    memberId: currentUser.userId, // From logged in user
-                    title: form.title.value,
-                    description: form.description.value,
-                    tags: form.tags.value,
-                    category: form.category.value,
-                    dateListed: new Date().toISOString().split('T')[0],
-                    status: "active",
-                    itemType: form.listingType.value,
-                    condition: form.condition.value,
-                    location: form.location.value,
-                    lookingFor: form.lookingFor.value, // New field
-                    userName: currentUser.fullName, // From tblusers
-                    userRating: currentUser.rating || 0, // You might need to calculate this
-                    userTradeCount: currentUser.tradeCount || 0, // From user history
-                    reported: false
-                };
-
-                // Add type-specific fields
-                if (form.listingType.value === 'plant') {
-                    listingData.species = form.species.value;
-                    listingData.growthStage = form.growthStage.value;
-                    listingData.careInstructions = form.careInstructions.value;
-                } else if (form.listingType.value === 'item') {
-                    listingData.brand = form.brand.value;
-                    listingData.dimensions = form.dimensions.value;
-                    listingData.usageHistory = form.usageHistory.value;
-                }
-
-                // Handle file uploads and get imageUrl
-                // You'll need to implement file upload logic here
-
-                // Save to localStorage or send to backend
-                saveListing(listingData);
-                
-                setTimeout(function() {
-                    alert('Your listing has been created successfully!');
-                    window.location.href = '../../pages/CommonPages/mainTrade.php';
-                }, 2000);
             });
-
-            function getCurrentUser() {
-                // This should return the logged in user's data
-                // For now, return mock data - replace with actual user session data
-                return {
-                    userId: "M001", // This should come from your auth system
-                    fullName: "Current User", // From tblusers.fullName
-                    rating: 4.5, // Calculate from user's trade history
-                    tradeCount: 0 // Count from user's previous trades
-                };
-            }
-
-            function generateListingId() {
-                return 'L' + Date.now().toString().slice(-6);
-            }
-
-            function saveListing(listingData) {
-                // Save to localStorage or send to your backend
-                const existingListings = JSON.parse(localStorage.getItem('listings') || '[]');
-                existingListings.push(listingData);
-                localStorage.setItem('listings', JSON.stringify(existingListings));
-            }
             
             function validateForm() {
                 const listingTypeValue = listingType.value;
-                const location = document.getElementById('listingLocation').value;
                 
                 if (!listingTypeValue) {
                     alert('Please select what type of item you are listing.');
                     listingType.focus();
                     return false;
                 }
-                
-                if (!location) {
-                    alert('Please enter your location.');
-                    document.getElementById('listingLocation').focus();
-                    return false;
-                }
 
-                if (listingTypeValue === 'plant') {
+                if (listingTypeValue === 'Plant') {
                     const species = document.getElementById('plantSpecies').value;
                     const growthStage = document.getElementById('plantGrowthStage').value;
                     
@@ -1026,7 +986,7 @@
                     }
                 }
                 
-                if (listingTypeValue === 'item') {
+                if (listingTypeValue === 'Item') {
                     const condition = document.getElementById('itemCondition').value;
                     
                     if (!condition) {

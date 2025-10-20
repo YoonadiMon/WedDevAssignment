@@ -136,7 +136,7 @@ function getAdminModalContent(listing) {
                 <h2>${listing.title}</h2>
                 <div class="modal-category">${listing.category}</div>
                 <div class="modal-description">${listing.description}</div>
-                ${listing.reported ? '<div class="admin-badge reported-badge">REPORTED</div>' : ''}
+                ${listing.reported == 1 ? '<div class="admin-badge reported-badge">REPORTED</div>' : ''}
             </div>
         </div>
         
@@ -222,7 +222,7 @@ function getAdminModalContent(listing) {
             <button class="delete-btn" onclick="deleteListing(${listing.listingID})">
                 Delete Listing
             </button>
-            ${listing.reported ? `
+            ${listing.reported == 1 ? `
                 <button class="save-btn" onclick="resolveReport(${listing.listingID})">
                     Resolve Report
                 </button>
@@ -260,7 +260,7 @@ function reportListing(listingId) {
         const reason = prompt(`Please provide a reason for reporting "${listing.title}":`);
         if (reason !== null && reason.trim() !== '') {
             // In real app, this would make an AJAX call to update the database
-            listing.reported = true;
+            listing.reported = 1;
             closeModal();
             alert('Thank you for your report. Our admin team will review this listing.');
         } else if (reason !== null) {
@@ -287,7 +287,7 @@ function resolveReport(listingId) {
     const listing = listingsData.find(l => l.listingID == listingId);
     if (listing) {
         // In real app, this would make an AJAX call to update the database
-        listing.reported = false;
+        listing.reported = 0;
         closeModal();
         applyFilters();
         alert('Report resolved successfully.');
@@ -377,7 +377,7 @@ function initAdminControls() {
 function applyFilters() {
     let filteredListings = listingsData.filter(listing => {
         // Admin view filter
-        if (isAdmin && currentAdminView === 'reported' && !listing.reported) {
+        if (isAdmin && currentAdminView === 'reported' && listing.reported == 0) {
             return false;
         }
         
@@ -434,7 +434,7 @@ function renderListings(listings) {
     listingsGrid.innerHTML = listings.map(listing => `
         <div class="listing-card ${listing.itemType === 'Plant' ? 'plant-special' : 'item-special'}" 
                 onclick="openListingModal(${listing.listingID})">
-            ${isAdmin && listing.reported ? '<div class="admin-badge">REPORTED</div>' : ''}
+            ${isAdmin && listing.reported == 1 ? '<div class="admin-badge">REPORTED</div>' : ''}
             <div class="listing-image">
                 ${listing.imageUrl ? 
                     `<img src="${listing.imageUrl}" alt="${listing.title}" style="width: 100%; height: 100%; object-fit: cover;">` :
@@ -475,8 +475,6 @@ function renderListings(listings) {
 
 // Main initialization
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing Trade Marketplace...');
-    console.log('Available listings:', listingsData);
     
     // Initialize global variables
     currentCategory = 'all';

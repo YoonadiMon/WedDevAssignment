@@ -6,9 +6,9 @@ $user_type = '';
 $user_id = '';
 
 // // Force reset for debugging
-// unset($_SESSION['admin_id']);
-// unset($_SESSION['user_id']);
-// unset($_SESSION['user_type']);
+unset($_SESSION['admin_id']);
+unset($_SESSION['user_id']);
+unset($_SESSION['user_type']);
 
 if (!isset($_SESSION['user_id']) && !isset($_SESSION['admin_id'])) {
     // $user_type = 'admin';
@@ -16,7 +16,7 @@ if (!isset($_SESSION['user_id']) && !isset($_SESSION['admin_id'])) {
     // $_SESSION['admin_id'] = $user_id;
 
     $user_type = 'member';
-    $user_id = 7;
+    $user_id = 4;
     $_SESSION['user_id'] = $user_id;
 } elseif (isset($_SESSION['admin_id'])) {
     $user_type = 'admin';
@@ -83,7 +83,6 @@ try {
     }
 
     $listings_json = json_encode($listings, JSON_INVALID_UTF8_SUBSTITUTE);
-    echo "<script>console.log('Listings Data: ' + " . json_encode($listings_json) . ");</script>";
 
 } catch (Exception $e) {
     error_log("Error fetching trade listings: " . $e->getMessage());
