@@ -254,7 +254,7 @@ function renderResults(type, query) {
                 .filter((tr) => match(tr.Title) || match(tr.Tags))
                 .map(
                     (tr) => `
-                    <div class="result-item clickable" onclick="window.location.href='../../pages/CommonPages/mainTrade.html?listingId=${tr.ListingID}'">
+                    <div class="result-item clickable" onclick="window.location.href='../../pages/CommonPages/mainTrade.php?listingId=${tr.ListingID}'">
                         <img src="${tr.ImageURL}" alt="${tr.Title}">
                         <div>
                             <h4>${tr.Title}</h4>

@@ -367,7 +367,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <a href="../../pages/MemberPages/memberIndex.html">Home</a>
                     <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.html">Event</a>
-                    <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                    <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                     <a href="../../pages/CommonPages/aboutUs.html">About</a>
                 </div>
             </div>
@@ -379,7 +379,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <a href="../../pages/MemberPages/memberIndex.html">Home</a>
             <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.html">Event</a>
-            <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+            <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             <a href="../../pages/CommonPages/aboutUs.html">About</a>
         </nav>
         <section class="c-navbar-more">
@@ -568,7 +568,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <b>Community</b><br>
                 <a href="../../pages/CommonPages/mainEvent.html">Events</a><br>
                 <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
-                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             </div>
         </section>
     </footer>
