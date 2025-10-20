@@ -37,6 +37,7 @@
             <th>Country</th>
             <th>User Type</th>
             <th>Points</th>
+            <th>Trades Completed</th>
         </tr>
         <?php
             // step 4 - process the result
@@ -53,6 +54,7 @@
                 <td><?php echo $row["country"]; ?></td>
                 <td><?php echo $row["userType"]; ?></td>
                 <td><?php echo $row["point"]; ?></td>
+                <td><?php echo $row["tradesCompleted"]; ?></td>
             </tr>
         <?php
             }

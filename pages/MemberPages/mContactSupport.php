@@ -2,7 +2,7 @@
 // Database connection and query for current user's tickets
 include("../../php/dbConn.php");
 
-// Assuming current user ID is 6 (as per requirements)
+// Assuming current user ID is 4 
 $currentUserID = 4;
 
 // Query to fetch tickets for the current user

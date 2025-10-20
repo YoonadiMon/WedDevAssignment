@@ -1,3 +1,96 @@
+<?php
+session_start();
+include("../../php/dbConn.php");
+
+$user_type = '';
+$user_id = '';
+
+// // Force reset for debugging
+// unset($_SESSION['admin_id']);
+// unset($_SESSION['user_id']);
+// unset($_SESSION['user_type']);
+
+if (!isset($_SESSION['user_id']) && !isset($_SESSION['admin_id'])) {
+    // $user_type = 'admin';
+    // $user_id = 1;
+    // $_SESSION['admin_id'] = $user_id;
+
+    $user_type = 'member';
+    $user_id = 7;
+    $_SESSION['user_id'] = $user_id;
+} elseif (isset($_SESSION['admin_id'])) {
+    $user_type = 'admin';
+    $user_id = $_SESSION['admin_id'];
+} elseif (isset($_SESSION['user_id'])) {
+    $user_type = 'member';
+    $user_id = $_SESSION['user_id'];
+}
+
+// Store user type in session for consistency
+$_SESSION['user_type'] = $user_type;
+echo "<script>console.log('" . $_SESSION['user_type'] . "');</script>";
+
+// Fetch listings from database
+$listings = [];
+
+try {
+    if (!isset($connection) || $connection === null) {
+        throw new Exception("Database connection not established.");
+    }
+
+    $query = "
+        SELECT 
+            tl.listingID,
+            tl.userID,
+            tl.title,
+            tl.description,
+            tl.tags,
+            tl.imageUrl,
+            tl.category,
+            tl.dateListed,
+            tl.status,
+            tl.itemType,
+            tl.itemCondition,
+            tl.species,
+            tl.growthStage,
+            tl.careInstructions,
+            tl.brand,
+            tl.dimensions,
+            tl.usageHistory,
+            tl.lookingFor,
+            tl.reported,
+            u.fullName AS userName,
+            u.country AS location,
+            u.tradesCompleted
+        FROM tbltrade_listings tl
+        LEFT JOIN tblusers u ON tl.userID = u.userID
+        WHERE tl.status = 'active'
+        ORDER BY tl.dateListed DESC
+    ";
+
+    $result = mysqli_query($connection, $query);
+
+    if (!$result) {
+        throw new Exception("SQL Error: " . mysqli_error($connection));
+    }
+
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $row['userRating'] = round(rand(45, 50) / 10, 1);
+            $row['userTradeCount'] = (int)$row['tradesCompleted'];
+            $listings[] = $row;
+        }
+    }
+
+    $listings_json = json_encode($listings, JSON_INVALID_UTF8_SUBSTITUTE);
+    echo "<script>console.log('Listings Data: ' + " . json_encode($listings_json) . ");</script>";
+
+} catch (Exception $e) {
+    error_log("Error fetching trade listings: " . $e->getMessage());
+    $listings = [];
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +106,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
     <style>
+        /* Additional styling for enhanced visual appeal */
         .trade-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -163,7 +257,8 @@
         }
 
         .listing-category {
-            background: var(--sec-bg-color);
+            background: var(--White);
+            color: var(--Black);
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 11px;
@@ -374,12 +469,10 @@
         }
 
         .modal-category {
-            background: var(--sec-bg-color);
             padding: 6px 12px;
             border-radius: 6px;
             font-size: 12px;
             font-weight: 500;
-            color: var(--Gray);
             display: inline-block;
             margin-bottom: 15px;
         }
@@ -631,7 +724,129 @@
 
     <!-- Dynamic Header based on user type -->
     <header id="main-header">
-        <!-- Header content will be populated by JavaScript based on user type -->
+        <?php if ($user_type === 'admin'): ?>
+            <!-- Admin Header -->
+            <section class="c-logo-section">
+                <a href="../../pages/adminPages/adminIndex.php" class="c-logo-link">
+                    <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                    <div class="c-text">ReLeaf</div>
+                </a>
+            </section>
+
+            <!-- Menu Links Mobile -->
+            <nav class="c-navbar-side">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
+                <div id="sidebarNav" class="c-navbar-side-menu">
+                    
+                    <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
+                    <div class="c-navbar-side-items">
+                        <section class="c-navbar-side-more">
+                            <button id="themeToggle1">
+                                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
+                            </button>
+                            <a href="../../pages/adminPages/aProfile.html">
+                                <img src="../../assets/images/profile-light.svg" alt="Profile">
+                            </a>
+                        </section>
+
+                        <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                        <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Menu Links Desktop + Tablet -->
+            <nav class="c-navbar-desktop">
+                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
+            </nav>          
+            <section class="c-navbar-more">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                <button id="themeToggle2">
+                    <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
+                </button>
+                <a href="../../pages/adminPages/aProfile.html">
+                    <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
+                </a>
+            </section>
+        <?php else: ?>
+            <!-- Member Header -->
+            <section class="c-logo-section">
+                <a href="../../pages/MemberPages/memberIndex.html" class="c-logo-link">
+                    <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                    <div class="c-text">ReLeaf</div>
+                </a>
+            </section>
+
+            <!-- Menu Links Mobile -->
+            <nav class="c-navbar-side">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
+                    id="menuBtn">
+                <div id="sidebarNav" class="c-navbar-side-menu">
+
+                    <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
+                        class="close-btn">
+                    <div class="c-navbar-side-items">
+                        <section class="c-navbar-side-more">
+                            <button id="themeToggle1">
+                                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                            </button>
+
+                            <div class="c-chatbox" id="chatboxMobile">
+                                <a href="../../pages/MemberPages/mChat.html">
+                                    <img src="../../assets/images/chat-light.svg" alt="Chatbox">
+                                </a>
+                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            </div>
+
+                            <a href="../../pages/MemberPages/mSetting.html">
+                                <img src="../../assets/images/setting-light.svg" alt="Settings">
+                            </a>
+                        </section>
+
+                        <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                        <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Menu Links Desktop + Tablet -->
+            <nav class="c-navbar-desktop">
+                <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                <a href="../../pages/CommonPages/aboutUs.html">About</a>
+            </nav>
+            <section class="c-navbar-more">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                
+                <button id="themeToggle2">
+                    <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                </button>
+                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                    <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                </a>
+
+                <a href="../../pages/MemberPages/mSetting.html">
+                    <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
+                </a>
+            </section>
+        <?php endif; ?>
     </header>
 
     <hr>
@@ -643,13 +858,16 @@
             <div class="trade-header">
                 <h1>Trade Marketplace</h1>
                 <p>Exchange items and plants with fellow ReLeaf community members. Sustainable trading for a greener future.</p>
-                <a link href="../../pages/MemberPages/addTrade.html" id="createListingLink">
-                    <button class="c-btn c-btn-primary" id="createListingBtn">Create New Listing</button>
-                </a>
+                <?php if ($user_type === 'member'): ?>
+                    <a link href="../../pages/MemberPages/addTrade.php" id="createListingLink">
+                        <button class="c-btn c-btn-primary" id="createListingBtn">Create New Listing</button>
+                    </a>
+                <?php endif; ?>
             </div>
 
             <!-- Admin Controls -->
-            <div class="admin-controls" id="adminControls" style="display: none;">
+            <?php if ($user_type === 'admin'): ?>
+            <div class="admin-controls" id="adminControls">
                 <div class="view-toggle">
                     <button class="view-toggle-btn active" data-view="all">All Listings</button>
                     <button class="view-toggle-btn" data-view="reported">Reported Listings</button>
@@ -658,15 +876,16 @@
                     <span id="adminStatus">Viewing all listings</span>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Category Tabs -->
             <div class="category-tabs">
                 <div class="category-tab active" data-category="all">All Listings</div>
-                <div class="category-tab" data-category="plants">Plants</div>
-                <div class="category-tab" data-category="tools">Gardening Tools</div>
-                <div class="category-tab" data-category="seeds">Seeds & Saplings</div>
-                <div class="category-tab" data-category="decor">Garden Decor</div>
-                <div class="category-tab" data-category="books">Gardening Books</div>
+                <div class="category-tab" data-category="Plants">Plants</div>
+                <div class="category-tab" data-category="Gardening Tools">Gardening Tools</div>
+                <div class="category-tab" data-category="Seeds & Saplings">Seeds & Saplings</div>
+                <div class="category-tab" data-category="Garden Decor">Garden Decor</div>
+                <div class="category-tab" data-category="Gardening Books">Gardening Books</div>
             </div>
 
             <!-- Filters Section -->
@@ -681,12 +900,12 @@
                         <label>Category</label>
                         <select class="filter-select" id="categoryFilter">
                             <option value="all">All Categories</option>
-                            <option value="plants">Plants</option>
-                            <option value="tools">Gardening Tools</option>
-                            <option value="seeds">Seeds & Saplings</option>
-                            <option value="decor">Garden Decor</option>
-                            <option value="books">Gardening Books</option>
-                            <option value="other">Other</option>
+                            <option value="Plants">Plants</option>
+                            <option value="Gardening Tools">Gardening Tools</option>
+                            <option value="Seeds & Saplings">Seeds & Saplings</option>
+                            <option value="Garden Decor">Garden Decor</option>
+                            <option value="Gardening Books">Gardening Books</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
                     
@@ -694,10 +913,10 @@
                         <label>Condition</label>
                         <select class="filter-select" id="conditionFilter">
                             <option value="all">Any Condition</option>
-                            <option value="new">New</option>
-                            <option value="excellent">Excellent</option>
-                            <option value="good">Good</option>
-                            <option value="fair">Fair</option>
+                            <option value="New">New</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
                         </select>
                     </div>
                     
@@ -705,8 +924,8 @@
                         <label>Item Type</label>
                         <select class="filter-select" id="typeFilter">
                             <option value="all">All Types</option>
-                            <option value="plant">Plants Only</option>
-                            <option value="item">Items Only</option>
+                            <option value="Plant">Plants Only</option>
+                            <option value="Item">Items Only</option>
                         </select>
                     </div>
                     
@@ -798,7 +1017,10 @@
     </footer>
 
     <script>
-        const isAdmin = true;
+        // Pass PHP variables to JavaScript
+        const isAdmin = <?php echo $user_type === 'admin' ? 'true' : 'false'; ?>;
+        const listingsData = <?php echo $listings_json ?: '[]'; ?>;
+        const currentUserId = <?php echo $user_id; ?>;
     </script>
     <script src="../../javascript/mainTrade.js"></script>
     <script src="../../javascript/mainScript.js"></script>
