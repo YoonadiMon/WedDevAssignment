@@ -698,7 +698,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="../../pages/MemberPages/memberIndex.html">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/aboutUs.html">About</a>
             <?php endif; ?>
         </nav>
@@ -926,7 +926,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <b>Community</b><br>
                 <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
                 <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
-                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             </div>
         </section>
     </footer>

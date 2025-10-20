@@ -355,7 +355,7 @@ if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
         <header>
             <!-- Logo + Name -->
             <section class="c-logo-section">
-                <a href="../../pages/adminPages/adminIndex.html" class="c-logo-link">
+                <a href="../../pages/adminPages/adminIndex.php" class="c-logo-link">
                     <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                     <div class="c-text">ReLeaf</div>
                 </a>
@@ -380,9 +380,9 @@ if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
                             </a>
                         </section>
 
-                        <a href="../../pages/adminPages/adminIndex.html">Dashboard</a>
+                        <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
@@ -393,9 +393,9 @@ if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
 
             <!-- Menu Links Desktop + Tablet -->
             <nav class="c-navbar-desktop">
-                <a href="../../pages/adminPages/adminIndex.html">Dashboard</a>
+                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>

@@ -509,15 +509,15 @@ $eventCount = count($events);
                         <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
                         <!-- Member Menu Items -->
                         <a href="../../pages/MemberPages/memberIndex.html">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.html">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/aboutUs.html">About</a>
                     <?php endif; ?>
                 </div>
@@ -531,7 +531,7 @@ $eventCount = count($events);
                 <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
@@ -539,7 +539,7 @@ $eventCount = count($events);
                 <a href="../../pages/MemberPages/memberIndex.html">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/aboutUs.html">About</a>
             <?php endif; ?>
         </nav>
@@ -789,9 +789,9 @@ $eventCount = count($events);
             </div>
             <div>
                 <b>Community</b><br>
-                <a href="../../pages/CommonPages/mainEvent.html">Events</a><br>
+                <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
                 <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
-                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             </div>
         </section>
     </footer>

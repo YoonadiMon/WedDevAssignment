@@ -612,7 +612,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
     <header>
         <!-- Logo + Name -->
         <section class="c-logo-section">
-            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.html' : 'MemberPages/memberIndex.html'; ?>" class="c-logo-link">
+            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.html'; ?>" class="c-logo-link">
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
             </a>
@@ -655,7 +655,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
                         <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
@@ -663,7 +663,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
                         <a href="../../pages/MemberPages/memberIndex.html">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/aboutUs.html">About</a>
                     <?php endif; ?>
                 </div>
@@ -674,10 +674,10 @@ $userInfo = mysqli_fetch_assoc($userResult);
         <nav class="c-navbar-desktop">
             <?php if ($isAdmin): ?>
                 <!-- Admin Desktop Menu -->
-                <a href="../../pages/adminPages/adminIndex.html">Dashboard</a>
+                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
@@ -685,7 +685,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
                 <a href="../../pages/MemberPages/memberIndex.html">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/aboutUs.html">About</a>
             <?php endif; ?>
         </nav>
@@ -966,9 +966,9 @@ $userInfo = mysqli_fetch_assoc($userResult);
             </div>
             <div>
                 <b>Community</b><br>
-                <a href="../../pages/CommonPages/mainEvent.html">Events</a><br>
+                <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
                 <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
-                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             </div>
         </section>
     </footer>
