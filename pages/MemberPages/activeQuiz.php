@@ -1,3 +1,43 @@
+<?php
+session_start();
+include("../../php/dbConn.php");
+
+// Check if user is logged in and is a member
+// if (!isset($_SESSION['userID']) || $_SESSION['userType'] !== 'member') {
+//     header("Location: ../../pages/CommonPages/login.php");
+//     exit();
+// }
+// $userID = $_SESSION['userID'];
+
+$userID = 6; // Temporary hardcoded userID for testing
+$stageID = isset($_GET['stage']) ? intval($_GET['stage']) : 1;
+
+// Fetch quiz questions for stage 1
+$quizQuestions = [];
+$questionQuery = "SELECT q.quizID, q.questionText, q.optionA, q.optionB, q.optionC, q.optionD, q.correctAnswer, q.points 
+                  FROM tblquiz_questions q 
+                  WHERE q.stageID = ? 
+                  ORDER BY q.questionOrder";
+$stmt = $connection->prepare($questionQuery);
+$stmt->bind_param("i", $stageID);
+$stmt->execute();
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+    $quizQuestions[] = $row;
+}
+$stmt->close();
+
+// Check if user has already completed this stage
+$progressQuery = "SELECT * FROM tbluser_quiz_progress WHERE userID = ? AND stageID = ?";
+$stmt = $connection->prepare($progressQuery);
+$stmt->bind_param("ii", $userID, $stageID);
+$stmt->execute();
+$progressResult = $stmt->get_result();
+$hasCompleted = $progressResult->num_rows > 0;
+$stmt->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -121,7 +161,43 @@
                 line-height: 1.6;
             }
 
-            .quiz-stats {
+            /* Popup Modal Styles */
+            .quiz-popup {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .quiz-popup-content {
+                background: var(--bg-color);
+                padding: 3rem;
+                border-radius: 16px;
+                max-width: 500px;
+                width: 90%;
+                text-align: center;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                animation: popupSlide 0.3s ease-out;
+            }
+
+            @keyframes popupSlide {
+                from {
+                    opacity: 0;
+                    transform: translateY(-50px) scale(0.9);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            .quiz-popup-stats {
                 display: flex;
                 justify-content: center;
                 gap: 2rem;
@@ -129,27 +205,27 @@
                 flex-wrap: wrap;
             }
 
-            .quiz-stat {
+            .quiz-popup-stat {
                 padding: 1.5rem;
                 background: var(--sec-bg-color);
                 border-radius: 12px;
-                min-width: 150px;
+                min-width: 120px;
             }
 
-            .quiz-stat-value {
-                font-size: 2.5rem;
+            .quiz-popup-value {
+                font-size: 2rem;
                 font-weight: 700;
                 color: var(--MainGreen);
                 display: block;
             }
 
-            .quiz-stat-label {
+            .quiz-popup-label {
                 font-size: 0.9rem;
                 color: var(--text-color);
                 margin-top: 0.5rem;
             }
 
-            .quiz-score-message {
+            .quiz-popup-message {
                 font-size: 1.3rem;
                 font-weight: 600;
                 margin: 1.5rem 0;
@@ -186,13 +262,17 @@
                     flex-direction: column;
                 }
 
-                .quiz-stats {
+                .quiz-popup-stats {
                     flex-direction: column;
                     gap: 1rem;
                 }
 
-                .quiz-stat {
+                .quiz-popup-stat {
                     min-width: 100%;
+                }
+
+                .quiz-popup-content {
+                    padding: 2rem 1.5rem;
                 }
             }
         </style>
@@ -205,7 +285,7 @@
         <header>
             <!-- Logo + Name -->
             <section class="c-logo-section">
-                <a href="../../pages/MemberPages/memberIndex.html" class="c-logo-link">
+                <a href="../../pages/MemberPages/memberIndex.php" class="c-logo-link">
                     <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                     <div class="c-text">ReLeaf</div>
                 </a>
@@ -225,31 +305,31 @@
                                 <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                             </button>
                             <div class="c-chatbox" id="chatboxMobile">
-                                <a href="../../pages/MemberPages/mChat.html">
+                                <a href="../../pages/MemberPages/mChat.php">
                                     <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                                 </a>
                                 <span class="c-notification-badge" id="chatBadgeMobile"></span>
                             </div>
-                            <a href="../../pages/MemberPages/mSetting.html">
+                            <a href="../../pages/MemberPages/mSetting.php">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a>
                         </section>
-                        <a href="../../pages/MemberPages/memberIndex.html">Home</a>
-                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                        <a href="../../pages/CommonPages/aboutUs.php">About</a>
                     </div>
                 </div>
             </nav>
 
             <!-- Menu Links Desktop + Tablet -->
             <nav class="c-navbar-desktop">
-                <a href="../../pages/MemberPages/memberIndex.html">Home</a>
-                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                <a href="../../pages/CommonPages/aboutUs.php">About</a>
             </nav>
             <section class="c-navbar-more">
                 <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
@@ -257,11 +337,11 @@
                 <button id="themeToggle2">
                     <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                 </button>
-                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                     <span class="c-notification-badge" id="chatBadgeDesktop"></span>
                 </a>
-                <a href="../../pages/MemberPages/mSetting.html">
+                <a href="../../pages/MemberPages/mSetting.php">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a>
             </section>
@@ -274,15 +354,20 @@
             <div class="quiz-container">
                 <!-- Start Screen -->
                 <div id="startScreen" class="quiz-start">
-                    <h2 class="c-heading-2">Environmental Awareness Quiz</h2>
-                    <p>Test your knowledge about environmental conservation and sustainability! This quiz contains 5 questions about important environmental topics.</p>
+                    <h2 class="c-heading-2">Recycling Champion Quiz</h2>
+                    <p>Test your knowledge about recycling and waste management! This quiz contains <?php echo count($quizQuestions); ?> questions about proper recycling practices.</p>
+                    <?php if ($hasCompleted): ?>
+                        <div style="background: var(--LightGreen); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>You've already completed this stage!</strong> You can retake it to improve your score.
+                        </div>
+                    <?php endif; ?>
                     <button class="c-btn c-btn-primary c-btn-big" onclick="startQuiz()">Start Quiz</button>
                 </div>
 
                 <!-- Quiz Screen -->
                 <div id="quizScreen" class="hidden">
                     <div class="quiz-header">
-                        <div class="c-text-label">Question <span id="currentQuestion">1</span> of <span id="totalQuestions">5</span></div>
+                        <div class="c-text-label">Question <span id="currentQuestion">1</span> of <span id="totalQuestions"><?php echo count($quizQuestions); ?></span></div>
                         <div class="quiz-progress">
                             <div id="progressBar" class="quiz-progress-bar" style="width: 0%"></div>
                         </div>
@@ -299,31 +384,33 @@
                         <button class="c-btn c-btn-primary" onclick="nextQuestion()" id="nextBtn" disabled>Next</button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Results Screen -->
-                <div id="resultsScreen" class="quiz-results hidden">
+            <!-- Results Popup -->
+            <div id="resultsPopup" class="quiz-popup">
+                <div class="quiz-popup-content">
                     <h2 class="c-heading-2">Quiz Complete!</h2>
-                    <div class="quiz-score-message" id="scoreMessage"></div>
+                    <div class="quiz-popup-message" id="popupMessage"></div>
                     
-                    <div class="quiz-stats">
-                        <div class="quiz-stat">
-                            <span class="quiz-stat-value" id="scoreValue">0</span>
-                            <div class="quiz-stat-label">Score</div>
+                    <div class="quiz-popup-stats">
+                        <div class="quiz-popup-stat">
+                            <span class="quiz-popup-value" id="popupScore">0</span>
+                            <div class="quiz-popup-label">Score</div>
                         </div>
-                        <div class="quiz-stat">
-                            <span class="quiz-stat-value" id="correctValue">0</span>
-                            <div class="quiz-stat-label">Correct Answers</div>
+                        <div class="quiz-popup-stat">
+                            <span class="quiz-popup-value" id="popupCorrect">0</span>
+                            <div class="quiz-popup-label">Correct</div>
                         </div>
-                        <div class="quiz-stat">
-                            <span class="quiz-stat-value" id="percentageValue">0%</span>
-                            <div class="quiz-stat-label">Percentage</div>
+                        <div class="quiz-popup-stat">
+                            <span class="quiz-popup-value" id="popupPercentage">0%</span>
+                            <div class="quiz-popup-label">Percentage</div>
                         </div>
                     </div>
 
-                    <p>Thank you for taking the quiz! Every small step towards environmental awareness makes a difference.</p>
+                    <p>Your progress has been saved! Redirecting to quiz page...</p>
                     
                     <div class="quiz-controls">
-                        <button class="c-btn c-btn-primary c-btn-big" onclick="restartQuiz()">Retake Quiz</button>
+                        <button class="c-btn c-btn-primary c-btn-big" onclick="redirectToQuizPage()">Continue</button>
                     </div>
                 </div>
             </div>
@@ -352,62 +439,30 @@
             <section class="c-footer-links-section">
                 <div>
                     <b>My Account</b><br>
-                    <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
-                    <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                    <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                    <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
+                    <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
+                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
                 </div>
                 <div>
                     <b>Helps</b><br>
-                    <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                    <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
-                    <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                    <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
+                    <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
+                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
                 </div>
                 <div>
                     <b>Community</b><br>
-                    <a href="../../pages/CommonPages/mainEvent.html">Events</a><br>
-                    <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
+                    <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blogs</a><br>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 </div>
             </section>
         </footer>
 
-        <script>const isAdmin = false;</script>
-        <script src="../../javascript/mainScript.js"></script>
-        
         <script>
-            // Quiz Data
-            const quizData = [
-                {
-                    question: "What percentage of Earth's oxygen is produced by the ocean?",
-                    options: ["30%", "50%", "70%", "90%"],
-                    correct: 1,
-                    feedback: "The ocean produces over 50% of the world's oxygen through phytoplankton!"
-                },
-                {
-                    question: "Which of these materials takes the longest to decompose?",
-                    options: ["Paper bag (1 month)", "Plastic bottle (450 years)", "Glass bottle (1 million years)", "Aluminum can (200 years)"],
-                    correct: 2,
-                    feedback: "Glass bottles can take up to 1 million years to decompose, making recycling essential!"
-                },
-                {
-                    question: "What is the most effective way to reduce your carbon footprint?",
-                    options: ["Recycling", "Using public transport", "Eating less meat", "Turning off lights"],
-                    correct: 2,
-                    feedback: "Animal agriculture is responsible for 14-18% of global greenhouse gas emissions."
-                },
-                {
-                    question: "How many trees does it take to absorb one ton of CO2 per year?",
-                    options: ["10 trees", "31 trees", "50 trees", "100 trees"],
-                    correct: 1,
-                    feedback: "On average, 31 trees are needed to absorb one ton of CO2 annually!"
-                },
-                {
-                    question: "What is the primary cause of coral reef bleaching?",
-                    options: ["Pollution", "Ocean warming", "Overfishing", "Tourism"],
-                    correct: 1,
-                    feedback: "Rising ocean temperatures due to climate change cause corals to expel their algae, leading to bleaching."
-                }
-            ];
+            const isAdmin = false;
+            const quizData = <?php echo json_encode($quizQuestions); ?>;
+            const userID = <?php echo $userID; ?>;
+            const stageID = <?php echo $stageID; ?>;
 
             let currentQuestionIndex = 0;
             let selectedAnswers = [];
@@ -424,7 +479,7 @@
 
             function loadQuestion() {
                 const question = quizData[currentQuestionIndex];
-                document.getElementById('questionText').textContent = question.question;
+                document.getElementById('questionText').textContent = question.questionText;
                 document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
                 document.getElementById('totalQuestions').textContent = quizData.length;
                 
@@ -434,7 +489,16 @@
                 const optionsContainer = document.getElementById('optionsContainer');
                 optionsContainer.innerHTML = '';
                 
-                question.options.forEach((option, index) => {
+                const options = [
+                    question.optionA,
+                    question.optionB, 
+                    question.optionC,
+                    question.optionD
+                ];
+
+                options.forEach((option, index) => {
+                    if (!option) return; // Skip empty options
+                    
                     const optionDiv = document.createElement('div');
                     optionDiv.className = 'quiz-option';
                     optionDiv.textContent = option;
@@ -469,22 +533,9 @@
                 });
                 
                 document.getElementById('nextBtn').disabled = false;
-                showFeedback();
-            }
-
-            function showFeedback() {
-                const question = quizData[currentQuestionIndex];
-                const feedback = document.getElementById('feedback');
-                const selected = selectedAnswers[currentQuestionIndex];
-                
-                if (selected !== null) {
-                    feedback.textContent = question.feedback;
-                    feedback.classList.remove('hidden');
-                }
             }
 
             function nextQuestion() {
-                // Check if an answer is selected before proceeding
                 if (selectedAnswers[currentQuestionIndex] === null) {
                     return;
                 }
@@ -493,7 +544,6 @@
                     currentQuestionIndex++;
                     loadQuestion();
                 } else {
-                    // This is the last question, show results
                     showResults();
                 }
             }
@@ -507,44 +557,78 @@
 
             function showResults() {
                 score = 0;
+                let totalPoints = 0;
+                
                 selectedAnswers.forEach((answer, index) => {
-                    if (answer === quizData[index].correct) {
+                    const correctAnswer = quizData[index].correctAnswer.toLowerCase();
+                    const userAnswer = String.fromCharCode(97 + answer); // Convert 0,1,2,3 to 'a','b','c','d'
+                    
+                    if (userAnswer === correctAnswer) {
                         score++;
+                        totalPoints += parseInt(quizData[index].points) || 1;
                     }
                 });
 
                 const percentage = Math.round((score / quizData.length) * 100);
                 
-                document.getElementById('quizScreen').classList.add('hidden');
-                document.getElementById('resultsScreen').classList.remove('hidden');
-                
-                document.getElementById('scoreValue').textContent = score + '/' + quizData.length;
-                document.getElementById('correctValue').textContent = score;
-                document.getElementById('percentageValue').textContent = percentage + '%';
+                // Update popup content
+                document.getElementById('popupScore').textContent = score + '/' + quizData.length;
+                document.getElementById('popupCorrect').textContent = score;
+                document.getElementById('popupPercentage').textContent = percentage + '%';
                 
                 let message = '';
                 if (percentage === 100) {
-                    message = "Perfect! You're an environmental champion! 🌟";
+                    message = "Perfect! You're a Recycling Champion! 🌟";
                 } else if (percentage >= 80) {
-                    message = "Excellent work! You have great environmental knowledge! 🌱";
+                    message = "Excellent work! Great recycling knowledge! 🌱";
                 } else if (percentage >= 60) {
-                    message = "Good job! Keep learning about our planet! 🌍";
+                    message = "Good job! Keep learning about recycling! ♻️";
                 } else if (percentage >= 40) {
-                    message = "Not bad! There's always room to learn more! 🌿";
+                    message = "Not bad! There's room to learn more! 🌿";
                 } else {
-                    message = "Keep exploring! Every step towards knowledge counts! 🌳";
+                    message = "Keep exploring! Every step counts! 🌳";
                 }
                 
-                document.getElementById('scoreMessage').textContent = message;
+                document.getElementById('popupMessage').textContent = message;
+                
+                // Save results to database
+                saveQuizResults(score, totalPoints, percentage);
+                
+                // Show popup
+                document.getElementById('resultsPopup').style.display = 'flex';
             }
 
-            function restartQuiz() {
-                document.getElementById('resultsScreen').classList.add('hidden');
-                document.getElementById('startScreen').classList.remove('hidden');
-                currentQuestionIndex = 0;
-                selectedAnswers = [];
-                score = 0;
+            function saveQuizResults(score, totalPoints, percentage) {
+                const formData = new FormData();
+                formData.append('userID', userID);
+                formData.append('stageID', stageID);
+                formData.append('score', score);
+                formData.append('totalPoints', totalPoints);
+                formData.append('percentage', percentage);
+
+                // Use the correct path to saveQuizResults.php
+                fetch('../../php/saveQuizResults.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Quiz results saved successfully');
+                        console.log('Points added:', totalPoints);
+                    } else {
+                        console.error('Failed to save quiz results:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving quiz results:', error);
+                });
+            }
+
+            function redirectToQuizPage() {
+                window.location.href = '../../pages/MemberPages/mQuiz.php';
             }
         </script>
+        <script src="../../javascript/mainScript.js"></script>
     </body>
 </html>
