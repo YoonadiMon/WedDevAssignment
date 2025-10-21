@@ -3,6 +3,10 @@ session_start();
 include('../../php/dbConn.php');
 include("../../php/sessionCheck.php");
 
+// Auto-close past events
+$autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
+$connection->query($autoCloseQuery);
+
 // Get filter parameters
 $filterMode = isset($_GET['mode']) ? $_GET['mode'] : [];
 $filterType = isset($_GET['type']) ? $_GET['type'] : [];
