@@ -1,5 +1,3 @@
-<!-- STILL IN PROGRESS -->
-
 <?php
 session_start();
 include("../../php/dbConn.php");
@@ -350,6 +348,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .form-container {
+            margin-bottom: 5rem;
             background: transparent;
             border: none;
         }
@@ -473,6 +472,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .file-upload-area {
+            margin-top: 0.5rem;
             border: 2px dashed var(--Gray);
             border-radius: 8px;
             padding: 2rem;
@@ -515,7 +515,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .preview-container {
-            margin-top: 1rem;
             display: none;
             text-align: center;
         }
@@ -529,11 +528,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 8px;
             border: 2px solid var(--MainGreen);
             padding: 0.5rem;
+            margin-top: 0.5rem;
             margin-bottom: 1rem;
         }
 
         .replace-btn {
-            background: var(--MainGreen);
+            background: var(--Red);
             color: var(--White);
             border: none;
             padding: 0.5rem 1rem;
@@ -587,23 +587,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .file-status {
-            margin-top: 0.5rem;
             padding: 0.5rem;
             border-radius: 4px;
             font-size: 0.9rem;
             font-weight: 600;
         }
 
+        .file-status-hide {
+            display: none;
+        }
+
         .file-status.success {
-            color: var(--MainGreen);
+            color: var(--White);
             background: var(--LowGreen);
-            border: 1px solid var(--MainGreen);
+            border: none;
         }
 
         .file-status.error {
-            color: var(--Red);
-            background: #ffe6e6;
-            border: 1px solid var(--Red);
+            color: var(--text-color);
+            background: var(--LowRed);
+            border: none;
         }
 
         @media (max-width: 768px) {
@@ -625,7 +628,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <header>
         <!-- Logo + Name -->
         <section class="c-logo-section">
-            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.html'; ?>" class="c-logo-link">
+            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.php'; ?>" class="c-logo-link">
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
             </a>
@@ -673,7 +676,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
                         <!-- Member Menu Items -->
-                        <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
@@ -695,7 +698,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
                 <!-- Member Desktop Menu -->
-                <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
@@ -845,21 +848,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="form-group">
                         <label>Event Banner <small>(Optional - PNG, JPG, JPEG)</small></label>
-                        
-                        <!-- File Upload Area (Initially Visible) -->
+                        <div id="fileStatus"></div>
+                        <!-- File Upload Area -->
                         <div class="file-upload-area" id="fileUploadArea">
                             <input type="file" name="banner" id="fileInput" accept="image/*" />
                             <div class="file-upload-text" id="uploadText">Click to upload or drag and drop</div>
                             <div class="file-upload-hint">Best viewed at 1200×400px | PNG, JPG, JPEG (Max 5MB)</div>
                         </div>
                         
-                        <!-- Preview Container (Initially Hidden) -->
+                        <!-- Preview Banner -->
                         <div class="preview-container" id="previewContainer">
                             <img id="imagePreview" class="preview-image" />
                             <button type="button" class="replace-btn" id="replaceBtn">Replace Image</button>
                         </div>
-                        
-                        <div id="fileStatus"></div>
                     </div>
 
                     <button type="submit" class="save-btn">Create Event</button>
@@ -1011,12 +1012,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Hide preview container
                 previewContainer.style.display = 'none';
                 
+                // Reset preview image
+                imagePreview.src = '';
+                
                 // Reset file input
                 fileInput.value = '';
                 validFile = null;
-                fileStatus.innerHTML = '';
                 
-                // Reset upload text
+                // Hide file status
+                fileStatus.innerHTML = '';
+                fileStatus.className = 'file-status-hide';
+                
+                // Reset upload text & styles
                 uploadText.textContent = 'Click to upload or drag and drop';
                 uploadText.style.color = '';
                 fileUploadArea.style.borderColor = 'var(--Gray)';

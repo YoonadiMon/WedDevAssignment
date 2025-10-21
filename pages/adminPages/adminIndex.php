@@ -1,12 +1,14 @@
 <?php
 session_start();
+include("../../php/dbConn.php");
+include("../../php/sessionCheck.php");
 
 $showWelcomePopup = false;
 $userName = '';
 if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
     $showWelcomePopup = true;
     $userName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : $_SESSION['username'];
-    unset($_SESSION['login_success']); // Clear the flag
+    unset($_SESSION['login_success']); 
 }
 ?>
 

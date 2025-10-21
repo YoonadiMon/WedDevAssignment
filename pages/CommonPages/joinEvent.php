@@ -1,5 +1,3 @@
-<!-- STILL IN PROGRESS -->
-
 <?php
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
@@ -64,9 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register']) && !$isAdm
 }
 
 // Format date/time
-$eventStartDate = date('M d, Y', strtotime($event['startDate']));
-$eventEndDate = date('M d, Y', strtotime($event['endDate']));
-$eventTime = date('g:i A', strtotime($event['time']));
+$startDate = date('M d, Y', strtotime($event['startDate']));
+$endDate = date('M d, Y', strtotime($event['endDate']));
+$time = date('g:i A', strtotime($event['time']));
 
 // Calculate event duration for display
 $durationText = $event['duration'] . ' hour' . ($event['duration'] > 1 ? 's' : '');
@@ -133,9 +131,13 @@ $userInfo = mysqli_fetch_assoc($userResult);
         .event-banner {
             width: 100%;
             height: 400px;
-            object-fit: contain;
+            object-fit: cover;
             background: var(--LowGreen);
             flex-shrink: 0;
+        }
+
+        .event-banner-placeholder {
+            object-fit: contain;
         }
 
         .event-header-content {
@@ -373,7 +375,6 @@ $userInfo = mysqli_fetch_assoc($userResult);
 
         .register-button:hover:not(:disabled) {
             transform: translateY(-2px);
-            background: var(--DarkerGreen);
         }
 
         .register-button:active:not(:disabled) {
@@ -388,7 +389,8 @@ $userInfo = mysqli_fetch_assoc($userResult);
         }
 
         .register-button.registered {
-            background: var(--DarkerGray);
+            background: var(--Gray);
+            box-shadow: none;
         }
 
         .admin-notice {
@@ -427,7 +429,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
         .alert-success {
             background: var(--bg-color);
             color: var(--MainGreen);
-            border: 1px solid var(--text-color);
+            border: 1px solid var(--MainGreen);
         }
 
         .alert-error {
@@ -456,6 +458,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
 
         .modal-content {
             background: var(--bg-color);
+            border: 2px solid var(--text-color);
             border-radius: 16px;
             padding: 2rem;
             max-width: 500px;
@@ -480,11 +483,6 @@ $userInfo = mysqli_fetch_assoc($userResult);
             margin-bottom: 1.5rem;
         }
 
-        .modal-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
         .modal-title {
             font-size: 1.5rem;
             font-weight: 700;
@@ -499,11 +497,19 @@ $userInfo = mysqli_fetch_assoc($userResult);
             text-align: center;
         }
 
+        .dark-mode .modal-message {
+            color: var(--Gray);
+        }
+
         .modal-details {
-            background: var(--sec-bg-color);
+            background: var(--LightGreen);
             padding: 1rem;
             border-radius: 10px;
             margin: 1.5rem 0;
+        }
+
+        .dark-mode .modal-details {
+            background: var(--LowGreen);
         }
 
         .modal-detail-item {
@@ -514,7 +520,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
         }
 
         .modal-detail-label {
-            color: var(--DarkerGray);
+            color: var(--text-color);
         }
 
         .modal-detail-value {
@@ -541,7 +547,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
 
         .modal-btn-cancel {
             background: var(--Gray);
-            color: var(--text-color);
+            color: var(--White);
         }
 
         .modal-btn-cancel:hover {
@@ -555,11 +561,11 @@ $userInfo = mysqli_fetch_assoc($userResult);
         }
 
         .modal-btn-confirm:hover {
-            background: var(--DarkerGreen);
+            transform: scale(1.05);
         }
 
         /* Success Modal */
-        .success-modal .modal-icon {
+        .success-modal {
             color: var(--MainGreen);
         }
 
@@ -612,7 +618,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
     <header>
         <!-- Logo + Name -->
         <section class="c-logo-section">
-            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.html'; ?>" class="c-logo-link">
+            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.php'; ?>" class="c-logo-link">
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
             </a>
@@ -660,7 +666,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
                         <!-- Member Menu Items -->
-                        <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
@@ -682,7 +688,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
                 <!-- Member Desktop Menu -->
-                <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
@@ -723,7 +729,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
 
                 <?php if ($registrationSuccess): ?>
                     <div class="alert alert-success">
-                        🎉 Registration successful! You are now registered for this event.
+                        Registration successful! You are now registered for this event.
                     </div>
                 <?php elseif ($registrationMessage && !$registrationSuccess): ?>
                     <div class="alert alert-error">
@@ -733,10 +739,17 @@ $userInfo = mysqli_fetch_assoc($userResult);
 
                 <!-- Event Header -->
                 <div class="event-header">
-                    <img src="<?php echo !empty($eventBanner) ? htmlspecialchars($eventBanner) : '../../assets/images/Logo.png'; ?>" 
-                         alt="Event Banner" 
-                         class="event-banner" 
-                         onerror="this.src='../../assets/images/Logo.png'">
+                    <?php
+                    if (!empty($event['bannerFilePath'])): ?>
+                        <img src="<?php echo htmlspecialchars($event['bannerFilePath']); ?>" 
+                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
+                            class="event-banner" 
+                            onerror="this.src='../../assets/images/Logo.png'; this.classList.add('event-banner-placeholder')">
+                    <?php else: ?>
+                        <img src="../../assets/images/Logo.png" 
+                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
+                            class="event-banner event-banner-placeholder">
+                    <?php endif; ?>
                     <div class="event-header-content">
                         <h1 class="event-title"><?php echo htmlspecialchars($event['title']); ?></h1>
                         
@@ -745,17 +758,17 @@ $userInfo = mysqli_fetch_assoc($userResult);
                                 <span class="event-meta-icon">📅</span>
                                 <span>
                                     <?php 
-                                    if ($eventStartDate != $eventEndDate){
-                                        echo $eventStartDate . " - " . $eventEndDate;
+                                    if ($startDate != $endDate){
+                                        echo $startDate . " - " . $endDate;
                                     } else {
-                                        echo $eventStartDate;
+                                        echo $startDate;
                                     }
                                     ?>
                                 </span>
                             </div>
                             <div class="event-meta-item">
                                 <span class="event-meta-icon">🕐</span>
-                                <span><?php echo $eventTime; ?></span>
+                                <span><?php echo $time; ?></span>
                             </div>
                             <div class="event-meta-item">
                                 <span class="event-meta-icon">📍</span>
@@ -833,7 +846,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
                                 </button>
                             <?php elseif ($isRegistered): ?>
                                 <button class="register-button registered" disabled>
-                                    ✓ Already Registered
+                                    Already Registered
                                 </button>
                             <?php else: ?>
                                 <button class="register-button" onclick="showConfirmation()">
@@ -851,7 +864,6 @@ $userInfo = mysqli_fetch_assoc($userResult);
         <div class="modal-overlay" id="confirmModal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <div class="modal-icon">✓</div>
                     <h2 class="modal-title">Confirm Registration</h2>
                     <p class="modal-message">
                         You are about to register for this event. Please review your details below:
@@ -873,11 +885,11 @@ $userInfo = mysqli_fetch_assoc($userResult);
                     </div>
                     <div class="modal-detail-item">
                         <span class="modal-detail-label">Date:</span>
-                        <span class="modal-detail-value"><?php echo $eventStartDate; ?></span>
+                        <span class="modal-detail-value"><?php echo $startDate; ?></span>
                     </div>
                     <div class="modal-detail-item">
                         <span class="modal-detail-label">Time:</span>
-                        <span class="modal-detail-value"><?php echo $eventTime; ?></span>
+                        <span class="modal-detail-value"><?php echo $time; ?></span>
                     </div>
                 </div>
 
@@ -895,7 +907,6 @@ $userInfo = mysqli_fetch_assoc($userResult);
         <div class="modal-overlay" id="successModal">
             <div class="modal-content success-modal">
                 <div class="modal-header">
-                    <div class="modal-icon">🎉</div>
                     <h2 class="modal-title">Registration Successful!</h2>
                     <p class="modal-message">
                         You have successfully registered for <strong id="successEventName"><?php echo htmlspecialchars($event['title']); ?></strong>. 

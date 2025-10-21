@@ -354,7 +354,7 @@ $stmt->close();
                             </a>
                         </section>
 
-                        <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.html">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php" class="active">Trade</a>
@@ -366,7 +366,7 @@ $stmt->close();
 
             <!-- Menu Links Desktop + Tablet -->
             <nav class="c-navbar-desktop">
-                <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.html">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php" class="active">Trade</a>

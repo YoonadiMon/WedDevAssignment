@@ -317,9 +317,13 @@ $eventCount = count($events);
         .event-card-banner {
             width: 100%;
             height: 180px;
-            object-fit: contain;
+            object-fit: cover;
             background: var(--LowGreen);
             flex-shrink: 0;
+        }
+
+        .event-card-placeholder {
+            object-fit: contain;
         }
 
         .event-card-content {
@@ -466,7 +470,7 @@ $eventCount = count($events);
     <header>
         <!-- Logo + Name -->
         <section class="c-logo-section">
-            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.html'; ?>" class="c-logo-link">
+            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.php'; ?>" class="c-logo-link">
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
             </a>
@@ -514,7 +518,7 @@ $eventCount = count($events);
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
                         <!-- Member Menu Items -->
-                        <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
@@ -536,7 +540,7 @@ $eventCount = count($events);
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
                 <!-- Member Desktop Menu -->
-                <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
@@ -575,6 +579,7 @@ $eventCount = count($events);
             <section class="btn-wrapper">
                 <button class="c-btn c-btn-primary top-btn filter-toggle" onclick="toggleFilters()">Show Filters</button>
                 <a href="../../pages/CommonPages/createEvent.php" class="c-btn c-btn-primary top-btn">Host an Event</a>
+                <a href="../../pages/CommonPages/myEvents.php" class="c-btn c-btn-primary top-btn">My Events</a>
             </section>
 
             <div class="event-browse-container">
@@ -699,20 +704,41 @@ $eventCount = count($events);
                         <?php else: ?>
                             <?php foreach ($events as $event): ?>
                                 <a href="joinEvent.php?id=<?php echo $event['eventID']; ?>" class="event-card">
-                                    <img src="<?php echo !empty($event['bannerFilePath']) ? htmlspecialchars($event['bannerFilePath']) : '../../assets/images/Logo.png'; ?>" 
-                                         alt="<?php echo htmlspecialchars($event['title']); ?>" 
-                                         class="event-card-banner" 
-                                         onerror="this.src='../../assets/images/Logo.png'">
+                                    <?php if (!empty($event['bannerFilePath'])): ?>
+                                        <img src="<?php echo htmlspecialchars($event['bannerFilePath']); ?>" 
+                                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
+                                            class="event-card-banner" 
+                                            onerror="this.src='../../assets/images/Logo.png'; this.classList.add('event-card-placeholder')">
+                                    <?php else: ?>
+                                        <img src="../../assets/images/Logo.png" 
+                                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
+                                            class="event-card-banner event-card-placeholder">
+                                    <?php endif; ?>
+                                    <?php
+                                        $maxDescriptionLength = 250; // characters
+                                        $maxLocationLength = 70; // characters
+
+                                        $description = $event['description'];
+                                        if (strlen($description) > $maxDescriptionLength) {
+                                            $description = substr($description, 0, $maxDescriptionLength) . '...';
+                                        }
+
+                                        $location = $event['location'] . ", " . $event['country'];
+                                        if (strlen($location) > $maxLocationLength) {
+                                            $location = substr($location, 0, $maxLocationLength) . '...';
+                                        }
+                                    ?>
+
                                     <div class="event-card-content">
                                         <div class="event-card-date">
                                             <?php echo date('M d, Y', strtotime($event['startDate'])); ?>
                                         </div>
                                         <h3 class="event-card-title"><?php echo htmlspecialchars($event['title']); ?></h3>
                                         <div class="event-card-location">
-                                            📍 <?php echo htmlspecialchars($event['location']) . ", " . htmlspecialchars($event['country']); ?>
+                                            📍 <?php echo htmlspecialchars($location); ?>
                                         </div>
                                         <p class="event-card-description">
-                                            <?php echo htmlspecialchars($event['description']); ?>
+                                            <?php echo htmlspecialchars($description); ?>
                                         </p>
                                         <div class="event-card-footer">
                                             <div class="event-card-attendees">

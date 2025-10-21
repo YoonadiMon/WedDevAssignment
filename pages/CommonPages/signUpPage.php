@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
                 if ($user['userType'] == 'admin') {
                     header("Location: ../../pages/adminPages/adminIndex.php");
                 } else {
-                    header("Location: ../../pages/memberPages/memberIndex.html");
+                    header("Location: ../../pages/memberPages/memberIndex.php");
                 }
                 exit();
             } else {
