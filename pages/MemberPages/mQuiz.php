@@ -356,7 +356,7 @@ $stmt->close();
 
                         <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php" class="active">Trade</a>
                         <a href="../../pages/CommonPages/aboutUs.html">About</a>
                     </div>
@@ -368,7 +368,7 @@ $stmt->close();
             <nav class="c-navbar-desktop">
                 <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php" class="active">Trade</a>
                 <a href="../../pages/CommonPages/aboutUs.html">About</a>
             </nav>

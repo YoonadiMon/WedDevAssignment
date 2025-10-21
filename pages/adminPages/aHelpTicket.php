@@ -577,7 +577,7 @@ foreach ($tickets as $ticket) {
 
                     <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                     <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                    <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                    <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                     <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
                     <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
@@ -590,7 +590,7 @@ foreach ($tickets as $ticket) {
         <nav class="c-navbar-desktop">
             <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
             <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-            <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+            <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
             <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
@@ -805,7 +805,7 @@ foreach ($tickets as $ticket) {
             </div>
             <div>
                 <b>Content Management</b><br>
-                <a href="../../pages/commonPages/mainEvent.html">Events</a><br>
+                <a href="../../pages/commonPages/mainEvent.php">Events</a><br>
                 <a href="../../pages/commonPages/mainBlog.html">Blogs</a><br>
                 <a href="../../pages/commonPages/mainTrade.php">Trades</a>
             </div>

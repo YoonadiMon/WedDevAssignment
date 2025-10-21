@@ -426,7 +426,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
 
                     <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                     <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                    <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                    <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                     <a href="../../pages/CommonPages/aboutUs.html">About</a>
                 </div>
@@ -438,7 +438,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
         <nav class="c-navbar-desktop">
             <a href="../../pages/MemberPages/memberIndex.php">Home</a>
             <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-            <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+            <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             <a href="../../pages/CommonPages/aboutUs.html">About</a>
         </nav>
@@ -628,7 +628,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
             </div>
             <div>
                 <b>Community</b><br>
-                <a href="../../pages/CommonPages/mainEvent.html">Events</a><br>
+                <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
                 <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             </div>
