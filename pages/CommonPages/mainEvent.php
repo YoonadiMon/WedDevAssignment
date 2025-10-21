@@ -1,9 +1,8 @@
 <?php
 session_start();
-include('../../php/dbConn.php');
+include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
-// Auto-close past events
 $autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
 $connection->query($autoCloseQuery);
 
@@ -102,9 +101,11 @@ $eventCount = count($events);
         .btn-wrapper {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             background: transparent;
             padding: 1rem;  
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .top-btn {
@@ -112,6 +113,16 @@ $eventCount = count($events);
             padding: 0.75rem 1.5rem;
             font-weight: 600;
             font-size: 0.95rem;
+        }
+        
+        .btn-left-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-toggle {
+            display: none;
         }
 
         /* Filter Sidebar */
@@ -403,13 +414,13 @@ $eventCount = count($events);
             color: var(--DarkerGray);
         }
 
-        .filter-toggle {
-            display: none;
-        }
-
         @media (max-width: 1024px) {
             .event-browse-container {
                 flex-direction: column;
+            }
+
+            .btn-wrapper {
+                justify-content: space-between;
             }
 
             .filter-sidebar {
@@ -417,7 +428,7 @@ $eventCount = count($events);
                 width: 100%;
                 position: static;
             }
-
+            
             .filter-sidebar.active {
                 display: block;
             }
@@ -456,12 +467,35 @@ $eventCount = count($events);
         }
 
         @media (max-width: 480px) {
+            .btn-left-group {
+                display: flex;
+                justify-content: space-between;
+                gap: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .top-btn {
+                font-size: 0.85rem;
+                padding: 0.6rem 1.2rem;
+            }
+
+            .filter-toggle {
+                width: 100%;
+            }
+
             .sort-control {
                 display: block;
             }
 
             .sort-control select{
                 margin: 1rem 0 1rem 0;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .top-btn {
+                font-size: 0.75rem;
+                padding: 0.5rem 1rem;
             }
         }
     </style>
@@ -581,9 +615,11 @@ $eventCount = count($events);
     <main>
         <section class="content" id="content">
             <section class="btn-wrapper">
+                <div class="btn-left-group">
+                    <a href="../../pages/CommonPages/createEvent.php" class="c-btn c-btn-primary top-btn">Host an Event</a>
+                    <a href="../../pages/CommonPages/myEvents.php" class="c-btn c-btn-primary top-btn">My Events</a>
+                </div>
                 <button class="c-btn c-btn-primary top-btn filter-toggle" onclick="toggleFilters()">Show Filters</button>
-                <a href="../../pages/CommonPages/createEvent.php" class="c-btn c-btn-primary top-btn">Host an Event</a>
-                <a href="../../pages/CommonPages/myEvents.php" class="c-btn c-btn-primary top-btn">My Events</a>
             </section>
 
             <div class="event-browse-container">
@@ -663,9 +699,9 @@ $eventCount = count($events);
                                 <label for="open">Open</label>
                             </div>
                             <div class="filter-option">
-                                <input type="checkbox" id="past" name="status[]" value="past" 
-                                    <?php echo in_array('past', $filterStatus) ? 'checked' : ''; ?>>
-                                <label for="past">Past</label>
+                                <input type="checkbox" id="closed" name="status[]" value="closed" 
+                                    <?php echo in_array('closed', $filterStatus) ? 'checked' : ''; ?>>
+                                <label for="Closed">Closed</label>
                             </div>
                         </div>
                         <input type="hidden" name="search" value="<?php echo htmlspecialchars($searchQuery); ?>">
@@ -838,10 +874,23 @@ $eventCount = count($events);
             const button = document.querySelector('.filter-toggle');
             if (sidebar.classList.contains('active')) {
                 button.textContent = 'Hide Filters';
+                localStorage.setItem('filterSidebarOpen', 'true');
             } else {
                 button.textContent = 'Show Filters';
+                localStorage.setItem('filterSidebarOpen', 'false');
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterState = localStorage.getItem('filterSidebarOpen');
+            const sidebar = document.getElementById('filterSidebar');
+            const button = document.querySelector('.filter-toggle');
+            
+            if (filterState === 'true' && window.innerWidth <= 1024) {
+                sidebar.classList.add('active');
+                button.textContent = 'Hide Filters';
+            }
+        });
 
         // Clear all filters
         function clearFilters() {

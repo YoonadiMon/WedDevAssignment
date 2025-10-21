@@ -33,6 +33,8 @@ if (!$isAdmin) {
     $checkResult = mysqli_query($connection, $checkQuery);
     $isRegistered = mysqli_num_rows($checkResult) > 0;
 }
+$isClosed = ($event['status'] == 'closed');
+$isHost = ($event['userID'] == $userID);
 
 // Count total attendees
 $countQuery = "SELECT COUNT(*) as total FROM tblregistration 
@@ -40,11 +42,17 @@ $countQuery = "SELECT COUNT(*) as total FROM tblregistration
 $countResult = mysqli_query($connection, $countQuery);
 $attendeeCount = mysqli_fetch_assoc($countResult)['total'];
 
+$isFull = ($event['maxPax'] <= $attendeeCount);
+if ($isFull) {
+    $updateQuery = "UPDATE tblevents SET status = 'closed' WHERE eventID = $eventID AND userID = $userID";
+    $updateResult = mysqli_query($connection, $updateQuery);
+}
+
 // Handle registration
 $registrationMessage = '';
 $registrationSuccess = false;
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register']) && !$isAdmin) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register']) && !$isAdmin && !$isHost && !$isClosed) {
     if (!$isRegistered) {
         $insertQuery = "INSERT INTO tblregistration (eventID, userID, datetimeRegistered, status) 
                         VALUES ($eventID, $userID, NOW(), 'active')";
@@ -393,7 +401,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
             box-shadow: none;
         }
 
-        .admin-notice {
+        .warning-notice {
             background: var(--Yellow);
             color: var(--White);
             padding: 1rem;
@@ -407,13 +415,13 @@ $userInfo = mysqli_fetch_assoc($userResult);
             gap: 0.5rem;
         }
 
-        .admin-notice img {
+        .warning-notice img {
             width: 20px;  
             height: 20px;
             flex-shrink: 0; 
         }
 
-        .dark-mode .admin-notice {
+        .dark-mode .warning-notice {
             background: var(--LowYellow);
         }
 
@@ -838,20 +846,23 @@ $userInfo = mysqli_fetch_assoc($userResult);
                             </ul>
 
                             <?php if ($isAdmin): ?>
-                                <div class="admin-notice">
+                                <div class="warning-notice">
                                     <img src="../../assets/images/warning-icon.svg" alt=""> Admins cannot register for events
                                 </div>
-                                <button class="register-button" disabled>
-                                    Admin Account
-                                </button>
+                                <button class="register-button" disabled>Admin Account</button>
+                            <?php elseif ($isHost): ?>
+                                <div class="warning-notice">
+                                    <img src="../../assets/images/warning-icon.svg" alt=""> Host cannot register for own events
+                                </div>
+                                <button class="register-button" disabled>Host Account</button>
+                            <?php elseif ($isClosed): ?>
+                                <button class="register-button" disabled>Registration Ended</button>
+                            <?php elseif ($isFull): ?>
+                                <button class="register-button" disabled>Registration Full</button>
                             <?php elseif ($isRegistered): ?>
-                                <button class="register-button registered" disabled>
-                                    Already Registered
-                                </button>
+                                <button class="register-button registered" disabled>Already Registered</button>
                             <?php else: ?>
-                                <button class="register-button" onclick="showConfirmation()">
-                                    Register for Event
-                                </button>
+                                <button class="register-button" onclick="showConfirmation()">Register for Event</button>
                             <?php endif; ?>
                         </div>
                     </aside>

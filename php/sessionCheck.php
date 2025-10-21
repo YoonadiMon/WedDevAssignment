@@ -47,6 +47,10 @@ if (!isset($_SESSION['userID'])) {
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
                 animation: slideUp 0.4s ease;
             }
+
+            .dark-mode .notification-card {
+                border: 1px solid var(--White);
+            }
             
             @keyframes slideUp {
                 from {
@@ -89,6 +93,10 @@ if (!isset($_SESSION['userID'])) {
                 font-size: 0.9rem;
                 color: var(--DarkerGray);
                 margin-top: 1rem;
+            }
+
+            .dark-mode .notification-countdown {
+                color: var(--Gray);
             }
             
             .progress-bar {
@@ -146,7 +154,7 @@ if (!isset($_SESSION['userID'])) {
                 </div>
             </div>
         </div>
-        
+        <script src="../../javascript/mainScript.js"></script>>
         <script>
             let timeLeft = 3;
             const countdownEl = document.getElementById("countdown");

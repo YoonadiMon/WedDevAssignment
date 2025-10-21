@@ -1,7 +1,12 @@
+<!-- STILL IN PROGRESS -->
+
 <?php
 session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
+
+$autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
+$connection->query($autoCloseQuery);
 
 // Full list of countries
 $countries = [
@@ -293,7 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt && $stmt->execute()) {
             $eventID = $stmt->insert_id;
             $_SESSION['success_message'] = "Event created successfully!";
-            header("Location: mainEvent.php");
+            header("Location: createEvent.php");
             exit();
         } else {
             $error_message = "Error creating event: " . ($stmt ? $stmt->error : $connection->error);
