@@ -4,7 +4,7 @@ include("../../php/dbConn.php");
 // Initialize variables
 $success_message = "";
 $error_message = "";
-$currentUserID = 6; // Assuming current user ID is 6
+$currentUserID = 4; // Assuming current user ID is 6
 
 // Process form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -35,7 +35,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $currentUserID, $username, $email, $isUnread, $current_time, $current_time);
         
         if (mysqli_stmt_execute($stmt)) {
+            $ticketId = mysqli_insert_id($connection); // Get the newly created ticket ID
             $success_message = "Ticket submitted successfully! We'll get back to you soon.";
+            
+            // Handle file uploads if any files were uploaded
+            if (!empty($_FILES['attachments']['name'][0])) {
+                $uploadSuccess = handleFileUploads($connection, $ticketId, $currentUserID);
+                
+                if (!$uploadSuccess) {
+                    $success_message .= " Note: Some attachments failed to upload.";
+                }
+            }
             
             // Clear form fields
             $_POST = array();
@@ -47,6 +57,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $error_message = "Database error: " . mysqli_error($connection);
     }
+}
+
+// Function to handle file uploads to database
+function handleFileUploads($connection, $ticketId, $uploadedBy) {
+    $attachments = $_FILES['attachments'];
+    $successCount = 0;
+    
+    // Loop through each uploaded file
+    for ($i = 0; $i < count($attachments['name']); $i++) {
+        if ($attachments['error'][$i] === UPLOAD_ERR_OK) {
+            $fileName = mysqli_real_escape_string($connection, $attachments['name'][$i]);
+            $fileSize = $attachments['size'][$i];
+            $fileType = mysqli_real_escape_string($connection, $attachments['type'][$i]);
+            
+            // Read file content
+            $fileContent = file_get_contents($attachments['tmp_name'][$i]);
+            
+            // Check file size (10MB limit)
+            if ($fileSize > 10 * 1024 * 1024) {
+                continue; // Skip files that are too large
+            }
+            
+            // Check file type
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 
+                           'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!in_array($fileType, $allowedTypes)) {
+                continue; // Skip unsupported file types
+            }
+            
+            // Insert file into database
+            $query = "INSERT INTO tblticket_attachments (ticketId, fileName, fileData, fileSize, fileType, uploadedBy) 
+                      VALUES (?, ?, ?, ?, ?, ?)";
+            
+            $stmt = mysqli_prepare($connection, $query);
+            
+            if ($stmt) {
+                $null = null; // Needed for binding BLOB parameter
+                mysqli_stmt_bind_param($stmt, "isbisi", $ticketId, $fileName, $null, $fileSize, $fileType, $uploadedBy);
+                mysqli_stmt_send_long_data($stmt, 2, $fileContent); // Bind BLOB data
+                
+                if (mysqli_stmt_execute($stmt)) {
+                    $successCount++;
+                }
+                
+                mysqli_stmt_close($stmt);
+            }
+        }
+    }
+    
+    return $successCount > 0;
 }
 ?>
 <!DOCTYPE html>
@@ -427,7 +487,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="ticket-form-section">
                 <h2>Create Support Ticket</h2>
                 
-                <form id="supportTicketForm" method="POST" action="">
+                <!-- Add enctype="multipart/form-data" to form for file uploads -->
+                <form id="supportTicketForm" method="POST" action="" enctype="multipart/form-data">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="ticketSubject">Subject *</label>
@@ -486,7 +547,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div class="upload-icon">📎</div>
                             <div class="file-upload-text">Click to upload files or drag and drop</div>
                             <div class="file-upload-hint">Maximum file size: 10MB. Supported formats: PDF, JPG, PNG, DOC</div>
-                            <input type="file" id="fileInput" multiple>
+                            <!-- Change to multiple file input with name as array -->
+                            <input type="file" id="fileInput" name="attachments[]" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
                         </div>
                         <div class="attachments-preview" id="attachmentsPreview">
                             <!-- Attachments will be listed here -->

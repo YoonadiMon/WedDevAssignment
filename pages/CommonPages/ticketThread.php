@@ -1,6 +1,7 @@
 <?php
 session_start();
 include("../../php/dbConn.php");
+// include("../../php/sessionCheck.php");
 
 $user_type = '';
 $user_id = '';
@@ -68,6 +69,16 @@ if (!$ticket_result || mysqli_num_rows($ticket_result) == 0) {
 }
 
 $ticket = mysqli_fetch_assoc($ticket_result);
+
+// Fetch attachments for this ticket
+$attachments_query = "SELECT * FROM tblticket_attachments WHERE ticketId = '$ticket_id' ORDER BY uploadedAt ASC";
+$attachments_result = mysqli_query($connection, $attachments_query);
+$attachments = [];
+if ($attachments_result) {
+    while ($row = mysqli_fetch_assoc($attachments_result)) {
+        $attachments[] = $row;
+    }
+}
 
 // Permission checks based on user type
 if ($user_type === 'admin') {
@@ -146,6 +157,57 @@ if (isset($_POST['send_response']) && isset($_POST['message'])) {
     }
 }
 
+// Handle file upload for attachments
+if (isset($_POST['add_attachment']) && isset($_FILES['attachment_file']) && $_FILES['attachment_file']['error'] === UPLOAD_ERR_OK) {
+    $file = $_FILES['attachment_file'];
+    $fileName = mysqli_real_escape_string($connection, $file['name']);
+    $fileSize = $file['size'];
+    $fileType = mysqli_real_escape_string($connection, $file['type']);
+    
+    // Check file size (10MB limit)
+    if ($fileSize > 10 * 1024 * 1024) {
+        $error_message = "File size too large. Maximum size is 10MB.";
+    } else {
+        // Check file type
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 
+                       'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (!in_array($fileType, $allowedTypes)) {
+            $error_message = "File type not supported. Please upload PDF, JPG, PNG, or DOC files.";
+        } else {
+            // Read file content
+            $fileContent = file_get_contents($file['tmp_name']);
+            
+            // Insert file into database
+            $insert_query = "INSERT INTO tblticket_attachments (ticketId, fileName, fileData, fileSize, fileType, uploadedBy) 
+                          VALUES (?, ?, ?, ?, ?, ?)";
+            
+            $stmt = mysqli_prepare($connection, $insert_query);
+            
+            if ($stmt) {
+                $null = null; // Needed for binding BLOB parameter
+                mysqli_stmt_bind_param($stmt, "isbisi", $ticket_id, $fileName, $null, $fileSize, $fileType, $user_id);
+                mysqli_stmt_send_long_data($stmt, 2, $fileContent); // Bind BLOB data
+                
+                if (mysqli_stmt_execute($stmt)) {
+                    $success_message = "Attachment added successfully!";
+                    // Refresh attachments
+                    $attachments_result = mysqli_query($connection, $attachments_query);
+                    $attachments = [];
+                    if ($attachments_result) {
+                        while ($row = mysqli_fetch_assoc($attachments_result)) {
+                            $attachments[] = $row;
+                        }
+                    }
+                } else {
+                    $error_message = "Error adding attachment: " . mysqli_error($connection);
+                }
+                
+                mysqli_stmt_close($stmt);
+            }
+        }
+    }
+}
+
 // Handle mark as solved (admin only)
 if (isset($_POST['mark_solved']) && $user_type === 'admin') {
     $update_query = "UPDATE tbltickets SET status = 'solved', updatedAt = NOW() WHERE ticketID = '$ticket_id'";
@@ -212,15 +274,164 @@ if (isset($_POST['reopen_ticket'])) {
         }
 
         .badge-category { background: var(--sec-bg-color); color: var(--text-color); }
-        .badge-priority { color: white; }
-        .priority-urgent { background: #ef4444; }
-        .priority-high { background: #f97316; }
-        .priority-medium { background: #f59e0b; }
-        .priority-low { background: #10b981; }
-        .badge-status { color: white; }
-        .status-open { background: #10b981; }
-        .status-in_progress { background: #f59e0b; }
-        .status-solved { background: #6b7280; }
+        .badge-priority { color: var(--White); }
+        .priority-urgent { background: var(--Red); }
+        .priority-high { background: var(--Orange); }
+        .priority-medium { background: var(--Yellow); }
+        .priority-low { background: var(--LowGreen); }
+        .badge-status { color: var(--White); }
+        .status-open { background: var(--MainGreen); }
+        .status-in_progress { background: var(--LowYellow); }
+        .status-solved { background: var(--DarkGray); }
+
+        .attachments-section {
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            margin-bottom: 20px;
+        }
+
+        .attachments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .attachments-slider {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            background: var(--shadow-color);
+        }
+
+        .attachments-track {
+            display: flex;
+            transition: transform 0.3s ease;
+        }
+
+        .attachment-slide {
+            flex: 0 0 100%;
+            padding: 20px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .attachment-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin-bottom: 15px;
+        }
+
+        .attachment-info {
+            text-align: center;
+        }
+
+        .dwn-btn {
+            margin-top: 10px; 
+            padding: 5px 10px; 
+            font-size: 12px;
+            color: var(--text-color);
+        }
+
+        .attachment-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-heading);
+        }
+
+        .attachment-meta {
+            font-size: 12px;
+            color: var(--Gray);
+        }
+
+        .slider-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .slider-arrow {
+            background: var(--MainGreen);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+
+        .slider-arrow:hover {
+            background: var(--btn-color-hover);
+        }
+
+        .slider-arrow:disabled {
+            background: var(--Gray);
+            cursor: not-allowed;
+        }
+
+        .slider-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .slider-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .slider-dot.active {
+            background: var(--MainGreen);
+        }
+
+        .add-attachment-form {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .attachment-form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .file-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--sec-bg-color);
+            color: var(--text-color);
+        }
+
+        .no-attachments {
+            text-align: center;
+            padding: 40px;
+            color: var(--Gray);
+        }
 
         .conversation-container {
             background: var(--bg-color);
@@ -281,7 +492,7 @@ if (isset($_POST['reopen_ticket'])) {
             padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            background: var(--sec-bg-color);
+            background: var(--shadow-color);
             color: var(--text-color);
             font-family: inherit;
             resize: vertical;
@@ -323,6 +534,14 @@ if (isset($_POST['reopen_ticket'])) {
             
             .form-actions {
                 flex-direction: column;
+            }
+            
+            .attachment-form-row {
+                flex-direction: column;
+            }
+            
+            .slider-nav {
+                gap: 10px;
             }
         }
     </style>
@@ -461,6 +680,92 @@ if (isset($_POST['reopen_ticket'])) {
                 </div>
             </div>
 
+            <!-- Attachments Section -->
+            <div class="attachments-section">
+                <div class="attachments-header">
+                    <h3>Attachments (<?php echo count($attachments); ?>)</h3>
+                    <?php if ($ticket['status'] !== 'solved'): ?>
+                        <button type="button" class="c-btn c-btn-primary" onclick="document.getElementById('attachmentForm').style.display = document.getElementById('attachmentForm').style.display === 'none' ? 'block' : 'none'">
+                            <b>+</b> Add Attachment
+                        </button>
+                    <?php endif; ?>
+                </div>
+
+                <?php if (empty($attachments)): ?>
+                    <div class="no-attachments">
+                        <p>No attachments yet</p>
+                    </div>
+                <?php else: ?>
+                    <div class="attachments-slider">
+                        <div class="attachments-track" id="attachmentsTrack">
+                            <?php foreach ($attachments as $index => $attachment): ?>
+                                <div class="attachment-slide" data-index="<?php echo $index; ?>">
+                                    <?php if (strpos($attachment['fileType'], 'image/') === 0): ?>
+                                        <img src="data:<?php echo $attachment['fileType']; ?>;base64,<?php echo base64_encode($attachment['fileData']); ?>" 
+                                             alt="<?php echo htmlspecialchars($attachment['fileName']); ?>" 
+                                             class="attachment-preview">
+                                    <?php else: ?>
+                                        <div style="font-size: 48px; margin-bottom: 15px;">
+                                            <?php
+                                            $fileIcon = '📄'; // Default file icon
+                                            if (strpos($attachment['fileType'], 'pdf') !== false) $fileIcon = '📕';
+                                            elseif (strpos($attachment['fileType'], 'word') !== false) $fileIcon = '📘';
+                                            elseif (strpos($attachment['fileType'], 'image') !== false) $fileIcon = '🖼️';
+                                            echo $fileIcon;
+                                            ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="attachment-info">
+                                        <div class="attachment-name"><?php echo htmlspecialchars($attachment['fileName']); ?></div>
+                                        <div class="attachment-meta">
+                                            <?php echo formatFileSize($attachment['fileSize']); ?> • 
+                                            <?php echo strtoupper(pathinfo($attachment['fileName'], PATHINFO_EXTENSION)); ?> • 
+                                            Uploaded <?php echo date('M j, Y', strtotime($attachment['uploadedAt'])); ?>
+                                        </div>
+                                        <a href="data:<?php echo $attachment['fileType']; ?>;base64,<?php echo base64_encode($attachment['fileData']); ?>" 
+                                           download="<?php echo htmlspecialchars($attachment['fileName']); ?>" 
+                                           class="c-btn c-btn-secondary dwn-btn">
+                                            DOWNLOAD
+                                        </a>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <div class="slider-nav">
+                            <button class="slider-arrow" id="prevArrow" disabled>‹</button>
+                            
+                            <div class="slider-dots" id="sliderDots">
+                                <?php foreach ($attachments as $index => $attachment): ?>
+                                    <div class="slider-dot <?php echo $index === 0 ? 'active' : ''; ?>" data-index="<?php echo $index; ?>"></div>
+                                <?php endforeach; ?>
+                            </div>
+                            
+                            <button class="slider-arrow" id="nextArrow" <?php echo count($attachments) <= 1 ? 'disabled' : ''; ?>>›</button>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Add Attachment Form -->
+                <?php if ($ticket['status'] !== 'solved'): ?>
+                    <div class="add-attachment-form" id="attachmentForm" style="display: none;">
+                        <form method="POST" enctype="multipart/form-data">
+                            <div class="attachment-form-row">
+                                <div class="file-input-wrapper">
+                                    <input type="file" name="attachment_file" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" required>
+                                </div>
+                                <button type="submit" name="add_attachment" class="c-btn c-btn-primary">
+                                    Upload
+                                </button>
+                            </div>
+                            <div style="font-size: 12px; color: var(--Gray); margin-top: 5px;">
+                                Maximum file size: 10MB. Supported formats: JPG, PNG, PDF, DOC
+                            </div>
+                        </form>
+                    </div>
+                <?php endif; ?>
+            </div>
+
             <!-- Conversation Thread -->
             <div class="conversation-container">
                 <?php if (empty($responses)): ?>
@@ -573,11 +878,67 @@ if (isset($_POST['reopen_ticket'])) {
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 </div>
             </section>
-        <?php else: ?>
-            <!-- Add admin footer here if needed -->
         <?php endif; ?>
     </footer>
 
+    <script>
+        // Attachments Slider Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const track = document.getElementById('attachmentsTrack');
+            const slides = document.querySelectorAll('.attachment-slide');
+            const dots = document.querySelectorAll('.slider-dot');
+            const prevArrow = document.getElementById('prevArrow');
+            const nextArrow = document.getElementById('nextArrow');
+            
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            function updateSlider() {
+                if (track) {
+                    track.style.transform = `translateX(-${currentSlide * 100}%)`;
+                }
+                
+                // Update dots
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentSlide);
+                });
+                
+                // Update arrows
+                prevArrow.disabled = currentSlide === 0;
+                nextArrow.disabled = currentSlide === totalSlides - 1;
+            }
+
+            // Arrow click handlers
+            if (prevArrow) {
+                prevArrow.addEventListener('click', () => {
+                    if (currentSlide > 0) {
+                        currentSlide--;
+                        updateSlider();
+                    }
+                });
+            }
+
+            if (nextArrow) {
+                nextArrow.addEventListener('click', () => {
+                    if (currentSlide < totalSlides - 1) {
+                        currentSlide++;
+                        updateSlider();
+                    }
+                });
+            }
+
+            // Dot click handlers
+            dots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    currentSlide = parseInt(dot.getAttribute('data-index'));
+                    updateSlider();
+                });
+            });
+
+            // Initialize slider
+            updateSlider();
+        });
+    </script>
     <script src="../../javascript/mainScript.js"></script>
 </body>
 </html>
@@ -605,6 +966,14 @@ function formatPriority($priority) {
         'urgent' => 'Urgent'
     ];
     return $priorities[$priority] ?? $priority;
+}
+
+function formatFileSize($bytes) {
+    if ($bytes == 0) return '0 Bytes';
+    $k = 1024;
+    $sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    $i = floor(log($bytes) / log($k));
+    return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
 }
 
 mysqli_close($connection);
