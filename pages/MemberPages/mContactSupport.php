@@ -366,7 +366,7 @@ $ticketCount = mysqli_num_rows($result);
         <header>
             <!-- Logo + Name -->
             <section class="c-logo-section">
-                <a href="../../pages/MemberPages/memberIndex.html" class="c-logo-link">
+                <a href="../../pages/MemberPages/memberIndex.php" class="c-logo-link">
                     <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                     <div class="c-text">ReLeaf</div>
                 </a>
@@ -401,7 +401,7 @@ $ticketCount = mysqli_num_rows($result);
                             </a>
                         </section>
 
-                        <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
@@ -413,7 +413,7 @@ $ticketCount = mysqli_num_rows($result);
 
             <!-- Menu Links Desktop + Tablet -->
             <nav class="c-navbar-desktop">
-                <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>

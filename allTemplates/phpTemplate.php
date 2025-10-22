@@ -23,7 +23,7 @@ include("../../php/sessionCheck.php");
     <header>
         <!-- Logo + Name -->
         <section class="c-logo-section">
-            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.html'; ?>" class="c-logo-link">
+            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.php'; ?>" class="c-logo-link">
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
             </a>
@@ -71,7 +71,7 @@ include("../../php/sessionCheck.php");
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
                         <!-- Member Menu Items -->
-                        <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
@@ -93,7 +93,7 @@ include("../../php/sessionCheck.php");
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
                 <!-- Member Desktop Menu -->
-                <a href="../../pages/MemberPages/memberIndex.html">Home</a>
+                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
