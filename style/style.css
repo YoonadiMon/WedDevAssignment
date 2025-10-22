@@ -290,6 +290,10 @@ c.btn-small:hover {
 }  
 
 /* Body */
+.c-fontsize-double {
+    font-size: 2rem;
+}
+
 .c-text {
     color: var(--text-color);
 }
