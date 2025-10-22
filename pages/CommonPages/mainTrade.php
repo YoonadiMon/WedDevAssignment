@@ -1,34 +1,11 @@
 <?php
 session_start();
 include("../../php/dbConn.php");
+include("../../php/sessionCheck.php");
 
-$user_type = '';
-$user_id = '';
-
-// // Force reset for debugging
-unset($_SESSION['admin_id']);
-unset($_SESSION['user_id']);
-unset($_SESSION['user_type']);
-
-if (!isset($_SESSION['user_id']) && !isset($_SESSION['admin_id'])) {
-    // $user_type = 'admin';
-    // $user_id = 1;
-    // $_SESSION['admin_id'] = $user_id;
-
-    $user_type = 'member';
-    $user_id = 4;
-    $_SESSION['user_id'] = $user_id;
-} elseif (isset($_SESSION['admin_id'])) {
-    $user_type = 'admin';
-    $user_id = $_SESSION['admin_id'];
-} elseif (isset($_SESSION['user_id'])) {
-    $user_type = 'member';
-    $user_id = $_SESSION['user_id'];
-}
-
-// Store user type in session for consistency
-$_SESSION['user_type'] = $user_type;
-echo "<script>console.log('" . $_SESSION['user_type'] . "');</script>";
+$user_type = $_SESSION['userType'];
+$user_id = $_SESSION['userID'];
+$user_name = $_SESSION['username'];
 
 // Fetch listings from database
 $listings = [];
@@ -794,7 +771,7 @@ try {
 
                         <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
@@ -806,7 +783,7 @@ try {
             <nav class="c-navbar-desktop">
                 <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
@@ -858,7 +835,7 @@ try {
 
                         <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/aboutUs.html">About</a>
                     </div>
@@ -869,7 +846,7 @@ try {
             <nav class="c-navbar-desktop">
                 <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                <a href="../../pages/CommonPages/mainEvent.html">Event</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/aboutUs.html">About</a>
             </nav>
@@ -898,7 +875,7 @@ try {
         <div class="trade-container">
             <!-- Trade Header -->
             <div class="trade-header">
-                <h1>Trade Marketplace</h1>
+                <h1>Welcome to Trade Marketplace, <?php echo $user_name?></h1>
                 <p>Exchange items and plants with fellow ReLeaf community members. Sustainable trading for a greener future.</p>
                 <?php if ($user_type === 'member'): ?>
                     <a link href="../../pages/MemberPages/addTrade.php" id="createListingLink">
@@ -1055,7 +1032,7 @@ try {
                     </div>
                     <div>
                         <b>Community</b><br>
-                        <a href="../../pages/CommonPages/mainEvent.html">Events</a><br>
+                        <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
                         <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                     </div>

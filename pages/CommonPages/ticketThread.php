@@ -1,43 +1,11 @@
 <?php
 session_start();
 include("../../php/dbConn.php");
-// include("../../php/sessionCheck.php");
+include("../../php/sessionCheck.php");
 
-$user_type = '';
-$user_id = '';
-
-// Force user type based on URL if provided
-if (isset($_GET['from'])) {
-    if ($_GET['from'] === 'member') {
-        unset($_SESSION['admin_id']); // remove admin session
-        $user_type = 'member';
-        $user_id = 4;
-        $_SESSION['user_id'] = $user_id;
-    } elseif ($_GET['from'] === 'admin') {
-        unset($_SESSION['user_id']); // remove member session
-        $user_type = 'admin';
-        $user_id = 1;
-        $_SESSION['admin_id'] = $user_id;
-    }
-}
-// If no GET parameter, check existing sessions
-elseif (isset($_SESSION['admin_id'])) {
-    $user_type = 'admin';
-    $user_id = $_SESSION['admin_id'];
-} elseif (isset($_SESSION['user_id'])) {
-    $user_type = 'member';
-    $user_id = $_SESSION['user_id'];
-}
-// Default fallback
-else {
-    $user_type = 'admin';
-    $user_id = 1;
-    $_SESSION['admin_id'] = $user_id;
-}
-
-// Store user type in session for consistency
-$_SESSION['user_type'] = $user_type;
-echo "<script>console.log(" . json_encode($_SESSION['user_type']) . ");</script>";
+$user_type = $_SESSION['userType'];
+$user_id = $_SESSION['userID'];
+$user_name = $_SESSION['username'];
 
 // Get ticket ID from URL
 if (!isset($_GET['ticket_id'])) {
@@ -487,6 +455,24 @@ if (isset($_POST['reopen_ticket'])) {
             margin-bottom: 15px;
         }
 
+        .user-badge {
+            display: inline-block;
+            background: var(--MainGreen);
+            color: var(--White);
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            box-shadow: var(--shadow-color);
+        }
+
+        .user-type {
+            color: var(--LightGreen);
+            opacity: 0.9;
+            margin-left: 2px;
+        }
+
         .form-control {
             width: 100%;
             padding: 12px;
@@ -497,6 +483,7 @@ if (isset($_POST['reopen_ticket'])) {
             font-family: inherit;
             resize: vertical;
             min-height: 100px;
+            margin-bottom: 1rem;
         }
 
         .form-actions {
@@ -542,6 +529,13 @@ if (isset($_POST['reopen_ticket'])) {
             
             .slider-nav {
                 gap: 10px;
+            }
+
+            .user-badge {
+                display: block;
+                width: fit-content;
+                font-size: 0.85rem;
+                margin-bottom: 10px;
             }
         }
     </style>
@@ -798,14 +792,17 @@ if (isset($_POST['reopen_ticket'])) {
             <?php if ($ticket['status'] !== 'solved'): ?>
                 <div class="response-form">
                     <form method="POST">
-                        <div class="form-group">
-                            <textarea 
-                                name="message" 
-                                class="form-control" 
-                                placeholder="Type your response here..." 
-                                required
-                            ></textarea>
+                    <div class="form-group">
+                        <div class="user-badge">
+                        <?php echo $user_name ?> 
+                            <span class="user-type">(<?php echo $user_type ?>)</span>
                         </div>
+                        <textarea 
+                            name="message" 
+                            class="form-control" 
+                            placeholder="Type your response here..." 
+                            required
+                        ></textarea>
                         <div class="form-actions">
                             <?php if ($user_type === 'admin'): ?>
                                 <?php if ($ticket['status'] === 'solved'): ?>

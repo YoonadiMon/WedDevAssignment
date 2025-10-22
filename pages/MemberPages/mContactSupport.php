@@ -2,8 +2,10 @@
 // Database connection and query for current user's tickets
 include("../../php/dbConn.php");
 
-// Assuming current user ID is 4 
-$currentUserID = 4;
+// Start session and get actual logged-in user ID
+session_start();
+$currentUserID = $_SESSION['userID']; 
+$username = $_SESSION['username'] ?? '';
 
 // Query to fetch tickets for the current user
 $query = "SELECT * FROM tbltickets WHERE userID = $currentUserID ORDER BY ticketID DESC";
@@ -364,7 +366,7 @@ $ticketCount = mysqli_num_rows($result);
         <header>
             <!-- Logo + Name -->
             <section class="c-logo-section">
-                <a href="../../pages/MemberPages/memberIndex.php" class="c-logo-link">
+                <a href="../../pages/MemberPages/memberIndex.html" class="c-logo-link">
                     <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                     <div class="c-text">ReLeaf</div>
                 </a>
@@ -399,7 +401,7 @@ $ticketCount = mysqli_num_rows($result);
                             </a>
                         </section>
 
-                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                        <a href="../../pages/MemberPages/memberIndex.html">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
@@ -411,7 +413,7 @@ $ticketCount = mysqli_num_rows($result);
 
             <!-- Menu Links Desktop + Tablet -->
             <nav class="c-navbar-desktop">
-                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                <a href="../../pages/MemberPages/memberIndex.html">Home</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
@@ -444,7 +446,7 @@ $ticketCount = mysqli_num_rows($result);
             <!-- Help Section -->
             <div class="help-section">
                 <div class="help-icon">?</div>
-                <h2>Need some help?</h2>
+                <h2>Need some help, <?php echo $username?>?</h2>
                 <p>Our team is happy to help or answer any question you may have. All you need to do is to create a support ticket, ask your question and our team will respond as soon as possible.</p>
                 <a link href="../../pages/MemberPages/mCreateTicket.php">
                     <button class="open-ticket-btn">Open a support ticket</button>

@@ -1,10 +1,11 @@
 <?php
 session_start();
 include("../../php/dbConn.php");
+include("../../php/sessionCheck.php");
 
-// For demo purposes, set admin user ID (in real app, this would come from session)
-$_SESSION['admin_id'] = 1;
+$_SESSION['admin_id'] = $_SESSION['userID'];
 $admin_id = $_SESSION['admin_id'];
+$admin_name = $_SESSION['fullName'];
 
 // Handle mark solved action
 if (isset($_POST['mark_solved']) && isset($_POST['ticket_id'])) {
@@ -614,7 +615,7 @@ foreach ($tickets as $ticket) {
             <!-- Admin Header -->
             <div class="admin-header">
                 <div class="admin-welcome">
-                    <h1>Hey Admin!</h1>
+                    <h1>Hey Admin, <?php echo $admin_name?>!</h1>
                     <p>Time to help the people who need us most</p>
                     <p><em>Click on a conversation to get started</em></p>
                 </div>
@@ -779,43 +780,6 @@ foreach ($tickets as $ticket) {
     </main>
 
     <hr>
-
-    <!-- <footer>
-        <section class="c-footer-info-section">
-            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
-            <div class="c-text">ReLeaf</div>
-            <div class="c-text c-text-center">
-                "Relief for the Planet, One Leaf at a Time."
-                <br>
-                "Together, We Can ReLeaf the Earth."
-            </div>
-            <div class="c-text c-text-label">
-                Admin Support: +60 12 345 6789
-            </div>
-            <div class="c-text">
-                admin@releaf.com
-            </div>
-        </section>
-        
-        <section class="c-footer-links-section">
-            <div>
-                <b>Admin Panel</b><br>
-                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a><br>
-                <a href="../../pages/adminPages/aHelpTicket.php">Support Tickets</a><br>
-            </div>
-            <div>
-                <b>Content Management</b><br>
-                <a href="../../pages/commonPages/mainEvent.php">Events</a><br>
-                <a href="../../pages/commonPages/mainBlog.html">Blogs</a><br>
-                <a href="../../pages/commonPages/mainTrade.php">Trades</a>
-            </div>
-            <div>
-                <b>System</b><br>
-                <a href="../../pages/adminPages/aProfile.html">Profile</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
-            </div>
-        </section>
-    </footer> -->
 
     <script>
         const isAdmin = true;

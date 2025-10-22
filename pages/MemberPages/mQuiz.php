@@ -1,15 +1,13 @@
 <?php
 session_start();
 include("../../php/dbConn.php");
+include("../../php/sessionCheck.php");
 
-// Check if user is logged in and is a member
-// if (!isset($_SESSION['userID']) || $_SESSION['userType'] !== 'member') {
-//     header("Location: ../../pages/CommonPages/login.php");
-//     exit();
-// }
-// $userID = $_SESSION['userID'];
+$user_type = $_SESSION['userType'];
+$user_id = $_SESSION['userID'];
+$user_name = $_SESSION['username'];
 
-$userID = 5; // Temporary hardcoded userID for testing
+$userID = $_SESSION['userID'];
 
 // Fetch user info and points
 $userQuery = "SELECT fullName, username, point FROM tblusers WHERE userID = ?";
