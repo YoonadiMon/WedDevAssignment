@@ -644,7 +644,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
@@ -652,7 +652,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <a href="../../pages/MemberPages/memberIndex.php">Home</a>
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/aboutUs.html">About</a>
                     <?php endif; ?>
                 </div>
@@ -666,7 +666,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.html">Trade</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
