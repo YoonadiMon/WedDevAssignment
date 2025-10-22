@@ -125,7 +125,7 @@ function getMemberModalContent(listing) {
                 </button>
             ` : `
                 <button class="trade-btn" onclick="startTrade(${listing.listingID})">
-                    Start Trade Conversation
+                    View Profile to Start Trade Conversation
                 </button>
                 <button class="report-btn" onclick="reportListing(${listing.listingID})">
                     Report Listing
