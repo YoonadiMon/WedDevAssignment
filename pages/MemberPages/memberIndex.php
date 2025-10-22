@@ -706,7 +706,7 @@ if ($userRank == 0) {
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
             </div>
             <div>
                 <b>Community</b><br>
