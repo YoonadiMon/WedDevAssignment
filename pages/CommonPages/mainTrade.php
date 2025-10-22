@@ -764,7 +764,7 @@ try {
                             <button id="themeToggle1">
                                 <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
                             </button>
-                            <a href="../../pages/adminPages/aProfile.html">
+                            <a href="../../pages/adminPages/aProfile.php">
                                 <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
                         </section>
@@ -773,7 +773,7 @@ try {
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     </div>
                 </div>
@@ -785,7 +785,7 @@ try {
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             </nav>          
             <section class="c-navbar-more">
@@ -793,7 +793,7 @@ try {
                 <button id="themeToggle2">
                     <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
                 </button>
-                <a href="../../pages/adminPages/aProfile.html">
+                <a href="../../pages/adminPages/aProfile.php">
                     <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
                 </a>
             </section>
@@ -1020,14 +1020,14 @@ try {
                 <section class="c-footer-links-section">
                     <div>
                         <b>My Account</b><br>
-                        <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                        <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                         <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
                         <a href="../../pages/MemberPages/mSetting.html">Settings</a>
                     </div>
                     <div>
                         <b>Helps</b><br>
                         <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                         <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
                     </div>
                     <div>

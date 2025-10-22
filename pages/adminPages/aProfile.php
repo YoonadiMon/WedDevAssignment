@@ -253,7 +253,7 @@ $connection->close();
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     </div>
                 </div>
@@ -266,7 +266,7 @@ $connection->close();
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             </nav>          
             <section class="c-navbar-more">
