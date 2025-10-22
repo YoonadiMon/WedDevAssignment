@@ -3,8 +3,18 @@ session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
+// Initialize variables
 $showWelcomePopup = false;
 $userName = '';
+$userData = [];
+$initials = '';
+$blogsPosted = 0;
+$tradesCompleted = 0;
+$eventsJoined = 0;
+$leaderboard = [];
+$userRank = 0;
+
+// Check for welcome popup
 if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
     $showWelcomePopup = true;
     $userName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : $_SESSION['username'];
@@ -15,62 +25,74 @@ if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
 $userID = $_SESSION['userID'];
 $query = "SELECT fullName, username, bio, point, tradesCompleted, country FROM tblusers WHERE userID = ?";
 
-$stmt = $connection->prepare($query);
-$stmt->bind_param("i", $userID);
-$stmt->execute();
-$result = $stmt->get_result();
-$userData = $result->fetch_assoc();
-
-// Get user initials
-function getInitials($name) {
-    $words = explode(' ', trim($name));
-    if (count($words) >= 2) {
-        return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+if ($stmt = $connection->prepare($query)) {
+    $stmt->bind_param("i", $userID);
+    
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $userData = $result->fetch_assoc();
+        
+        if ($userData) {
+            // Get user initials
+            function getInitials($name) {
+                $words = explode(' ', trim($name));
+                if (count($words) >= 2) {
+                    return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+                }
+                return strtoupper(substr($words[0], 0, 2));
+            }
+            
+            $initials = getInitials($userData['fullName']);
+            $tradesCompleted = $userData['tradesCompleted'] ?? 0;
+            
+            // Get events joined count
+            $eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
+                                FROM tblregistration r 
+                                INNER JOIN tblevents e ON r.eventID = e.eventID 
+                                WHERE r.userID = ? 
+                                AND r.status = 'active' 
+                                AND e.endDate < CURDATE() 
+                                AND e.status != 'cancelled'";
+            
+            if ($eventsJoinedStmt = $connection->prepare($eventsJoinedQuery)) {
+                $eventsJoinedStmt->bind_param("i", $userID);
+                if ($eventsJoinedStmt->execute()) {
+                    $eventsJoinedResult = $eventsJoinedStmt->get_result();
+                    $eventsJoinedData = $eventsJoinedResult->fetch_assoc();
+                    $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
+                }
+                $eventsJoinedStmt->close();
+            }
+        }
     }
-    return strtoupper(substr($words[0], 0, 2));
+    $stmt->close();
 }
-
-$initials = getInitials($userData['fullName']);
-
-$blogsPosted = 0; //placeholder
-$tradesCompleted = $userData['tradesCompleted'] ?? 0;
-
-$eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
-                      FROM tblregistration r 
-                      INNER JOIN tblevents e ON r.eventID = e.eventID 
-                      WHERE r.userID = ? 
-                      AND r.status = 'active' 
-                      AND e.endDate < CURDATE() 
-                      AND e.status != 'cancelled'";
-$eventsJoinedStmt = $connection->prepare($eventsJoinedQuery);
-$eventsJoinedStmt->bind_param("i", $userID);
-$eventsJoinedStmt->execute();
-$eventsJoinedResult = $eventsJoinedStmt->get_result();
-$eventsJoinedData = $eventsJoinedResult->fetch_assoc();
-$eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
 
 // Get leaderboard data
 $leaderboardQuery = "SELECT userID, fullName, username, point FROM tblusers WHERE userType = 'member' ORDER BY point DESC LIMIT 5";
-$leaderboardResult = $connection->query($leaderboardQuery);
-$leaderboard = [];
-$userRank = 0;
-$rank = 1;
-while ($row = $leaderboardResult->fetch_assoc()) {
-    $leaderboard[] = $row;
-    if ($row['userID'] == $userID) {
-        $userRank = $rank;
+if ($leaderboardResult = $connection->query($leaderboardQuery)) {
+    $rank = 1;
+    while ($row = $leaderboardResult->fetch_assoc()) {
+        $leaderboard[] = $row;
+        if ($row['userID'] == $userID) {
+            $userRank = $rank;
+        }
+        $rank++;
     }
-    $rank++;
 }
 
 // If user is not in top 5, get their rank
-if ($userRank == 0) {
+if ($userRank == 0 && isset($userData['point'])) {
     $rankQuery = "SELECT COUNT(*) + 1 as rank FROM tblusers WHERE point > ? AND userType = 'member'";
-    $rankStmt = $connection->prepare($rankQuery);
-    $rankStmt->bind_param("i", $userData['point']);
-    $rankStmt->execute();
-    $rankResult = $rankStmt->get_result();
-    $userRank = $rankResult->fetch_assoc()['rank'];
+    if ($rankStmt = $connection->prepare($rankQuery)) {
+        $rankStmt->bind_param("i", $userData['point']);
+        if ($rankStmt->execute()) {
+            $rankResult = $rankStmt->get_result();
+            $rankData = $rankResult->fetch_assoc();
+            $userRank = $rankData['rank'] ?? 0;
+        }
+        $rankStmt->close();
+    }
 }
 ?>
 
@@ -706,7 +728,7 @@ if ($userRank == 0) {
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
-                <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>

@@ -3,17 +3,21 @@ session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
-$autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
-$connection->query($autoCloseQuery);
-
-// Get filter parameters
-$filterMode = isset($_GET['mode']) ? $_GET['mode'] : [];
-$filterType = isset($_GET['type']) ? $_GET['type'] : [];
-$filterStatus = isset($_GET['status']) ? $_GET['status'] : [];
+// Initialize variables
+$filterMode = isset($_GET['mode']) ? (array)$_GET['mode'] : [];
+$filterType = isset($_GET['type']) ? (array)$_GET['type'] : [];
+$filterStatus = isset($_GET['status']) ? (array)$_GET['status'] : [];
 $sortBy = isset($_GET['sortBy']) ? $_GET['sortBy'] : 'newest';
 $searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
+$events = [];
+$eventCount = 0;
 
-// Build query
+// Auto-close expired events
+$autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
+if (!$connection->query($autoCloseQuery)) {
+    error_log("Auto-close events failed: " . $connection->error);
+}
+
 $query = "SELECT * FROM tblevents WHERE 1=1";
 $params = [];
 $types = "";
@@ -26,29 +30,45 @@ if (!empty($searchQuery)) {
     $types .= "sss";
 }
 
-// Apply filters
+// Apply filters with validation
+$validModes = ['online', 'physical', 'hybrid'];
+$validTypes = ['clean-up', 'workshop', 'tree-planting', 'campaign', 'talk', 'seminar', 'competition', 'other'];
+$validStatuses = ['open', 'closed'];
+
 if (!empty($filterMode)) {
-    $placeholders = implode(',', array_fill(0, count($filterMode), '?'));
-    $query .= " AND mode IN ($placeholders)";
-    $params = array_merge($params, $filterMode);
-    $types .= str_repeat('s', count($filterMode));
+    $filterMode = array_intersect($filterMode, $validModes);
+    if (!empty($filterMode)) {
+        $placeholders = implode(',', array_fill(0, count($filterMode), '?'));
+        $query .= " AND mode IN ($placeholders)";
+        $params = array_merge($params, $filterMode);
+        $types .= str_repeat('s', count($filterMode));
+    }
 }
 
 if (!empty($filterType)) {
-    $placeholders = implode(',', array_fill(0, count($filterType), '?'));
-    $query .= " AND type IN ($placeholders)";
-    $params = array_merge($params, $filterType);
-    $types .= str_repeat('s', count($filterType));
+    $filterType = array_intersect($filterType, $validTypes);
+    if (!empty($filterType)) {
+        $placeholders = implode(',', array_fill(0, count($filterType), '?'));
+        $query .= " AND type IN ($placeholders)";
+        $params = array_merge($params, $filterType);
+        $types .= str_repeat('s', count($filterType));
+    }
 }
 
 if (!empty($filterStatus)) {
-    $placeholders = implode(',', array_fill(0, count($filterStatus), '?'));
-    $query .= " AND status IN ($placeholders)";
-    $params = array_merge($params, $filterStatus);
-    $types .= str_repeat('s', count($filterStatus));
+    $filterStatus = array_intersect($filterStatus, $validStatuses);
+    if (!empty($filterStatus)) {
+        $placeholders = implode(',', array_fill(0, count($filterStatus), '?'));
+        $query .= " AND status IN ($placeholders)";
+        $params = array_merge($params, $filterStatus);
+        $types .= str_repeat('s', count($filterStatus));
+    }
 }
 
-// Apply sorting
+// Apply sorting with validation
+$validSortOptions = ['newest', 'oldest', 'popular', 'date'];
+$sortBy = in_array($sortBy, $validSortOptions) ? $sortBy : 'newest';
+
 switch($sortBy) {
     case 'oldest':
         $query .= " ORDER BY eventID ASC";
@@ -65,15 +85,26 @@ switch($sortBy) {
         break;
 }
 
-// Execute query
-$stmt = $connection->prepare($query);
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
+if ($stmt = $connection->prepare($query)) {
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+    
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $events = $result->fetch_all(MYSQLI_ASSOC);
+        $eventCount = count($events);
+    } else {
+        error_log("Event query execution failed: " . $stmt->error);
+        $events = [];
+        $eventCount = 0;
+    }
+    $stmt->close();
+} else {
+    error_log("Event query preparation failed: " . $connection->error);
+    $events = [];
+    $eventCount = 0;
 }
-$stmt->execute();
-$result = $stmt->get_result();
-$events = $result->fetch_all(MYSQLI_ASSOC);
-$eventCount = count($events);
 ?>
 
 <!DOCTYPE html>
@@ -851,7 +882,7 @@ $eventCount = count($events);
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
-                <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>

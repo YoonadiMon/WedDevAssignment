@@ -2,44 +2,44 @@
 session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
+include("../../php/errorPopup.php");
 
-// Get the profile user ID from URL parameter
-$currentUserID = $_SESSION['userID'];
 $indexUrl = $isAdmin ? '../../pages/adminPages/adminIndex.php' : '../../pages/MemberPages/memberIndex.php';
-$previousPage = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $indexUrl;
 
+// Initialize variables
+$currentUserID = $_SESSION['userID'];
 $profileUserID = isset($_GET['userID']) ? intval($_GET['userID']) : 0;
 $hasError = false;
-$userData = null;
+$userData = [];
+$initials = '';
+$blogsPosted = 0;
+$tradesCompleted = 0;
+$eventsJoined = 0;
+$profileUserIsAdmin = false;
+
+// Get previous page for redirect
+$previousPage = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $indexUrl;
 
 // Validate user ID first
-if ($profileUserID === 0) {
-    $_SESSION['profile_error'] = "Invalid user profile requested.";
-    $hasError = true;
+if ($profileUserID <= 0) {
+    showErrorPopup("Invalid user profile requested.", $previousPage);
 } else {
-    // Fetch profile user data
+    // Fetch profile user data with proper error handling
     $query = "SELECT fullName, username, bio, point, tradesCompleted, country, userType FROM tblusers WHERE userID = ?";
-    $stmt = $connection->prepare($query);
     
-    // Check if prepare was successful
-    if ($stmt === false) {
-        $_SESSION['profile_error'] = "Database error: " . $connection->error;
-        $hasError = true;
-    } else {
+    if ($stmt = $connection->prepare($query)) {
         $stmt->bind_param("i", $profileUserID);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows === 0) {
-            $_SESSION['profile_error'] = "User profile not found.";
-            $hasError = true;
-        } else {
-            $userData = $result->fetch_assoc();
-
-            if ($userData['userType'] === 'admin') {
-                $_SESSION['profile_error'] = "This is an admin account.";
-                $hasError = true;
+        
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows === 0) {
+                showErrorPopup("User profile not found.", $previousPage);
             } else {
+                $userData = $result->fetch_assoc();
+                $profileUserIsAdmin = ($userData['userType'] === 'admin');
+                
+                // Get user initials
                 function getInitials($name) {
                     $words = explode(' ', trim($name));
                     if (count($words) >= 2) {
@@ -47,43 +47,38 @@ if ($profileUserID === 0) {
                     }
                     return strtoupper(substr($words[0], 0, 2));
                 }
-
+                
                 $initials = getInitials($userData['fullName']);
-
-                $blogsPosted = 0; //placeholder
                 $tradesCompleted = $userData['tradesCompleted'] ?? 0;
-
-                // Get events joined count
-                $eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
-                                    FROM tblregistration r 
-                                    INNER JOIN tblevents e ON r.eventID = e.eventID 
-                                    WHERE r.userID = ? 
-                                    AND r.status = 'active' 
-                                    AND e.endDate < CURDATE() 
-                                    AND e.status != 'cancelled'";
-                $eventsJoinedStmt = $connection->prepare($eventsJoinedQuery);
                 
-                if ($eventsJoinedStmt) {
-                    $eventsJoinedStmt->bind_param("i", $profileUserID);
-                    $eventsJoinedStmt->execute();
-                    $eventsJoinedResult = $eventsJoinedStmt->get_result();
-                    $eventsJoinedData = $eventsJoinedResult->fetch_assoc();
-                    $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
-                    $eventsJoinedStmt->close();
-                } else {
-                    $eventsJoined = 0;
+                // Only get events joined count for members (non-admin profile users)
+                if (!$profileUserIsAdmin) {
+                    $eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
+                                        FROM tblregistration r 
+                                        INNER JOIN tblevents e ON r.eventID = e.eventID 
+                                        WHERE r.userID = ? 
+                                        AND r.status = 'active' 
+                                        AND e.endDate < CURDATE() 
+                                        AND e.status != 'cancelled'";
+                    
+                    if ($eventsJoinedStmt = $connection->prepare($eventsJoinedQuery)) {
+                        $eventsJoinedStmt->bind_param("i", $profileUserID);
+                        if ($eventsJoinedStmt->execute()) {
+                            $eventsJoinedResult = $eventsJoinedStmt->get_result();
+                            $eventsJoinedData = $eventsJoinedResult->fetch_assoc();
+                            $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
+                        }
+                        $eventsJoinedStmt->close();
+                    }
                 }
-                
-                $stmt->close();
-            }  
+            }
+            $stmt->close();
+        } else {
+            showErrorPopup("Database error: Unable to fetch user data.", $previousPage);
         }
+    } else {
+        showErrorPopup("Database error: " . $connection->error, $previousPage);
     }
-}
-
-// If there's an error, redirect back
-if ($hasError) {
-    header("Location: " . $previousPage);
-    exit();
 }
 ?>
 
@@ -296,99 +291,6 @@ if ($hasError) {
             color: var(--Gray);
         }
 
-        .leaderboard-section {
-            background: var(--bg-color);
-            border: 1px solid var(--Gray);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-top: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-color);
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .leaderboard-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            border-bottom: 1px solid var(--Gray);
-            transition: all 0.2s ease;
-        }
-
-        .leaderboard-item:last-child {
-            border-bottom: none;
-        }
-
-        .leaderboard-item.current-user {
-            background: var(--LightGreen);
-            font-weight: 600;
-        }
-
-        .dark-mode .leaderboard-item.current-user {
-            background: var(--LowGreen);
-        }
-
-        .rank-number {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-color);
-            width: 40px;
-            text-align: center;
-        }
-
-        .user-avatar-small {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--Gray);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: var(--White);
-            margin: 0 1rem;
-            flex-shrink: 0;
-        }
-
-        .leaderboard-item.current-user .user-avatar-small {
-            background: var(--MainGreen);
-        }
-
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .user-fullname {
-            font-size: 1rem;
-            color: var(--text-color);
-            font-weight: 600;
-            word-wrap: break-word;
-        }
-
-        .user-username {
-            font-size: 0.875rem;
-            color: var(--Gray);
-        }
-
-        .user-points {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--MainGreen);
-            flex-shrink: 0;
-        }
-
         .back-button {
             display: inline-flex;
             align-items: center;
@@ -471,107 +373,6 @@ if ($hasError) {
                 font-size: 1.25rem;
             }
         }
-
-        /* Error Popup Modal */
-        .error-popup-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .error-popup-overlay.show {
-            display: flex;
-        }
-
-        .error-popup {
-            background: var(--bg-color);
-            border-radius: 16px;
-            padding: 2.5rem;
-            max-width: 450px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.4s ease;
-            border: 2px solid var(--Red);
-        }
-
-        .dark-mode .error-popup {
-            border-color: var(--Red);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .error-popup-icon {
-            width: 70px;
-            height: 70px;
-            margin: 0 auto 1.25rem;
-        }
-
-        .error-popup-icon img {
-            width: 100%;
-            height: 100%;
-        }
-
-        .error-popup-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--Red);
-            margin-bottom: 1rem;
-        }
-
-        .error-popup-message {
-            font-size: 1.05rem;
-            color: var(--text-color);
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-
-        .error-popup-btn {
-            padding: 0.875rem 2.5rem;
-            background: var(--Red);
-            color: var(--White);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .error-popup-btn:hover {
-            opacity: 0.8;
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 480px) {
-            .error-popup {
-                padding: 2rem 1.5rem;
-            }
-            .error-popup-title {
-                font-size: 1.5rem;
-            }
-            .error-popup-icon {
-                width: 60px;
-                height: 60px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -581,7 +382,7 @@ if ($hasError) {
     <header>
         <!-- Logo + Name -->
         <section class="c-logo-section">
-            <a href="../../pages/MemberPages/memberIndex.php" class="c-logo-link">
+            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.php'; ?>" class="c-logo-link">
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
             </a>
@@ -592,38 +393,71 @@ if ($hasError) {
             <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
             <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
             <div id="sidebarNav" class="c-navbar-side-menu">
+                
                 <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
                 <div class="c-navbar-side-items">
                     <section class="c-navbar-side-more">
                         <button id="themeToggle1">
                             <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                         </button>
-                        <div class="c-chatbox" id="chatboxMobile">
-                            <a href="../../pages/MemberPages/mChat.html">
-                                <img src="../../assets/images/chat-light.svg" alt="Chatbox">
+
+                        <?php if ($isAdmin): ?>
+                            <!-- Admin Navigation Icons -->
+                            <a href="../../pages/adminPages/aProfile.html">
+                                <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
-                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
-                        </div>
-                        <a href="../../pages/MemberPages/mSetting.html">
-                            <img src="../../assets/images/setting-light.svg" alt="Settings">
-                        </a>
+                        <?php else: ?>
+                            <!-- Member Navigation Icons -->
+                            <div class="c-chatbox" id="chatboxMobile">
+                                <a href="../../pages/MemberPages/mChat.html">
+                                    <img src="../../assets/images/chat-light.svg" alt="Chatbox">
+                                </a>
+                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            </div>
+                            <a href="../../pages/MemberPages/mSetting.html">
+                                <img src="../../assets/images/setting-light.svg" alt="Settings">
+                            </a>
+                        <?php endif; ?>
                     </section>
-                    <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-                    <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                    <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
+
+                    <?php if ($isAdmin): ?>
+                        <!-- Admin Menu Items -->
+                        <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                        <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
+                    <?php else: ?>
+                        <!-- Member Menu Items -->
+                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                        <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </nav>
 
         <!-- Menu Links Desktop + Tablet -->
         <nav class="c-navbar-desktop">
-            <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-            <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-            <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-            <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-            <a href="../../pages/CommonPages/aboutUs.html">About</a>
+            <?php if ($isAdmin): ?>
+                <!-- Admin Desktop Menu -->
+                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
+            <?php else: ?>
+                <!-- Member Desktop Menu -->
+                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                <a href="../../pages/CommonPages/aboutUs.html">About</a>
+            <?php endif; ?>
         </nav>
 
         <section class="c-navbar-more">
@@ -631,38 +465,29 @@ if ($hasError) {
             <button id="themeToggle2">
                 <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
             </button>
-            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
-                <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
-            </a>
-            <a href="../../pages/MemberPages/mSetting.html">
-                <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
-            </a>
+
+            <?php if ($isAdmin): ?>
+                <!-- Admin Navbar More -->
+                <a href="../../pages/adminPages/aProfile.html">
+                    <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
+                </a>
+            <?php else: ?>
+                <!-- Member Navbar More -->
+                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                    <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                </a>
+                <a href="../../pages/MemberPages/mSetting.html">
+                    <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
+                </a>
+            <?php endif; ?>
         </section>
     </header>
     <hr>
     
     <!-- Main Content -->
     <main class="content">
-        <!-- Error Popup -->
-        <?php if (isset($_SESSION['profile_error'])): ?>
-        <div class="error-popup-overlay show" id="errorPopup">
-            <div class="error-popup">
-                <div class="error-popup-icon">
-                    <img src="../../assets/images/banned-icon-red.svg" alt="Error">
-                </div>
-                <h2 class="error-popup-title">Error</h2>
-                <p class="error-popup-message">
-                    <?php 
-                        echo htmlspecialchars($_SESSION['profile_error']); 
-                        unset($_SESSION['profile_error']);
-                    ?>
-                </p>
-                <button class="error-popup-btn" onclick="closeErrorPopup()">OK</button>
-            </div>
-        </div>
-        <?php endif; ?>
-        <section class="profile-container" style="<?php echo $hasError ? 'display: none;' : ''; ?>">
+        <section class="profile-container">
             <!-- Back Button -->
             <a href="javascript:history.back()" class="back-button">
                 ← Back
@@ -696,6 +521,8 @@ if ($hasError) {
                         </div>
                     </div>
                 </div>
+                <!-- only show action buttons if that user is not admin or own profile -->
+                <?php if ($profileUserIsAdmin || ($profileUserID === $currentUserID)): ?>
                 <div class="action-buttons">
                     <a href="../../pages/MemberPages/mCreateTicket.php" 
                        class="action-btn" 
@@ -708,8 +535,9 @@ if ($hasError) {
                         <img src="../../assets/images/chat-light.svg" alt="Chat" class="chat-icon">
                     </a>
                 </div>
+                <?php endif; ?>
             </div>
-
+            <?php if (!$profileUserIsAdmin): ?>
             <!-- Stats Bar -->
             <div class="stats-bar">
                 <div class="stat-item">
@@ -729,6 +557,7 @@ if ($hasError) {
                     <span class="stat-label">Points</span>
                 </div>
             </div>
+            <?php endif; ?>
         </section>
 
         <!-- Search & Results -->
@@ -752,10 +581,10 @@ if ($hasError) {
             <div class="results" id="results"></div>
         </section>
     </main>
-
-    <hr>
     
-    <!-- Footer -->
+    <?php if (!$isAdmin): ?>
+    <!-- Footer (Member Only) -->
+    <hr>
     <footer>
         <section class="c-footer-info-section">
             <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
@@ -794,39 +623,14 @@ if ($hasError) {
             </div>
         </section>
     </footer>
+    <?php endif; ?>
 
     <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
     <script src="../../javascript/mainScript.js"></script>
-    <script>
-        const redirectUrl = <?php echo json_encode($previousPage); ?>;
-
-        function redirectBack() {
-            if (redirectUrl.includes('http')) {
-                window.location.href = redirectUrl;
-            } else {
-                window.location.href = '../../' + redirectUrl;
-            }
-        }
-
-        function closeErrorPopup() {
-            const popup = document.getElementById('errorPopup');
-            if (popup) {
-                popup.classList.remove('show');
-                setTimeout(() => {
-                    redirectBack();
-                }, 200);
-            }
-        }
-        setTimeout(() => {
-            if (document.getElementById('errorPopup')) {
-                redirectBack();
-            }
-        }, 1000);
-    </script>
 </body>
 </html>
+
 <?php
-// Close database connection
 if (isset($connection)) {
     mysqli_close($connection);
 }
