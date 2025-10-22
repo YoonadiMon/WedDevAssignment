@@ -164,6 +164,14 @@ foreach ($tickets as $ticket) {
             box-shadow: 0 2px 10px var(--shadow-color);
         }
 
+        .error-message{
+            background: #f44336; 
+            color: white; 
+            padding: 12px; 
+            border-radius: 4px; 
+            margin-bottom: 20px;
+        }
+
         .admin-welcome h1 {
             font-size: 28px;
             margin-bottom: 5px;
@@ -632,7 +640,7 @@ foreach ($tickets as $ticket) {
             <?php endif; ?>
 
             <?php if (isset($error_message)): ?>
-                <div class="message error-message" style="background: #f44336; color: white; padding: 12px; border-radius: 4px; margin-bottom: 20px;">
+                <div class="message error-message">
                     <?php echo $error_message; ?>
                 </div>
             <?php endif; ?>

@@ -473,6 +473,22 @@ if (isset($_POST['reopen_ticket'])) {
             margin-left: 2px;
         }
 
+        .success-message {
+            background: var(--MainGreen); 
+            color: var(--White); 
+            padding: 12px; 
+            border-radius: 4px; 
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            background: var(--Red); 
+            color: white; 
+            padding: 12px; 
+            border-radius: 4px; 
+            margin-bottom: 20px;
+        }
+
         .form-control {
             width: 100%;
             padding: 12px;
@@ -646,13 +662,13 @@ if (isset($_POST['reopen_ticket'])) {
 
             <!-- Success/Error Messages -->
             <?php if (isset($success_message)): ?>
-                <div class="message success-message" style="background: var(--MainGreen); color: white; padding: 12px; border-radius: 4px; margin-bottom: 20px;">
+                <div class="message success-message">
                     <?php echo $success_message; ?>
                 </div>
             <?php endif; ?>
 
             <?php if (isset($error_message)): ?>
-                <div class="message error-message" style="background: #f44336; color: white; padding: 12px; border-radius: 4px; margin-bottom: 20px;">
+                <div class="message error-message">
                     <?php echo $error_message; ?>
                 </div>
             <?php endif; ?>
@@ -699,7 +715,7 @@ if (isset($_POST['reopen_ticket'])) {
                                              alt="<?php echo htmlspecialchars($attachment['fileName']); ?>" 
                                              class="attachment-preview">
                                     <?php else: ?>
-                                        <div style="font-size: 48px; margin-bottom: 15px;">
+                                        <div class="c-margin-bottom-small c-fontsize-double">
                                             <?php
                                             $fileIcon = '📄'; // Default file icon
                                             if (strpos($attachment['fileType'], 'pdf') !== false) $fileIcon = '📕';
@@ -752,7 +768,7 @@ if (isset($_POST['reopen_ticket'])) {
                                     Upload
                                 </button>
                             </div>
-                            <div style="font-size: 12px; color: var(--Gray); margin-top: 5px;">
+                            <div class="c-gray-text c-text-caption c-margin-top-small">
                                 Maximum file size: 10MB. Supported formats: JPG, PNG, PDF, DOC
                             </div>
                         </form>
@@ -764,7 +780,7 @@ if (isset($_POST['reopen_ticket'])) {
             <div class="conversation-container">
                 <?php if (empty($responses)): ?>
                     <div class="message">
-                        <p style="text-align: center; color: var(--Gray);">No messages yet. Start the conversation!</p>
+                        <p class="c-gray-text c-text-center">No messages yet. Start the conversation!</p>
                     </div>
                 <?php else: ?>
                     <?php foreach ($responses as $response): ?>
@@ -822,8 +838,8 @@ if (isset($_POST['reopen_ticket'])) {
                     </form>
                 </div>
             <?php else: ?>
-                <div class="response-form" style="text-align: center; padding: 30px;">
-                    <p style="color: var(--Gray); margin-bottom: 15px;">This ticket has been solved.</p>
+                <div class="response-form c-text-center .c-padding-medium">
+                    <p class="c-gray-text c-margin-bottom-small">This ticket has been solved.</p>
                     <form method="POST" style="display: inline;">
                         <button type="submit" name="reopen_ticket" class="c-btn c-btn-primary">
                             Reopen Ticket
