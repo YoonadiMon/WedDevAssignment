@@ -1,4 +1,6 @@
 
+
+
 <?php
 session_start();
 include("../../php/dbConn.php");
@@ -15,200 +17,322 @@ $message = '';
 $messageType = '';
 
 // Fetch user data
-$stmt = $connection->prepare("SELECT fullName, username, gender, email, bio, country FROM tblusers WHERE userID = ?");
+$stmt = $connection->prepare("SELECT fullName, username, gender, email, password, bio, country FROM tblusers WHERE userID = ?");
 $stmt->bind_param("i", $userID);
 $stmt->execute();
-$stmt->bind_result($fullName, $username, $gender, $email, $bio, $country);
-$stmt->fetch();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
 $stmt->close();
 
-// Update profile
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['saveProfile'])) {
-    $newFullName = $_POST['fullName'];
-    $newUsername = $_POST['username'];
-    $newGender = $_POST['gender'];
-    $newEmail = $_POST['email'];
-    $newBio = $_POST['bio'];
-    $newCountry = $_POST['country'];
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $fullName = trim($_POST['fullName']);
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $gender = $_POST['gender'];
+    $oldPassword = trim($_POST['oldPassword']);
+    $newPassword = trim($_POST['password']);
+    $confirmPassword = trim($_POST['confirmPassword']);
+    $bio = trim($_POST['bio']);
+    $country = $_POST['country'];
 
-    $updateStmt = $connection->prepare("UPDATE tblusers SET fullName=?, username=?, gender=?, email=?, bio=?, country=? WHERE userID=?");
-    $updateStmt->bind_param("ssssssi", $newFullName, $newUsername, $newGender, $newEmail, $newBio, $newCountry, $userID);
-    if ($updateStmt->execute()) {
-        $message = "Profile updated successfully!";
-        $messageType = "success";
-    } else {
-        $message = "Error updating profile.";
+    // Validation
+    if (empty($fullName) || empty($username)) {
+        $message = "Full name and username are required.";
         $messageType = "error";
-    }
-    $updateStmt->close();
-}
+    } elseif (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $message = "Invalid email format.";
+        $messageType = "error";
+    } elseif (strlen($bio) > 500) {
+        $message = "Bio cannot exceed 500 characters.";
+        $messageType = "error";
+    } else {
+        $passwordChanged = false;
+        $updateSuccess = false;
 
-// Update password
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['changePassword'])) {
-    $oldPassword = $_POST['oldPassword'];
-    $newPassword = $_POST['password'];
-    $confirmPassword = $_POST['confirmPassword'];
-
-    $stmt = $connection->prepare("SELECT password FROM tblusers WHERE userID = ?");
-    $stmt->bind_param("i", $userID);
-    $stmt->execute();
-    $stmt->bind_result($hashedPassword);
-    $stmt->fetch();
-    $stmt->close();
-
-    if (password_verify($oldPassword, $hashedPassword)) {
-        if ($newPassword === $confirmPassword) {
-            $newHashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-            $updatePasswordStmt = $connection->prepare("UPDATE tblusers SET password=? WHERE userID=?");
-            $updatePasswordStmt->bind_param("si", $newHashedPassword, $userID);
-            if ($updatePasswordStmt->execute()) {
-                $message = "Password changed successfully!";
-                $messageType = "success";
-            } else {
-                $message = "Error changing password.";
+        // Check if user wants to change password
+        if (!empty($newPassword) || !empty($confirmPassword)) {
+            // Password change validation
+            if (empty($oldPassword)) {
+                $message = "Current password is required to change password.";
                 $messageType = "error";
+            } elseif (!password_verify($oldPassword, $user['password'])) {
+                $message = "Current password is incorrect!";
+                $messageType = "error";
+            } elseif ($newPassword !== $confirmPassword) {
+                $message = "New passwords do not match.";
+                $messageType = "error";
+            } elseif (strlen($newPassword) < 8) {
+                $message = "New password must be at least 8 characters.";
+                $messageType = "error";
+            } elseif (!preg_match('/[A-Z]/', $newPassword) || !preg_match('/[a-z]/', $newPassword) || !preg_match('/[0-9]/', $newPassword)) {
+                $message = "Password must contain uppercase, lowercase, and numbers.";
+                $messageType = "error";
+            } else {
+                // Update with new password
+                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+                $stmt = $connection->prepare("UPDATE tblusers SET fullName = ?, username = ?, gender = ?, email = ?, password = ?, bio = ?, country = ? WHERE userID = ?");
+                
+                if (!$stmt) {
+                    $message = "Database error: " . $connection->error;
+                    $messageType = "error";
+                } else {
+                    $stmt->bind_param("sssssssi", $fullName, $username, $gender, $email, $hashedPassword, $bio, $country, $userID);
+                    if ($stmt->execute()) {
+                        $updateSuccess = true;
+                        $passwordChanged = true;
+                        $message = "Password updated successfully ✓";
+                        $messageType = "success";
+                    } else {
+                        $message = "Error updating profile: " . $stmt->error;
+                        $messageType = "error";
+                    }
+                    $stmt->close();
+                }
             }
-            $updatePasswordStmt->close();
         } else {
-            $message = "New passwords do not match.";
-            $messageType = "error";
+            // Update without password change
+            $stmt = $connection->prepare("UPDATE tblusers SET fullName = ?, username = ?, gender = ?, email = ?, bio = ?, country = ? WHERE userID = ?");
+            
+            if (!$stmt) {
+                $message = "Database error: " . $connection->error;
+                $messageType = "error";
+            } else {
+                $stmt->bind_param("ssssssi", $fullName, $username, $gender, $email, $bio, $country, $userID);
+                if ($stmt->execute()) {
+                    $updateSuccess = true;
+                    $message = "Profile updated successfully ✓";
+                    $messageType = "success";
+                } else {
+                    $message = "Error updating profile: " . $stmt->error;
+                    $messageType = "error";
+                }
+                $stmt->close();
+            }
         }
-    } else {
-        $message = "Old password is incorrect.";
-        $messageType = "error";
+
+        // If update was successful, refresh user data from database
+        if ($updateSuccess) {
+            $stmt = $connection->prepare("SELECT fullName, username, gender, email, password, bio, country FROM tblusers WHERE userID = ?");
+            $stmt->bind_param("i", $userID);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+            $stmt->close();
+        }
     }
 }
-?>
 
+$connection->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile</title>
-    <style>
-        body {
-            font-family: "Segoe UI", sans-serif;
-            background-color: #f5f7fa;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 600px;
-            margin: 40px auto;
-            background: white;
-            padding: 25px 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .form-row {
-            margin-bottom: 18px;
-        }
-        .label {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        .input {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 15px;
-        }
-        textarea.input {
-            height: 80px;
-            resize: none;
-        }
-        button.save-btn {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            background-color: #0078ff;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button.save-btn:hover {
-            background-color: #005fcc;
-        }
-        .message {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        .success { color: #2e8b57; }
-        .error { color: #e63946; }
+    <title>Profile - ReLeaf</title>
 
-        .password-wrapper {
+    <link rel="stylesheet" href="../../style/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
+
+    <style>
+        /* Password toggle styling */
+        .password-wrap {
             position: relative;
+            display: flex;
+            align-items: center;
         }
+
+        .password-wrap .input {
+            padding-right: 60px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
         .toggle-password {
             position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
+            right: 8px;
+            background: transparent;
             border: none;
+            padding: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            padding: 0;
+            line-height: 0;
+            color: inherit;
         }
-        .toggle-password svg {
-            width: 20px;
-            height: 20px;
-            fill: #666;
+
+        .toggle-password:focus {
+            outline: 2px solid rgba(0, 0, 0, 0.12);
+            border-radius: 6px;
+        }
+
+        .toggle-password[aria-pressed="false"] svg {
+            opacity: 0.7;
+        }
+
+        .toggle-password[aria-pressed="true"] svg {
+            opacity: 1;
+        }
+
+        /* Enhanced toast notification */
+        .toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #16a34a;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: bottom 0.3s ease-in-out;
+            z-index: 1000;
+            max-width: 90%;
+            text-align: center;
+            min-width: 250px;
+        }
+
+        .toast.show {
+            bottom: 20px;
+        }
+
+        .toast.error {
+            background: #dc2626;
+        }
+
+        .toast.success {
+            background: #16a34a;
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h2>Edit Profile</h2>
-        <?php if ($message): ?>
-            <div class="message <?php echo $messageType; ?>">
-                <?php echo htmlspecialchars($message); ?>
-            </div>
-        <?php endif; ?>
+    <div id="cover" class="" onclick="hideMenu()"></div>
+        
+        <!-- Logo + Name & Navbar -->
+        <header>
+            <!-- Logo + Name -->
+            <section class="c-logo-section">
+                <a href="../../pages/adminPages/adminIndex.php" class="c-logo-link">
+                    <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                    <div class="c-text">ReLeaf</div>
+                </a>
+            </section>
 
-        <form method="POST">
-            <div class="form-row">
-                <div class="label">Full Name:</div>
-                <input type="text" name="fullName" class="input" value="<?php echo htmlspecialchars($fullName); ?>" required>
-            </div>
+            <!-- Menu Links -->
 
-            <div class="form-row">
-                <div class="label">Username:</div>
-                <input type="text" name="username" class="input" value="<?php echo htmlspecialchars($username); ?>" required>
-            </div>
+            <!-- Menu Links Mobile -->
+            <nav class="c-navbar-side">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
+                <div id="sidebarNav" class="c-navbar-side-menu">
+                    
+                    <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
+                    <div class="c-navbar-side-items">
+                        <section class="c-navbar-side-more">
+                            <button id="themeToggle1">
+                                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
+                            </button>
+                            <a href="../../pages/adminPages/aProfile.php">
+                                <img src="../../assets/images/profile-light.svg" alt="Profile">
+                            </a>
+                        </section>
 
-            <div class="form-row">
-                <div class="label">Gender:</div>
-                <select name="gender" class="input" required>
-                    <option value="Male" <?php if ($gender == 'Male') echo 'selected'; ?>>Male</option>
-                    <option value="Female" <?php if ($gender == 'Female') echo 'selected'; ?>>Female</option>
-                    <option value="Other" <?php if ($gender == 'Other') echo 'selected'; ?>>Other</option>
-                </select>
-            </div>
+                        <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                        <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
+                    </div>
+                </div>
 
-            <div class="form-row">
-                <div class="label">Email:</div>
-                <input type="email" name="email" class="input" value="<?php echo htmlspecialchars($email); ?>" required>
-            </div>
+            </nav>
 
-            <div class="form-row">
-                <div class="label">Bio:</div>
-                <textarea name="bio" class="input"><?php echo htmlspecialchars($bio); ?></textarea>
-            </div>
+            <!-- Menu Links Desktop + Tablet -->
+            <nav class="c-navbar-desktop">
+                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
+            </nav>          
+            <section class="c-navbar-more">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                <button id="themeToggle2">
+                    <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
+                </button>
+                <a href="../../pages/adminPages/aProfile.php">
+                    <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
+                </a>
+            </section>
+        </header>
+        <hr>
 
-            <!-- <div class="form-row">
-                <div class="label">Country:</div>
-                <input type="text" name="country" class="input" value="<?php echo htmlspecialchars($country); ?>">
-            </div> -->
+    <!-- Main Content -->
+    <main>
+        <div class="mprofile-container">
+            <main>
+                <div class="left">
 
-            <div class="form-row">
+                    <div class="avatar" id="avatar">
+                        <img id="avatarImg" src="" alt="avatar" style="display:none">
+                    </div>
+
+                    <div class="change-wrap">
+                        <!-- <div class="hint" id="fileHint">Generated Avatar</div> -->
+                    </div>
+                </div>
+
+                <div class="right">
+                    <h1>Editing Profile</h1>
+
+                    <form method="POST" action="">
+                        <div class="form-row">
+                            <div class="label">Full Name:</div>
+                            <input id="fullName" name="fullName" class="input" type="text"
+                                placeholder="Enter your full name"
+                                value="<?php echo htmlspecialchars($user['fullName'] ?? ''); ?>" required />
+                        </div>
+
+                        <div class="form-row">
+                            <div class="label">Username:</div>
+                            <input id="username" name="username" class="input" type="text"
+                                placeholder="Enter your username"
+                                value="<?php echo htmlspecialchars($user['username'] ?? ''); ?>" required />
+                        </div>
+
+                        <div class="form-row">
+                            <div class="label">Email:</div>
+                            <input id="email" name="email" class="input" type="email"
+                                placeholder="Enter your email address"
+                                value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>" />
+                        </div>
+
+                        <div class="form-row">
+                            <div class="label">Gender:</div>
+                            <select id="gender" name="gender" class="input">
+                                <option value="">Select gender</option>
+                                <option value="Male" <?php echo (($user['gender'] ?? '') === 'Male') ? 'selected' : ''; ?>>Male</option>
+                                <option value="Female" <?php echo (($user['gender'] ?? '') === 'Female') ? 'selected' : ''; ?>>Female</option>
+                                <option value="other" <?php echo (($user['gender'] ?? '') === 'other') ? 'selected' : ''; ?>>Other</option>
+                                <option value="prefer not to say" <?php echo (($user['gender'] ?? '') === 'prefer not to say') ? 'selected' : ''; ?>>Prefer not to say</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
                             <div class="label">Country:</div>
                             <select id="country" name="country" class="input">
                                 <option value="">Select country</option>
@@ -459,51 +583,114 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['changePassword'])) {
                             </select>
                         </div>
 
-            <button type="submit" name="saveProfile" class="save-btn">Save Profile</button>
-        </form>
+                        <!-- Password fields with toggle -->
+                        <div class="form-row">
+                            <div class="label">Current Password:</div>
+                            <div class="password-wrap">
+                                <input id="old-password" name="oldPassword" class="input" type="password"
+                                    placeholder="Enter your current password" />
+                                <button type="button" class="toggle-password" data-target="old-password"
+                                    aria-pressed="false" aria-label="Show current password"></button>
+                            </div>
+                        </div>
 
-        <hr style="margin: 30px 0;">
+                        <div class="form-row">
+                            <div class="label">New Password:</div>
+                            <div class="password-wrap">
+                                <input id="password" name="password" class="input" type="password"
+                                    placeholder="Enter new password" />
+                                <button type="button" class="toggle-password" data-target="password" aria-pressed="false"
+                                    aria-label="Show new password"></button>
+                            </div>
+                        </div>
 
-        <h2>Change Password</h2>
-        <form method="POST">
-            <div class="form-row">
-                <div class="label">Old Password:</div>
-                <div class="password-wrapper">
-                    <input id="old-password" name="oldPassword" class="input" type="password" placeholder="Enter old password">
-                    <button type="button" class="toggle-password" data-target="old-password" aria-label="Show password"></button>
+                        <div class="form-row">
+                            <div class="label">Confirm Password:</div>
+                            <div class="password-wrap">
+                                <input id="confirmPassword" name="confirmPassword" class="input" type="password"
+                                    placeholder="Confirm new password" />
+                                <button type="button" class="toggle-password" data-target="confirmPassword"
+                                    aria-pressed="false" aria-label="Show confirm password"></button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="label">Bio:</div>
+                            <textarea id="bio" name="bio" class="input" placeholder="Tell us about yourself..."
+                                maxlength="500"><?php echo htmlspecialchars($user['bio'] ?? ''); ?></textarea>
+                        </div>
+
+                        <div class="save-wrap">
+                            <button type="submit" id="saveBtn" class="btn-save">Save Changes</button>
+                        </div>
+                    </form>
                 </div>
-            </div>
+            </main>
+            <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+        </div>
+    </main>
 
-            <div class="form-row">
-                <div class="label">New Password:</div>
-                <div class="password-wrapper">
-                    <input id="password" name="password" class="input" type="password" placeholder="Enter new password">
-                    <button type="button" class="toggle-password" data-target="password" aria-label="Show password"></button>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="label">Confirm Password:</div>
-                <div class="password-wrapper">
-                    <input id="confirmPassword" name="confirmPassword" class="input" type="password" placeholder="Confirm new password">
-                    <button type="button" class="toggle-password" data-target="confirmPassword" aria-label="Show password"></button>
-                </div>
-            </div>
-
-            <button type="submit" name="changePassword" class="save-btn">Change Password</button>
-        </form>
-    </div>
-
+    <!-- Scripts -->
+    <script>const isAdmin = false;</script>
+    <script src="../../javascript/mainScript.js"></script>
     <script>
+        // Profile data from PHP
+        const userData = {
+            fullName: <?php echo json_encode($user['fullName'] ?? ''); ?>,
+            username: <?php echo json_encode($user['username'] ?? ''); ?>,
+            email: <?php echo json_encode($user['email'] ?? ''); ?>,
+            gender: <?php echo json_encode($user['gender'] ?? ''); ?>,
+            bio: <?php echo json_encode($user['bio'] ?? ''); ?>
+        };
+
+        const elements = {
+            avatarImg: document.getElementById('avatarImg'),
+            avatarWrap: document.getElementById('avatar'),
+            toast: document.getElementById('toast')
+        };
+
+        const AVATAR_COLOR = '#4ECDC4';
+        function generateAvatar(name) {
+            const initials = name.split(/\s+/).map(s => s[0]).slice(0, 2).join('').toUpperCase();
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = 300;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = AVATAR_COLOR;
+            ctx.fillRect(0, 0, 300, 300);
+            ctx.fillStyle = '#FFF';
+            ctx.font = 'bold 120px Inter, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(initials, 150, 160);
+            const dataURL = canvas.toDataURL('image/png');
+            elements.avatarImg.src = dataURL;
+            elements.avatarImg.style.display = "block";
+            elements.avatarWrap.style.background = "transparent";
+        }
+
+        function showToast(msg, isError = false) {
+            elements.toast.textContent = msg;
+            elements.toast.classList.remove('error', 'success');
+            elements.toast.classList.add(isError ? 'error' : 'success');
+            elements.toast.classList.remove('show');
+            // Trigger reflow to restart animation
+            void elements.toast.offsetWidth;
+            elements.toast.classList.add('show');
+            setTimeout(() => elements.toast.classList.remove('show'), 4000);
+        }
+
+        window.addEventListener('load', () => {
+            generateAvatar(userData.fullName);
+            
+            <?php if (!empty($message)): ?>
+                showToast(<?php echo json_encode($message); ?>, <?php echo $messageType === 'error' ? 'true' : 'false'; ?>);
+            <?php endif; ?>
+        });
+
+        // Show/hide password logic
         (function () {
-            const eyeSVG = `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M12 5c-7.633 0-11 7-11 7s3.367 7 11 7 11-7 11-7-3.367-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/>
-                </svg>`;
-            const eyeOffSVG = `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M12 5c-7.633 0-11 7-11 7 1.437 2.93 4.12 5.06 7.5 5.92L5.41 18.5 4 17.09 19.09 2l1.41 1.41-2.13 2.13C20.24 7.12 22 9 22 12c0 0-3.367 7-11 7a10.35 10.35 0 01-3.32-.54l1.46-1.46A8.15 8.15 0 0012 17c4.633 0 8-5 8-5s-.805-1.227-2.16-2.45L12 12a3 3 0 01-3-3l2.12-2.12A10.35 10.35 0 0112 5z"/>
-                </svg>`;
+            const eyeSVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></circle></svg>';
+            const eyeOffSVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.58 10.58A3 3 0 0 0 13.42 13.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 12s4-7 10-7c2.12 0 4.09.6 5.8 1.64M22 12s-4 7-10 7c-1.6 0-3.09-.36-4.4-.99" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 
             document.querySelectorAll('.toggle-password').forEach(btn => {
                 btn.innerHTML = eyeSVG;

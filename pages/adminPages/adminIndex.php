@@ -377,7 +377,7 @@ if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
                             <button id="themeToggle1">
                                 <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
                             </button>
-                            <a href="../../pages/adminPages/aProfile.html">
+                            <a href="../../pages/adminPages/aProfile.php">
                                 <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
                         </section>
@@ -407,7 +407,7 @@ if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
                 <button id="themeToggle2">
                     <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
                 </button>
-                <a href="../../pages/adminPages/aProfile.html">
+                <a href="../../pages/adminPages/aProfile.php">
                     <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
                 </a>
             </section>
