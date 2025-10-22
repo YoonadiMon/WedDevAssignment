@@ -2,7 +2,7 @@
 session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
-include("../../php/errorPopup.php");
+include("../../php/errorPopUp.php");
 
 $indexUrl = $isAdmin ? '../../pages/adminPages/adminIndex.php' : '../../pages/MemberPages/memberIndex.php';
 
