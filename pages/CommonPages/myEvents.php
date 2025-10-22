@@ -1009,33 +1009,33 @@ $hostedEvents = $stmt2->get_result();
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php while ($user = $participants->fetch_assoc()): ?>
-                                                    <tr>
-                                                        <td><?php echo htmlspecialchars($user['fullName']); ?></td>
-                                                        <td><?php echo htmlspecialchars($user['email']); ?></td>
-                                                        <td>
-                                                            <div class="participant-actions">
-                                                                <a href="viewProfile.php?id=<?php echo $user['userID']; ?>" 
-                                                                    class="participant-btn participant-btn-view">
-                                                                    View
-                                                                </a>
-                                                                <form method="POST" action="myEvents.php" style="display:inline;" 
-                                                                    onsubmit="return confirm('Are you sure you want to remove this participant?');">
-                                                                    <input type="hidden" name="action" value="removeParticipant">
-                                                                    <input type="hidden" name="eventID" value="<?php echo $event['eventID']; ?>">
-                                                                    <input type="hidden" name="userID" value="<?php echo $user['userID']; ?>">
-                                                                    <button type="submit" class="participant-btn participant-btn-remove" 
-                                                                        <?php echo ($event['status'] == 'closed') ? 'disabled' : ''; ?>
-                                                                        <?php if ($event['status'] == 'closed'): ?>
-                                                                            title="Cannot remove participants from closed events"
-                                                                        <?php endif; ?>>
-                                                                        Remove
-                                                                    </button>
-                                                                </form>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                <?php endwhile; ?>
+                                            <?php while ($participant = $participants->fetch_assoc()): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($participant['fullName']); ?></td>
+                                                    <td><?php echo htmlspecialchars($participant['email']); ?></td>
+                                                    <td>
+                                                        <div class="participant-actions">
+                                                            <a href="../../pages/CommonPages/viewProfile.php?userID=<?php echo $participant['userID']; ?>" 
+                                                                class="participant-btn participant-btn-view">
+                                                                View
+                                                            </a>
+                                                            <form method="POST" action="myEvents.php" style="display:inline;" 
+                                                                onsubmit="return confirm('Are you sure you want to remove this participant?');">
+                                                                <input type="hidden" name="action" value="removeParticipant">
+                                                                <input type="hidden" name="eventID" value="<?php echo $event['eventID']; ?>">
+                                                                <input type="hidden" name="userID" value="<?php echo $participant['userID']; ?>">
+                                                                <button type="submit" class="participant-btn participant-btn-remove" 
+                                                                    <?php echo ($event['status'] == 'closed') ? 'disabled' : ''; ?>
+                                                                    <?php if ($event['status'] == 'closed'): ?>
+                                                                        title="Cannot remove participants from closed events"
+                                                                    <?php endif; ?>>
+                                                                    Remove
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <?php endwhile; ?>
                                             </tbody>
                                         </table>
                                     <?php else: ?>

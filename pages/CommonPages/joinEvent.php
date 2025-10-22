@@ -733,8 +733,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
     <main>
         <section class="content" id="content">
             <div class="event-detail-container">
-                <a href="mainEvent.php" class="back-button">← Back to Events</a>
-
+                <a href="javascript:history.back()" class="back-button">← Back</a>
                 <?php if ($registrationSuccess): ?>
                     <div class="alert alert-success">
                         Registration successful! You are now registered for this event.

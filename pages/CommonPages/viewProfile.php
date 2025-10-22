@@ -3,75 +3,64 @@ session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
-$showWelcomePopup = false;
-$userName = '';
-if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
-    $showWelcomePopup = true;
-    $userName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : $_SESSION['username'];
-    unset($_SESSION['login_success']);
-}
+// Get the profile user ID from URL parameter
+$currentUserID = $_SESSION['userID'];
+$indexUrl = $isAdmin ? '../../pages/adminPages/adminIndex.php' : '../../pages/MemberPages/memberIndex.php';
+$previousPage = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $indexUrl;
 
-// Fetch user data
-$userID = $_SESSION['userID'];
-$query = "SELECT fullName, username, bio, point, tradesCompleted, country FROM tblusers WHERE userID = ?";
+$profileUserID = isset($_GET['userID']) ? intval($_GET['userID']) : 0;
+$hasError = false;
 
+// Fetch profile user data
+$query = "SELECT fullName, username, bio, point, tradesCompleted, country, userType FROM tblusers WHERE userID = ?";
 $stmt = $connection->prepare($query);
-$stmt->bind_param("i", $userID);
+$stmt->bind_param("i", $profileUserID);
 $stmt->execute();
 $result = $stmt->get_result();
-$userData = $result->fetch_assoc();
 
-// Get user initials
-function getInitials($name) {
-    $words = explode(' ', trim($name));
-    if (count($words) >= 2) {
-        return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
-    }
-    return strtoupper(substr($words[0], 0, 2));
+if ($profileUserID === 0) {
+    $_SESSION['profile_error'] = "Invalid user profile requested.";
+    $hasError = true;
+} else if ($result->num_rows === 0) {
+    $_SESSION['profile_error'] = "User profile not found.";
+    $hasError = true;
+} else {
+    $userData = $result->fetch_assoc();
+
+    if ($userData['userType'] === 'admin') {
+        $_SESSION['profile_error'] = "This is an admin account.";
+        $hasError = true;
+    } else {
+        function getInitials($name) {
+            $words = explode(' ', trim($name));
+            if (count($words) >= 2) {
+                return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+            }
+            return strtoupper(substr($words[0], 0, 2));
+        }
+
+        $initials = getInitials($userData['fullName']);
+
+        $blogsPosted = 0; //placeholder
+        $tradesCompleted = $userData['tradesCompleted'] ?? 0;
+
+        // Get events joined count
+        $eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
+                            FROM tblregistration r 
+                            INNER JOIN tblevents e ON r.eventID = e.eventID 
+                            WHERE r.userID = ? 
+                            AND r.status = 'active' 
+                            AND e.endDate < CURDATE() 
+                            AND e.status != 'cancelled'";
+        $eventsJoinedStmt = $connection->prepare($eventsJoinedQuery);
+        $eventsJoinedStmt->bind_param("i", $profileUserID);
+        $eventsJoinedStmt->execute();
+        $eventsJoinedResult = $eventsJoinedStmt->get_result();
+        $eventsJoinedData = $eventsJoinedResult->fetch_assoc();
+        $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
+    }  
 }
 
-$initials = getInitials($userData['fullName']);
-
-$blogsPosted = 0; //placeholder
-$tradesCompleted = $userData['tradesCompleted'] ?? 0;
-
-$eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
-                      FROM tblregistration r 
-                      INNER JOIN tblevents e ON r.eventID = e.eventID 
-                      WHERE r.userID = ? 
-                      AND r.status = 'active' 
-                      AND e.endDate < CURDATE() 
-                      AND e.status != 'cancelled'";
-$eventsJoinedStmt = $connection->prepare($eventsJoinedQuery);
-$eventsJoinedStmt->bind_param("i", $userID);
-$eventsJoinedStmt->execute();
-$eventsJoinedResult = $eventsJoinedStmt->get_result();
-$eventsJoinedData = $eventsJoinedResult->fetch_assoc();
-$eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
-
-// Get leaderboard data
-$leaderboardQuery = "SELECT userID, fullName, username, point FROM tblusers WHERE userType = 'member' ORDER BY point DESC LIMIT 5";
-$leaderboardResult = $connection->query($leaderboardQuery);
-$leaderboard = [];
-$userRank = 0;
-$rank = 1;
-while ($row = $leaderboardResult->fetch_assoc()) {
-    $leaderboard[] = $row;
-    if ($row['userID'] == $userID) {
-        $userRank = $rank;
-    }
-    $rank++;
-}
-
-// If user is not in top 5, get their rank
-if ($userRank == 0) {
-    $rankQuery = "SELECT COUNT(*) + 1 as rank FROM tblusers WHERE point > ? AND userType = 'member'";
-    $rankStmt = $connection->prepare($rankQuery);
-    $rankStmt->bind_param("i", $userData['point']);
-    $rankStmt->execute();
-    $rankResult = $rankStmt->get_result();
-    $userRank = $rankResult->fetch_assoc()['rank'];
-}
 ?>
 
 <!DOCTYPE html>
@@ -79,7 +68,7 @@ if ($userRank == 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReLeaf - Home</title>
+    <title>ReLeaf - <?php echo htmlspecialchars($userData['fullName']); ?>'s Profile</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
     <link rel="stylesheet" href="../../style/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -205,7 +194,13 @@ if ($userRank == 0) {
             white-space: normal;
         }
 
-        .edit-btn {
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .action-btn {
             background: none;
             border: none;
             cursor: pointer;
@@ -214,21 +209,34 @@ if ($userRank == 0) {
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
+            border-radius: 8px;
+            text-decoration: none;
         }
 
-        .edit-btn:hover {
+        .action-btn:hover {
             transform: translateY(-2px);
+            background: var(--sec-bg-color);
         }
 
-        .edit-btn img {
+        .action-btn img {
             width: 24px;
             height: 24px;
-            content: url('../../assets/images/edit-icon-light.svg');
         }
 
-        .dark-mode .edit-btn img {
-            content: url('../../assets/images/edit-icon-dark.svg');
+        .report-icon {
+            content: url('../../assets/images/report-icon-light.svg');
+        }
+
+        .dark-mode .report-icon {
+            content: url('../../assets/images/report-icon-dark.svg');
+        }
+
+        .chat-icon {
+            content: url('../../assets/images/chat-light.svg');
+        }
+
+        .dark-mode .chat-icon {
+            content: url('../../assets/images/chat-dark.svg');
         }
 
         .stats-bar {
@@ -357,30 +365,21 @@ if ($userRank == 0) {
             flex-shrink: 0;
         }
 
-        .floating-btn {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 60px;
-            height: 60px;
-            background: var(--MainGreen);
-            border-radius: 50%;
-            display: flex;
+        .back-button {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            z-index: 1000;
+            gap: 0.5rem;
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
         }
 
-        .floating-btn img {
-            width: 28px;
-            height: 28px;
-        }
-
-        .floating-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 12px var(--MainGreen);
+        .back-button:hover {
+            color: var(--MainGreen);
+            text-decoration: underline;
         }
 
         @media (max-width: 768px) {
@@ -423,6 +422,10 @@ if ($userRank == 0) {
             .profile-details {
                 text-align: center;
             }
+
+            .action-buttons {
+                justify-content: center;
+            }
         }
 
         @media (max-width: 480px) {
@@ -444,54 +447,110 @@ if ($userRank == 0) {
                 font-size: 1.25rem;
             }
         }
-    </style>
-</head>
-<body>
-    <?php if ($showWelcomePopup): ?>
-    <!-- Welcome Popup -->
-    <div class="welcome-overlay" id="welcomeOverlay">
-        <div class="welcome-popup">
-            <h2 class="welcome-title">Welcome Back!</h2>
-            <p class="welcome-message">
-                Hello, <span class="welcome-username"><?php echo htmlspecialchars($userName); ?></span><br>
-                Great to see you again! 🌱
-            </p>
-            <button class="welcome-close-btn" onclick="closeWelcomePopup()">
-                Get Started
-            </button>
-        </div>
-    </div>
 
-    <script>
-        // Show welcome popup on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            const welcomeOverlay = document.getElementById('welcomeOverlay');
-            if (welcomeOverlay) {
-                setTimeout(() => {
-                    welcomeOverlay.classList.add('show');
-                }, 100);
+        /* Error Popup Modal */
+        .error-popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .error-popup-overlay.show {
+            display: flex;
+        }
+
+        .error-popup {
+            background: var(--bg-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease;
+            border: 2px solid var(--Red);
+        }
+
+        .dark-mode .error-popup {
+            border-color: var(--Red);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
             }
-        });
-
-        function closeWelcomePopup() {
-            const welcomeOverlay = document.getElementById('welcomeOverlay');
-            if (welcomeOverlay) {
-                welcomeOverlay.classList.remove('show');
-                setTimeout(() => {
-                    welcomeOverlay.style.display = 'none';
-                }, 300);
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        document.addEventListener('click', function(e) {
-            const welcomeOverlay = document.getElementById('welcomeOverlay');
-            if (e.target === welcomeOverlay) {
-                closeWelcomePopup();
+        .error-popup-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 1.25rem;
+        }
+
+        .error-popup-icon img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .error-popup-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--Red);
+            margin-bottom: 1rem;
+        }
+
+        .error-popup-message {
+            font-size: 1.05rem;
+            color: var(--text-color);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .error-popup-btn {
+            padding: 0.875rem 2.5rem;
+            background: var(--Red);
+            color: var(--White);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .error-popup-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 480px) {
+            .error-popup {
+                padding: 2rem 1.5rem;
             }
-        });
-    </script>
-    <?php endif; ?>
-    
+            .error-popup-title {
+                font-size: 1.5rem;
+            }
+            .error-popup-icon {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
     <div id="cover" class="" onclick="hideMenu()"></div>
     
     <!-- Logo + Name & Navbar -->
@@ -558,10 +617,33 @@ if ($userRank == 0) {
         </section>
     </header>
     <hr>
-
+    
     <!-- Main Content -->
     <main class="content">
-        <section class="profile-container">
+        <!-- Error Popup -->
+        <?php if (isset($_SESSION['profile_error'])): ?>
+        <div class="error-popup-overlay show" id="errorPopup">
+            <div class="error-popup">
+                <div class="error-popup-icon">
+                    <img src="../../assets/images/banned-icon-red.svg" alt="Error">
+                </div>
+                <h2 class="error-popup-title">Error</h2>
+                <p class="error-popup-message">
+                    <?php 
+                        echo htmlspecialchars($_SESSION['profile_error']); 
+                        unset($_SESSION['profile_error']);
+                    ?>
+                </p>
+                <button class="error-popup-btn" onclick="closeErrorPopup()">OK</button>
+            </div>
+        </div>
+        <?php endif; ?>
+        <section class="profile-container" style="<?php echo $hasError ? 'display: none;' : ''; ?>">
+            <!-- Back Button -->
+            <a href="javascript:history.back()" class="back-button">
+                ← Back
+            </a>
+
             <!-- Profile Header -->
             <div class="profile-top">
                 <div class="profile-info">
@@ -570,9 +652,9 @@ if ($userRank == 0) {
                         <h1 class="profile-name"><?php echo htmlspecialchars($userData['fullName']); ?></h1>
                         <div class="username-country-wrapper">
                             <div class="profile-username-wrapper">
-                            <p class="profile-username">
-                                @<?php echo htmlspecialchars($userData['username']); ?>
-                            </p>
+                                <p class="profile-username">
+                                    @<?php echo htmlspecialchars($userData['username']); ?>
+                                </p>
                             </div>
                             <div class="profile-country-wrapper">
                                 <img src="../../assets/images/location-icon-light.svg" alt="Location">
@@ -590,9 +672,18 @@ if ($userRank == 0) {
                         </div>
                     </div>
                 </div>
-                <a href="../../pages/MemberPages/mProfile.html" class="edit-btn">
-                    <img src="../../assets/images/edit-icon-light.svg" alt="Edit Profile">
-                </a>
+                <div class="action-buttons">
+                    <a href="../../pages/MemberPages/mCreateTicket.php" 
+                       class="action-btn" 
+                       title="Report User">
+                        <img src="../../assets/images/report-icon-light.svg" alt="Report" class="report-icon">
+                    </a>
+                    <a href="../../pages/MemberPages/mChat.html" 
+                       class="action-btn" 
+                       title="Chat">
+                        <img src="../../assets/images/chat-light.svg" alt="Chat" class="chat-icon">
+                    </a>
+                </div>
             </div>
 
             <!-- Stats Bar -->
@@ -614,45 +705,8 @@ if ($userRank == 0) {
                     <span class="stat-label">Points</span>
                 </div>
             </div>
-            
-            <!-- Leaderboard Section -->
-            <section class="leaderboard-section">
-                <h2 class="section-title">Leaderboard</h2>
-                <ul class="leaderboard-list">
-                    <?php foreach ($leaderboard as $index => $user): ?>
-                        <li class="leaderboard-item <?php echo ($user['userID'] == $userID) ? 'current-user' : ''; ?>">
-                            <span class="rank-number"><?php echo $index + 1; ?></span>
-                            <div class="user-avatar-small">
-                                <?php echo htmlspecialchars(getInitials($user['fullName'])); ?>
-                            </div>
-                            <div class="user-info">
-                                <div class="user-fullname"><?php echo htmlspecialchars($user['fullName']); ?></div>
-                                <div class="user-username">@<?php echo htmlspecialchars($user['username']); ?></div>
-                            </div>
-                            <span class="user-points"><?php echo number_format($user['point']); ?> Points</span>
-                        </li>
-                    <?php endforeach; ?>
-                    
-                    <?php if ($userRank > 5): ?>
-                        <li class="leaderboard-item current-user" style="margin-top: 1rem; border-top: 2px solid var(--MainGreen);">
-                            <span class="rank-number"><?php echo $userRank; ?></span>
-                            <div class="user-avatar-small">
-                                <?php echo htmlspecialchars($initials); ?>
-                            </div>
-                            <div class="user-info">
-                                <div class="user-fullname"><?php echo htmlspecialchars($userData['fullName']); ?></div>
-                                <div class="user-username">@<?php echo htmlspecialchars($userData['username']); ?></div>
-                            </div>
-                            <span class="user-points"><?php echo number_format($userData['point']); ?> Points</span>
-                        </li>
-                    <?php endif; ?>
-                </ul>
-            </section>
-
-            <a href="../../pages/MemberPages/mQuiz.php" class="floating-btn" title="Take a Quiz">
-                <img src="../../assets/images/quiz-icon-dark.svg" alt="Quiz">
-            </a>
         </section>
+
         <!-- Search & Results -->
         <section class="search-container" id="searchContainer" style="display: none;">
             <!-- Tabs -->
@@ -719,5 +773,39 @@ if ($userRank == 0) {
 
     <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
     <script src="../../javascript/mainScript.js"></script>
+    <script>
+        const redirectUrl = <?php echo json_encode($previousPage); ?>;
+
+        function redirectBack() {
+            if (redirectUrl.includes('http')) {
+                window.location.href = redirectUrl;
+            } else {
+                window.location.href = '../../' + redirectUrl;
+            }
+        }
+
+        function closeErrorPopup() {
+            const popup = document.getElementById('errorPopup');
+            if (popup) {
+                popup.classList.remove('show');
+                setTimeout(() => {
+                    redirectBack();
+                }, 200);
+            }
+        }
+
+        // Auto-redirect after 3 seconds
+        setTimeout(() => {
+            if (document.getElementById('errorPopup')) {
+                redirectBack();
+            }
+        }, 3000);
+    </script>
 </body>
 </html>
+<?php
+// Close database connection
+if (isset($connection)) {
+    mysqli_close($connection);
+}
+?>
