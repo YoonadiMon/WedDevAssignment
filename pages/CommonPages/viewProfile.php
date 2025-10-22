@@ -10,57 +10,81 @@ $previousPage = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $in
 
 $profileUserID = isset($_GET['userID']) ? intval($_GET['userID']) : 0;
 $hasError = false;
+$userData = null;
 
-// Fetch profile user data
-$query = "SELECT fullName, username, bio, point, tradesCompleted, country, userType FROM tblusers WHERE userID = ?";
-$stmt = $connection->prepare($query);
-$stmt->bind_param("i", $profileUserID);
-$stmt->execute();
-$result = $stmt->get_result();
-
+// Validate user ID first
 if ($profileUserID === 0) {
     $_SESSION['profile_error'] = "Invalid user profile requested.";
     $hasError = true;
-} else if ($result->num_rows === 0) {
-    $_SESSION['profile_error'] = "User profile not found.";
-    $hasError = true;
 } else {
-    $userData = $result->fetch_assoc();
-
-    if ($userData['userType'] === 'admin') {
-        $_SESSION['profile_error'] = "This is an admin account.";
+    // Fetch profile user data
+    $query = "SELECT fullName, username, bio, point, tradesCompleted, country, userType FROM tblusers WHERE userID = ?";
+    $stmt = $connection->prepare($query);
+    
+    // Check if prepare was successful
+    if ($stmt === false) {
+        $_SESSION['profile_error'] = "Database error: " . $connection->error;
         $hasError = true;
     } else {
-        function getInitials($name) {
-            $words = explode(' ', trim($name));
-            if (count($words) >= 2) {
-                return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
-            }
-            return strtoupper(substr($words[0], 0, 2));
+        $stmt->bind_param("i", $profileUserID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            $_SESSION['profile_error'] = "User profile not found.";
+            $hasError = true;
+        } else {
+            $userData = $result->fetch_assoc();
+
+            if ($userData['userType'] === 'admin') {
+                $_SESSION['profile_error'] = "This is an admin account.";
+                $hasError = true;
+            } else {
+                function getInitials($name) {
+                    $words = explode(' ', trim($name));
+                    if (count($words) >= 2) {
+                        return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+                    }
+                    return strtoupper(substr($words[0], 0, 2));
+                }
+
+                $initials = getInitials($userData['fullName']);
+
+                $blogsPosted = 0; //placeholder
+                $tradesCompleted = $userData['tradesCompleted'] ?? 0;
+
+                // Get events joined count
+                $eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
+                                    FROM tblregistration r 
+                                    INNER JOIN tblevents e ON r.eventID = e.eventID 
+                                    WHERE r.userID = ? 
+                                    AND r.status = 'active' 
+                                    AND e.endDate < CURDATE() 
+                                    AND e.status != 'cancelled'";
+                $eventsJoinedStmt = $connection->prepare($eventsJoinedQuery);
+                
+                if ($eventsJoinedStmt) {
+                    $eventsJoinedStmt->bind_param("i", $profileUserID);
+                    $eventsJoinedStmt->execute();
+                    $eventsJoinedResult = $eventsJoinedStmt->get_result();
+                    $eventsJoinedData = $eventsJoinedResult->fetch_assoc();
+                    $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
+                    $eventsJoinedStmt->close();
+                } else {
+                    $eventsJoined = 0;
+                }
+                
+                $stmt->close();
+            }  
         }
-
-        $initials = getInitials($userData['fullName']);
-
-        $blogsPosted = 0; //placeholder
-        $tradesCompleted = $userData['tradesCompleted'] ?? 0;
-
-        // Get events joined count
-        $eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
-                            FROM tblregistration r 
-                            INNER JOIN tblevents e ON r.eventID = e.eventID 
-                            WHERE r.userID = ? 
-                            AND r.status = 'active' 
-                            AND e.endDate < CURDATE() 
-                            AND e.status != 'cancelled'";
-        $eventsJoinedStmt = $connection->prepare($eventsJoinedQuery);
-        $eventsJoinedStmt->bind_param("i", $profileUserID);
-        $eventsJoinedStmt->execute();
-        $eventsJoinedResult = $eventsJoinedStmt->get_result();
-        $eventsJoinedData = $eventsJoinedResult->fetch_assoc();
-        $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
-    }  
+    }
 }
 
+// If there's an error, redirect back
+if ($hasError) {
+    header("Location: " . $previousPage);
+    exit();
+}
 ?>
 
 <!DOCTYPE html>

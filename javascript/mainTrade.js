@@ -249,22 +249,6 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-function startTrade(listingId) {
-    const listing = listingsData.find(l => l.listingID == listingId);
-    if (listing) {
-        // Close modal first
-        closeModal();
-        
-        // Show confirmation and redirect to chat
-        const confirmTrade = confirm(`Start a trade conversation with ${listing.userName} about "${listing.title}"?`);
-        if (confirmTrade) {
-            // Redirect to chat page with the lister's ID
-            alert(`Redirecting to chat with ${listing.userName}...\n\nIn a real application, this would open the chat page with the lister.`);
-            // window.location.href = `../../pages/MemberPages/mChat.html?userId=${listing.userID}`;
-        }
-    }
-}
-
 // Add this function to handle reporting listings
 function reportListing(listingId) {
     const listing = listingsData.find(l => l.listingID == listingId);
@@ -677,9 +661,7 @@ function startTrade(listingId) {
         // Show confirmation and redirect to chat
         const confirmTrade = confirm(`Start a trade conversation with ${listing.userName} about "${listing.title}"?`);
         if (confirmTrade) {
-            // Redirect to chat page with the lister's ID
-            alert(`Redirecting to chat with ${listing.userName}...\n\nIn a real application, this would open the chat page with the lister.`);
-            // window.location.href = `../../pages/MemberPages/mChat.html?userId=${listing.userID}`;
+            window.location.href = `../../pages/CommonPages/viewProfile.php?userID=${listing.userID}`;
         }
     }
 }
