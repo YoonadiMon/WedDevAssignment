@@ -164,11 +164,21 @@ $registeredSql = "
     WHERE r.userID = ? AND r.status = 'active' AND e.title LIKE ?
     ORDER BY e.startDate DESC
 ";
-$stmt = $connection->prepare($registeredSql);
+
+// Check if prepare was successful
+$stmt_registered = $connection->prepare($registeredSql);
+if ($stmt_registered === false) {
+    die("Error preparing registered events query: " . $connection->error);
+}
+
 $searchParam = "%$search%";
-$stmt->bind_param("is", $userID, $searchParam);
-$stmt->execute();
-$registeredEvents = $stmt->get_result();
+$stmt_registered->bind_param("is", $userID, $searchParam);
+
+if (!$stmt_registered->execute()) {
+    die("Error executing registered events query: " . $stmt_registered->error);
+}
+
+$registeredEvents = $stmt_registered->get_result();
 
 // Fetch Hosted Events 
 $searchHost = $_GET['searchHosted'] ?? '';
@@ -177,12 +187,21 @@ $hostedSql = "
     WHERE userID = ? AND title LIKE ?
     ORDER BY startDate DESC
 ";
-$stmt2 = $connection->prepare($hostedSql);
-$searchHostParam = "%$searchHost%";
-$stmt2->bind_param("is", $userID, $searchHostParam);
-$stmt2->execute();
-$hostedEvents = $stmt2->get_result();
 
+// Check if prepare was successful
+$stmt_hosted = $connection->prepare($hostedSql);
+if ($stmt_hosted === false) {
+    die("Error preparing hosted events query: " . $connection->error);
+}
+
+$searchHostParam = "%$searchHost%";
+$stmt_hosted->bind_param("is", $userID, $searchHostParam);
+
+if (!$stmt_hosted->execute()) {
+    die("Error executing hosted events query: " . $stmt_hosted->error);
+}
+
+$hostedEvents = $stmt_hosted->get_result();
 
 ?>
 

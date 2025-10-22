@@ -85,25 +85,56 @@ switch($sortBy) {
         break;
 }
 
-if ($stmt = $connection->prepare($query)) {
-    if (!empty($params)) {
-        $stmt->bind_param($types, ...$params);
-    }
-    
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        $events = $result->fetch_all(MYSQLI_ASSOC);
-        $eventCount = count($events);
-    } else {
-        error_log("Event query execution failed: " . $stmt->error);
-        $events = [];
-        $eventCount = 0;
-    }
-    $stmt->close();
-} else {
-    error_log("Event query preparation failed: " . $connection->error);
+$stmt = $connection->prepare($query);
+if ($stmt === false) {
+    error_log("Prepare failed: " . $connection->error);
     $events = [];
     $eventCount = 0;
+} else {
+    // Only bind parameters if there are any
+    if (!empty($params)) {
+        if (!$stmt->bind_param($types, ...$params)) {
+            error_log("Bind param failed: " . $stmt->error);
+            $events = [];
+            $eventCount = 0;
+            $stmt->close();
+        } else {
+            if ($stmt->execute()) {
+                $result = $stmt->get_result();
+                if ($result) {
+                    $events = $result->fetch_all(MYSQLI_ASSOC);
+                    $eventCount = count($events);
+                } else {
+                    error_log("Get result failed: " . $stmt->error);
+                    $events = [];
+                    $eventCount = 0;
+                }
+            } else {
+                error_log("Execute failed: " . $stmt->error);
+                $events = [];
+                $eventCount = 0;
+            }
+            $stmt->close();
+        }
+    } else {
+        // No parameters to bind, just execute
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            if ($result) {
+                $events = $result->fetch_all(MYSQLI_ASSOC);
+                $eventCount = count($events);
+            } else {
+                error_log("Get result failed: " . $stmt->error);
+                $events = [];
+                $eventCount = 0;
+            }
+        } else {
+            error_log("Execute failed: " . $stmt->error);
+            $events = [];
+            $eventCount = 0;
+        }
+        $stmt->close();
+    }
 }
 ?>
 

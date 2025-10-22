@@ -24,6 +24,11 @@ $previousPage = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $in
 if ($profileUserID <= 0) {
     showErrorPopup("Invalid user profile requested.", $previousPage);
 } else {
+    $isViewingOwnProfile = ($profileUserID == $currentUserID);
+    if ($isViewingOwnProfile) {
+        header("Location: " . $indexUrl);
+        exit();
+    }
     // Fetch profile user data with proper error handling
     $query = "SELECT fullName, username, bio, point, tradesCompleted, country, userType FROM tblusers WHERE userID = ?";
     
@@ -486,8 +491,8 @@ if ($profileUserID <= 0) {
     <hr>
     
     <!-- Main Content -->
-    <main class="content">
-        <section class="profile-container">
+    <main>
+        <section class="profile-container content">
             <!-- Back Button -->
             <a href="javascript:history.back()" class="back-button">
                 ← Back
@@ -522,16 +527,12 @@ if ($profileUserID <= 0) {
                     </div>
                 </div>
                 <!-- only show action buttons if that user is not admin or own profile -->
-                <?php if ($profileUserIsAdmin || ($profileUserID === $currentUserID)): ?>
+                <?php if ($profileUserID !== $currentUserID && !$profileUserIsAdmin): ?>
                 <div class="action-buttons">
-                    <a href="../../pages/MemberPages/mCreateTicket.php" 
-                       class="action-btn" 
-                       title="Report User">
+                    <a href="../../pages/MemberPages/mCreateTicket.php" class="action-btn" title="Report User">
                         <img src="../../assets/images/report-icon-light.svg" alt="Report" class="report-icon">
                     </a>
-                    <a href="../../pages/MemberPages/mChat.html" 
-                       class="action-btn" 
-                       title="Chat">
+                    <a href="../../pages/MemberPages/mChat.html" class="action-btn" title="Chat">
                         <img src="../../assets/images/chat-light.svg" alt="Chat" class="chat-icon">
                     </a>
                 </div>
