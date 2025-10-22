@@ -793,13 +793,11 @@ if ($profileUserID === 0) {
                 }, 200);
             }
         }
-
-        // Auto-redirect after 3 seconds
         setTimeout(() => {
             if (document.getElementById('errorPopup')) {
                 redirectBack();
             }
-        }, 3000);
+        }, 1000);
     </script>
 </body>
 </html>

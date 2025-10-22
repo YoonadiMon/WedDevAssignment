@@ -218,6 +218,19 @@ $userInfo = mysqli_fetch_assoc($userResult);
             color: var(--Gray);
         }
 
+        .event-host-info a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .event-host-info a:hover {
+            text-decoration: underline;
+        }
+
+        .event-host-info a:visited {
+            color: var(--text-color);
+        }
+
         /* Event Content */
         .event-content {
             display: grid;
@@ -734,6 +747,7 @@ $userInfo = mysqli_fetch_assoc($userResult);
         <section class="content" id="content">
             <div class="event-detail-container">
                 <a href="javascript:history.back()" class="back-button">← Back</a>
+
                 <?php if ($registrationSuccess): ?>
                     <div class="alert alert-success">
                         Registration successful! You are now registered for this event.
@@ -782,11 +796,15 @@ $userInfo = mysqli_fetch_assoc($userResult);
                                 <span><?php echo htmlspecialchars($event['location'] . ", " . $event['country']); ?></span>
                             </div>
                         </div>
-
+                                    
                         <div class="event-host">
                             <div class="event-host-avatar"><?php echo $hostInitial; ?></div>
                             <div class="event-host-info">
-                                <h4>Hosted by <span><?php echo htmlspecialchars($event['hostName']); ?></span></h4>
+                                <h4>Hosted by 
+                                <span><a href="../../pages/CommonPages/viewProfile.php?userID=<?php echo $event['userID']; ?>">
+                                    <?php echo htmlspecialchars($event['hostName']); ?>
+                                </a></span>
+                            </h4>
                                 <p><?php echo htmlspecialchars($event['hostEmail']); ?></p>
                             </div>
                         </div>
