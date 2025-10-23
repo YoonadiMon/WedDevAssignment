@@ -32,6 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
             $user = mysqli_fetch_assoc($result);
             
             if (password_verify($password, $user['password'])) {
+                // Update lastLogin timestamp
+                $updateLoginQuery = "UPDATE tblusers SET lastLogin = NOW() WHERE userID = " . $user['userID'];
+                mysqli_query($connection, $updateLoginQuery);
+
                 // Set session variables
                 $_SESSION['userID'] = $user['userID'];
                 $_SESSION['username'] = $user['username'];
@@ -97,8 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             
             // Insert new user 
-            $insertQuery = "INSERT INTO tblusers (fullName, username, email, password, country, userType, point, bio, gender) 
-                           VALUES ('$fullname', '$username', '$email', '$hashedPassword', '$country', 'member', 0, '', '')";
+            $insertQuery = "INSERT INTO tblusers (fullName, username, email, password, country, userType, point, bio, gender, tradesCompleted, lastLogin, createdAt) 
+               VALUES ('$fullname', '$username', '$email', '$hashedPassword', '$country', 'member', 0, '', '', 0, NOW(), NOW())";
             
             if (mysqli_query($connection, $insertQuery)) {
                 $_SESSION['registration_success'] = true;

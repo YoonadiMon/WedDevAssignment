@@ -327,6 +327,10 @@ if ($profileUserID <= 0) {
                 gap: 1rem;
             }
 
+            .username-country-wrapper {
+                justify-content: center;
+            }
+
             .profile-bio-wrapper {
                 width: 100%;
                 max-width: 100%;
@@ -376,6 +380,10 @@ if ($profileUserID <= 0) {
             
             .profile-name {
                 font-size: 1.25rem;
+            }
+
+            .username-country-wrapper {
+                justify-content: center;
             }
         }
     </style>
@@ -428,7 +436,7 @@ if ($profileUserID <= 0) {
                     <?php if ($isAdmin): ?>
                         <!-- Admin Menu Items -->
                         <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -436,7 +444,7 @@ if ($profileUserID <= 0) {
                     <?php else: ?>
                         <!-- Member Menu Items -->
                         <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -450,7 +458,7 @@ if ($profileUserID <= 0) {
             <?php if ($isAdmin): ?>
                 <!-- Admin Desktop Menu -->
                 <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -458,7 +466,7 @@ if ($profileUserID <= 0) {
             <?php else: ?>
                 <!-- Member Desktop Menu -->
                 <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -619,7 +627,7 @@ if ($profileUserID <= 0) {
             <div>
                 <b>Community</b><br>
                 <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
-                <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
+                <a href="../../pages/CommonPages/mainBlog.php">Blogs</a><br>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             </div>
         </section>

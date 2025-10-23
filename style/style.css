@@ -543,8 +543,9 @@ c.btn-small:hover {
 }
 
 .c-input:focus {
-    border: 2px solid var(--MainGreen);
+    border-color: var(--MainGreen);
     outline: none;
+    box-shadow: 0 0 0 3px var(--LowGreen);
 }
 
 .c-input::placeholder {

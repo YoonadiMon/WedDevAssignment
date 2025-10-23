@@ -628,7 +628,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                     <?php if ($isAdmin): ?>
                         <!-- Admin Menu Items -->
                         <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -636,7 +636,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                     <?php else: ?>
                         <!-- Member Menu Items -->
                         <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -650,7 +650,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             <?php if ($isAdmin): ?>
                 <!-- Admin Desktop Menu -->
                 <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -658,7 +658,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             <?php else: ?>
                 <!-- Member Desktop Menu -->
                 <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -749,7 +749,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                     
                     <div class="form-group">
                         <label for="categorySelect">Category <span class="required">*</span></label>
-                        <select id="categorySelect" required>
+                        <select class="c-input c-input-select" id="categorySelect" required>
                             <option value="" disabled>-- Select Category --</option>
                             <option value="General">General</option>
                             <option value="Blog">Blog</option>
@@ -850,7 +850,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             <div>
                 <b>Community</b><br>
                 <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
-                <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
+                <a href="../../pages/CommonPages/mainBlog.php">Blogs</a><br>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             </div>
         </section>

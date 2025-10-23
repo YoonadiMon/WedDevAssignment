@@ -227,30 +227,49 @@ if ($userRank == 0 && isset($userData['point'])) {
             white-space: normal;
         }
 
-        .edit-btn {
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .action-btn {
             background: none;
             border: none;
             cursor: pointer;
-            padding: 0.75rem;
+            padding: 0.75rem;    
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
+            border-radius: 8px;
+            text-decoration: none;
         }
 
-        .edit-btn:hover {
+        .action-btn:hover {
             transform: translateY(-2px);
+            background: var(--sec-bg-color);
         }
 
-        .edit-btn img {
+        .action-btn img {
             width: 24px;
             height: 24px;
+        }
+
+        .edit-icon {
             content: url('../../assets/images/edit-icon-light.svg');
         }
 
-        .dark-mode .edit-btn img {
+        .dark-mode .edit-icon {
             content: url('../../assets/images/edit-icon-dark.svg');
+        }
+
+        .log-out-icon {
+            content: url('../../assets/images/log-out-icon-light.svg');
+        }
+
+        .dark-mode .log-out-icon {
+            content: url('../../assets/images/log-out-icon-dark.svg');
         }
 
         .stats-bar {
@@ -286,7 +305,7 @@ if ($userRank == 0 && isset($userData['point'])) {
             color: var(--Gray);
         }
 
-        .leaderboard-section {
+        .leaderboard {
             background: var(--bg-color);
             border: 1px solid var(--Gray);
             border-radius: 16px;
@@ -294,7 +313,7 @@ if ($userRank == 0 && isset($userData['point'])) {
             margin-top: 2rem;
         }
 
-        .section-title {
+        .leaderboard-title {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--text-color);
@@ -306,6 +325,28 @@ if ($userRank == 0 && isset($userData['point'])) {
             list-style: none;
             padding: 0;
             margin: 0;
+        }
+
+        .leaderboard-link {
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            border-bottom: 1px solid var(--text-color);
+        }
+
+        .leaderboard-link:hover .leaderboard-item {
+            background: var(--LightGreen);
+            border-color: var(--MainGreen);
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .leaderboard-link:hover .leaderboard-item {
+            background: var(--LowGreen);
+        }
+
+        .leaderboard-link:hover .user-username {
+            color: var(--MainGreen);
         }
 
         .leaderboard-item {
@@ -341,7 +382,7 @@ if ($userRank == 0 && isset($userData['point'])) {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: var(--Gray);
+            background: var(--DarkerGray);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -442,8 +483,16 @@ if ($userRank == 0 && isset($userData['point'])) {
                 font-size: 1.5rem;
             }
 
+            .username-country-wrapper {
+                justify-content: center;
+            }
+
             .profile-details {
                 text-align: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
             }
         }
 
@@ -464,6 +513,10 @@ if ($userRank == 0 && isset($userData['point'])) {
             
             .profile-name {
                 font-size: 1.25rem;
+            }
+
+            .username-country-wrapper {
+                justify-content: center;
             }
         }
     </style>
@@ -548,7 +601,7 @@ if ($userRank == 0 && isset($userData['point'])) {
                         </a>
                     </section>
                     <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                     <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -582,8 +635,8 @@ if ($userRank == 0 && isset($userData['point'])) {
     <hr>
 
     <!-- Main Content -->
-    <main class="content">
-        <section class="profile-container">
+    <main>
+        <section class="content profile-container">
             <!-- Profile Header -->
             <div class="profile-top">
                 <div class="profile-info">
@@ -592,9 +645,9 @@ if ($userRank == 0 && isset($userData['point'])) {
                         <h1 class="profile-name"><?php echo htmlspecialchars($userData['fullName']); ?></h1>
                         <div class="username-country-wrapper">
                             <div class="profile-username-wrapper">
-                            <p class="profile-username">
-                                @<?php echo htmlspecialchars($userData['username']); ?>
-                            </p>
+                                <p class="profile-username">
+                                    @<?php echo htmlspecialchars($userData['username']); ?>
+                                </p>
                             </div>
                             <div class="profile-country-wrapper">
                                 <img src="../../assets/images/location-icon-light.svg" alt="Location">
@@ -612,9 +665,14 @@ if ($userRank == 0 && isset($userData['point'])) {
                         </div>
                     </div>
                 </div>
-                <a href="../../pages/MemberPages/mProfile.php" class="edit-btn">
-                    <img src="../../assets/images/edit-icon-light.svg" alt="Edit Profile">
-                </a>
+                <div class="action-buttons">
+                    <a href="../../pages/MemberPages/mProfile.php" class="action-btn">
+                        <img src="../../assets/images/edit-icon-light.svg" alt="Edit Profile" class="edit-icon">
+                    </a>
+                    <a href="../../php/logOut.php" class="action-btn">
+                        <img src="../../assets/images/log-out-icon-light.svg" alt="Log Out" class="log-out-icon">
+                    </a>
+                </div>
             </div>
 
             <!-- Stats Bar -->
@@ -637,36 +695,40 @@ if ($userRank == 0 && isset($userData['point'])) {
                 </div>
             </div>
             
-            <!-- Leaderboard Section -->
-            <section class="leaderboard-section">
-                <h2 class="section-title">Leaderboard</h2>
+            <!-- Leaderboard -->
+            <section class="leaderboard">
+                <h2 class="leaderboard-title">Leaderboard</h2>
                 <ul class="leaderboard-list">
                     <?php foreach ($leaderboard as $index => $user): ?>
-                        <li class="leaderboard-item <?php echo ($user['userID'] == $userID) ? 'current-user' : ''; ?>">
-                            <span class="rank-number"><?php echo $index + 1; ?></span>
-                            <div class="user-avatar-small">
-                                <?php echo htmlspecialchars(getInitials($user['fullName'])); ?>
-                            </div>
-                            <div class="user-info">
-                                <div class="user-fullname"><?php echo htmlspecialchars($user['fullName']); ?></div>
-                                <div class="user-username">@<?php echo htmlspecialchars($user['username']); ?></div>
-                            </div>
-                            <span class="user-points"><?php echo number_format($user['point']); ?> Points</span>
-                        </li>
+                        <a href="../../pages/CommonPages/viewProfile.php?userID=<?php echo $user['userID']; ?>" class="leaderboard-link">
+                            <li class="leaderboard-item <?php echo ($user['userID'] == $userID) ? 'current-user' : ''; ?>">
+                                <span class="rank-number"><?php echo $index + 1; ?></span>
+                                <div class="user-avatar-small">
+                                    <?php echo htmlspecialchars(getInitials($user['fullName'])); ?>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-fullname"><?php echo htmlspecialchars($user['fullName']); ?></div>
+                                    <div class="user-username">@<?php echo htmlspecialchars($user['username']); ?></div>
+                                </div>
+                                <span class="user-points"><?php echo number_format($user['point']); ?> Points</span>
+                            </li>
+                        </a>
                     <?php endforeach; ?>
                     
                     <?php if ($userRank > 5): ?>
-                        <li class="leaderboard-item current-user" style="margin-top: 1rem; border-top: 2px solid var(--MainGreen);">
-                            <span class="rank-number"><?php echo $userRank; ?></span>
-                            <div class="user-avatar-small">
-                                <?php echo htmlspecialchars($initials); ?>
-                            </div>
-                            <div class="user-info">
-                                <div class="user-fullname"><?php echo htmlspecialchars($userData['fullName']); ?></div>
-                                <div class="user-username">@<?php echo htmlspecialchars($userData['username']); ?></div>
-                            </div>
-                            <span class="user-points"><?php echo number_format($userData['point']); ?> Points</span>
-                        </li>
+                        <a href="../../pages/CommonPages/viewProfile.php?userID=<?php echo $userID; ?>" class="leaderboard-link">
+                            <li class="leaderboard-item current-user" style="margin-top: 1rem; border-top: 2px solid var(--MainGreen);">
+                                <span class="rank-number"><?php echo $userRank; ?></span>
+                                <div class="user-avatar-small">
+                                    <?php echo htmlspecialchars($initials); ?>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-fullname"><?php echo htmlspecialchars($userData['fullName']); ?></div>
+                                    <div class="user-username">@<?php echo htmlspecialchars($userData['username']); ?></div>
+                                </div>
+                                <span class="user-points"><?php echo number_format($userData['point']); ?> Points</span>
+                            </li>
+                        </a>
                     <?php endif; ?>
                 </ul>
             </section>
