@@ -482,6 +482,7 @@ c.btn-small:hover {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    margin-top: 1rem;
     
 }
 
@@ -505,7 +506,7 @@ c.btn-small:hover {
 
 .c-navbar-side-more {
     position: flex;
-    margin-bottom: 4rem;
+    margin-bottom: 1rem;
 }
 
 .c-navbar-more {
@@ -786,6 +787,7 @@ Desktop (e.g., ~1150px - 1200px) */
 .c-chatbox {
   position: relative;
   display: inline-flex;
+  max-height: 45px;
 }
 
 
