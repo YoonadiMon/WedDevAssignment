@@ -643,213 +643,202 @@ if ($stmt = $connection->prepare($query)) {
     <hr>
 
     <!-- Main Content -->
-    <main>
-        <section class="content" id="content">
-            <section class="btn-wrapper">
-                <div class="btn-left-group">
-                    <a href="../../pages/CommonPages/createEvent.php" class="c-btn c-btn-primary top-btn">Host an Event</a>
-                    <a href="../../pages/CommonPages/myEvents.php" class="c-btn c-btn-primary top-btn">My Events</a>
+    <main class="content" id="content">
+        <section class="btn-wrapper">
+            <div class="btn-left-group">
+                <a href="../../pages/CommonPages/createEvent.php" class="c-btn c-btn-primary top-btn">Host an Event</a>
+                <a href="../../pages/CommonPages/myEvents.php" class="c-btn c-btn-primary top-btn">My Events</a>
+            </div>
+            <button class="c-btn c-btn-primary top-btn filter-toggle" onclick="toggleFilters()">Show Filters</button>
+        </section>
+
+        <section class="event-browse-container">
+            <!-- Filter Sidebar -->
+            <aside class="filter-sidebar" id="filterSidebar">
+                <h3>Filters</h3>
+
+                <form method="GET" action="" id="filterForm">
+                    <div class="filter-group">
+                        <h4>Mode</h4>
+                        <div class="filter-option">
+                            <input type="checkbox" id="online" name="mode[]" value="online" 
+                                <?php echo in_array('online', $filterMode) ? 'checked' : ''; ?>>
+                            <label for="online">Online</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="physical" name="mode[]" value="physical" 
+                                <?php echo in_array('physical', $filterMode) ? 'checked' : ''; ?>>
+                            <label for="physical">Physical</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="hybrid" name="mode[]" value="hybrid" 
+                                <?php echo in_array('hybrid', $filterMode) ? 'checked' : ''; ?>>
+                            <label for="hybrid">Hybrid</label>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <h4>Type</h4>
+                        <div class="filter-option">
+                            <input type="checkbox" id="cleanup" name="type[]" value="clean-up" 
+                                <?php echo in_array('clean-up', $filterType) ? 'checked' : ''; ?>>
+                            <label for="cleanup">Clean-up</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="workshop" name="type[]" value="workshop" 
+                                <?php echo in_array('workshop', $filterType) ? 'checked' : ''; ?>>
+                            <label for="workshop">Workshop</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="planting" name="type[]" value="tree-planting" 
+                                <?php echo in_array('tree-planting', $filterType) ? 'checked' : ''; ?>>
+                            <label for="planting">Tree Planting</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="campaign" name="type[]" value="campaign" 
+                                <?php echo in_array('campaign', $filterType) ? 'checked' : ''; ?>>
+                            <label for="campaign">Campaign</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="talk" name="type[]" value="talk" 
+                                <?php echo in_array('talk', $filterType) ? 'checked' : ''; ?>>
+                            <label for="talk">Talk</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="seminar" name="type[]" value="seminar" 
+                                <?php echo in_array('seminar', $filterType) ? 'checked' : ''; ?>>
+                            <label for="seminar">Seminar</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="competition" name="type[]" value="competition" 
+                                <?php echo in_array('competition', $filterType) ? 'checked' : ''; ?>>
+                            <label for="competition">Competition</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="other" name="type[]" value="other" 
+                                <?php echo in_array('other', $filterType) ? 'checked' : ''; ?>>
+                            <label for="other">Other</label>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <h4>Status</h4>
+                        <div class="filter-option">
+                            <input type="checkbox" id="open" name="status[]" value="open" 
+                                <?php echo in_array('open', $filterStatus) ? 'checked' : ''; ?>>
+                            <label for="open">Open</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="closed" name="status[]" value="closed" 
+                                <?php echo in_array('closed', $filterStatus) ? 'checked' : ''; ?>>
+                            <label for="Closed">Closed</label>
+                        </div>
+                    </div>
+                    <input type="hidden" name="search" value="<?php echo htmlspecialchars($searchQuery); ?>">
+                    <input type="hidden" name="sortBy" value="<?php echo htmlspecialchars($sortBy); ?>">
+                </form>
+
+                <button class="filter-clear" onclick="clearFilters()">Clear All Filters</button>
+            </aside>
+
+            <!-- Event Content -->
+            <div class="event-content">                    
+                <!-- Search Bar -->
+                <div class="event-search-bar">
+                    <div class="event-count">Showing <span id="eventCount"><?php echo $eventCount; ?></span> events</div>
+                    <div class="search-input-wrapper">
+                        <input type="text" id="eventSearch" placeholder="Search events..." class="c-input event-search-input" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+                        <button onclick="performSearch()" class="search-btn">Search</button>
+                    </div>
                 </div>
-                <button class="c-btn c-btn-primary top-btn filter-toggle" onclick="toggleFilters()">Show Filters</button>
-            </section>
-
-            <div class="event-browse-container">
-                <!-- Filter Sidebar -->
-                <aside class="filter-sidebar" id="filterSidebar">
-                    <h3>Filters</h3>
-
-                    <form method="GET" action="" id="filterForm">
-                        <div class="filter-group">
-                            <h4>Mode</h4>
-                            <div class="filter-option">
-                                <input type="checkbox" id="online" name="mode[]" value="online" 
-                                    <?php echo in_array('online', $filterMode) ? 'checked' : ''; ?>>
-                                <label for="online">Online</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="physical" name="mode[]" value="physical" 
-                                    <?php echo in_array('physical', $filterMode) ? 'checked' : ''; ?>>
-                                <label for="physical">Physical</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="hybrid" name="mode[]" value="hybrid" 
-                                    <?php echo in_array('hybrid', $filterMode) ? 'checked' : ''; ?>>
-                                <label for="hybrid">Hybrid</label>
-                            </div>
-                        </div>
-
-                        <div class="filter-group">
-                            <h4>Type</h4>
-                            <div class="filter-option">
-                                <input type="checkbox" id="cleanup" name="type[]" value="clean-up" 
-                                    <?php echo in_array('clean-up', $filterType) ? 'checked' : ''; ?>>
-                                <label for="cleanup">Clean-up</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="workshop" name="type[]" value="workshop" 
-                                    <?php echo in_array('workshop', $filterType) ? 'checked' : ''; ?>>
-                                <label for="workshop">Workshop</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="planting" name="type[]" value="tree-planting" 
-                                    <?php echo in_array('tree-planting', $filterType) ? 'checked' : ''; ?>>
-                                <label for="planting">Tree Planting</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="campaign" name="type[]" value="campaign" 
-                                    <?php echo in_array('campaign', $filterType) ? 'checked' : ''; ?>>
-                                <label for="campaign">Campaign</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="talk" name="type[]" value="talk" 
-                                    <?php echo in_array('talk', $filterType) ? 'checked' : ''; ?>>
-                                <label for="talk">Talk</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="seminar" name="type[]" value="seminar" 
-                                    <?php echo in_array('seminar', $filterType) ? 'checked' : ''; ?>>
-                                <label for="seminar">Seminar</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="competition" name="type[]" value="competition" 
-                                    <?php echo in_array('competition', $filterType) ? 'checked' : ''; ?>>
-                                <label for="competition">Competition</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="other" name="type[]" value="other" 
-                                    <?php echo in_array('other', $filterType) ? 'checked' : ''; ?>>
-                                <label for="other">Other</label>
-                            </div>
-                        </div>
-
-                        <div class="filter-group">
-                            <h4>Status</h4>
-                            <div class="filter-option">
-                                <input type="checkbox" id="open" name="status[]" value="open" 
-                                    <?php echo in_array('open', $filterStatus) ? 'checked' : ''; ?>>
-                                <label for="open">Open</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="closed" name="status[]" value="closed" 
-                                    <?php echo in_array('closed', $filterStatus) ? 'checked' : ''; ?>>
-                                <label for="Closed">Closed</label>
-                            </div>
-                        </div>
-                        <input type="hidden" name="search" value="<?php echo htmlspecialchars($searchQuery); ?>">
-                        <input type="hidden" name="sortBy" value="<?php echo htmlspecialchars($sortBy); ?>">
-                    </form>
-
-                    <button class="filter-clear" onclick="clearFilters()">Clear All Filters</button>
-                </aside>
-
-                <!-- Event Content -->
-                <div class="event-content">                    
-                    <!-- Search Bar -->
-                    <div class="event-search-bar">
-                        <div class="event-count">Showing <span id="eventCount"><?php echo $eventCount; ?></span> events</div>
-                        <div class="search-input-wrapper">
-                            <input type="text" id="eventSearch" placeholder="Search events..." class="c-input event-search-input" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
-                            <button onclick="performSearch()" class="search-btn">Search</button>
-                        </div>
+                
+                <!-- Sort Bar -->
+                <div class="event-sort-bar">
+                    <div class="sort-control">
+                        <label for="sortBy">Sort by:</label>
+                        <select class="c-input c-input-select" id="sortBy" name="sortBy" onchange="updateSort()">
+                            <option value="newest" <?php echo $sortBy == 'newest' ? 'selected' : ''; ?>>Newest First</option>
+                            <option value="oldest" <?php echo $sortBy == 'oldest' ? 'selected' : ''; ?>>Oldest First</option>
+                            <option value="popular" <?php echo $sortBy == 'popular' ? 'selected' : ''; ?>>Most Popular</option>
+                            <option value="date" <?php echo $sortBy == 'date' ? 'selected' : ''; ?>>Event Date</option>
+                        </select>
                     </div>
-                    
-                    <!-- Sort Bar -->
-                    <div class="event-sort-bar">
-                        <div class="sort-control">
-                            <label for="sortBy">Sort by:</label>
-                            <select class="c-input c-input-select" id="sortBy" name="sortBy" onchange="updateSort()">
-                                <option value="newest" <?php echo $sortBy == 'newest' ? 'selected' : ''; ?>>Newest First</option>
-                                <option value="oldest" <?php echo $sortBy == 'oldest' ? 'selected' : ''; ?>>Oldest First</option>
-                                <option value="popular" <?php echo $sortBy == 'popular' ? 'selected' : ''; ?>>Most Popular</option>
-                                <option value="date" <?php echo $sortBy == 'date' ? 'selected' : ''; ?>>Event Date</option>
-                            </select>
-                        </div>
-                    </div>
+                </div>
 
-                    <!-- Event Grid -->
-                    <div class="event-grid" id="eventGrid">
-                        <?php if ($eventCount == 0): ?>
-                            <p class="no-results-text">
-                                No events found matching your filters.
-                            </p>
-                        <?php else: ?>
-                            <?php foreach ($events as $event): ?>
-                                <a href="joinEvent.php?id=<?php echo $event['eventID']; ?>" class="event-card">
-                                    <?php if (!empty($event['bannerFilePath'])): ?>
-                                        <img src="<?php echo htmlspecialchars($event['bannerFilePath']); ?>" 
-                                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
-                                            class="event-card-banner" 
-                                            onerror="this.src='../../assets/images/Logo.png'; this.classList.add('event-card-placeholder')">
-                                    <?php else: ?>
-                                        <img src="../../assets/images/Logo.png" 
-                                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
-                                            class="event-card-banner event-card-placeholder">
-                                    <?php endif; ?>
-                                    <?php
-                                        $maxDescriptionLength = 250; // characters
-                                        $maxLocationLength = 70; // characters
+                <!-- Event Grid -->
+                <div class="event-grid" id="eventGrid">
+                    <?php if ($eventCount == 0): ?>
+                        <p class="no-results-text">
+                            No events found matching your filters.
+                        </p>
+                    <?php else: ?>
+                        <?php foreach ($events as $event): ?>
+                            <a href="joinEvent.php?id=<?php echo $event['eventID']; ?>" class="event-card">
+                                <?php if (!empty($event['bannerFilePath'])): ?>
+                                    <img src="<?php echo htmlspecialchars($event['bannerFilePath']); ?>" 
+                                        alt="<?php echo htmlspecialchars($event['title']); ?>" 
+                                        class="event-card-banner" 
+                                        onerror="this.src='../../assets/images/Logo.png'; this.classList.add('event-card-placeholder')">
+                                <?php else: ?>
+                                    <img src="../../assets/images/Logo.png" 
+                                        alt="<?php echo htmlspecialchars($event['title']); ?>" 
+                                        class="event-card-banner event-card-placeholder">
+                                <?php endif; ?>
+                                <?php
+                                    $maxDescriptionLength = 250; // characters
+                                    $maxLocationLength = 70; // characters
 
-                                        $description = $event['description'];
-                                        if (strlen($description) > $maxDescriptionLength) {
-                                            $description = substr($description, 0, $maxDescriptionLength) . '...';
-                                        }
+                                    $description = $event['description'];
+                                    if (strlen($description) > $maxDescriptionLength) {
+                                        $description = substr($description, 0, $maxDescriptionLength) . '...';
+                                    }
 
-                                        $location = $event['location'] . ", " . $event['country'];
-                                        if (strlen($location) > $maxLocationLength) {
-                                            $location = substr($location, 0, $maxLocationLength) . '...';
-                                        }
-                                    ?>
+                                    $location = $event['location'] . ", " . $event['country'];
+                                    if (strlen($location) > $maxLocationLength) {
+                                        $location = substr($location, 0, $maxLocationLength) . '...';
+                                    }
+                                ?>
 
-                                    <div class="event-card-content">
-                                        <div class="event-card-date">
-                                            <?php echo date('M d, Y', strtotime($event['startDate'])); ?>
+                                <div class="event-card-content">
+                                    <div class="event-card-date">
+                                        <?php echo date('M d, Y', strtotime($event['startDate'])); ?>
+                                    </div>
+                                    <h3 class="event-card-title"><?php echo htmlspecialchars($event['title']); ?></h3>
+                                    <div class="event-card-location">
+                                        📍 <?php echo htmlspecialchars($location); ?>
+                                    </div>
+                                    <p class="event-card-description">
+                                        <?php echo htmlspecialchars($description); ?>
+                                    </p>
+                                    <div class="event-card-footer">
+                                        <div class="event-card-attendees">
+                                            👥 <?php echo $event['maxPax']; ?> max attendees
                                         </div>
-                                        <h3 class="event-card-title"><?php echo htmlspecialchars($event['title']); ?></h3>
-                                        <div class="event-card-location">
-                                            📍 <?php echo htmlspecialchars($location); ?>
-                                        </div>
-                                        <p class="event-card-description">
-                                            <?php echo htmlspecialchars($description); ?>
-                                        </p>
-                                        <div class="event-card-footer">
-                                            <div class="event-card-attendees">
-                                                👥 <?php echo $event['maxPax']; ?> max attendees
-                                            </div>
-                                            <div class="event-card-mode">
-                                                <?php echo htmlspecialchars($event['mode']); ?>
-                                            </div>
+                                        <div class="event-card-mode">
+                                            <?php echo htmlspecialchars($event['mode']); ?>
                                         </div>
                                     </div>
-                                </a>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
-            <br>
         </section>
-
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="tickets">Tickets</div>
-                <?php endif; ?>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="faqs">FAQ</div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Results -->
-            <div class="results" id="results"></div>
-        </section>
+        <br>
     </main>
+
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
 
     <?php if (!$isAdmin): ?>
     <!-- Footer (Member Only) -->

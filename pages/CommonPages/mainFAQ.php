@@ -608,7 +608,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
                         <?php if ($isAdmin): ?>
                             <!-- Admin Navigation Icons -->
-                            <a href="../../pages/adminPages/aProfile.html">
+                            <a href="../../pages/adminPages/aProfile.php">
                                 <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
                         <?php else: ?>
@@ -691,8 +691,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     <hr>
 
     <!-- Main Content -->
-    <main>
-        <div class="content faq-container" id="faqContainer">
+    <main class="content" id="content">
+        <section class="faq-container" id="faqContainer">
             <div class="faq-content" id="faqContent">
                 <!-- Header -->
                 <div class="faq-header" id="faqHeader">
@@ -790,29 +790,20 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <img src="../../assets/images/edit-icon-light.svg" alt="edit-icon">
             </button>
             <?php endif; ?>
-        </div>
-
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="tickets">Tickets</div>
-                <?php endif; ?>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="faqs">FAQ</div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Results -->
-            <div class="results" id="results"></div>
         </section>
     </main>
+
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
 
     <?php if (!$isAdmin): ?>
     <!-- Footer (Member Only) -->
@@ -837,7 +828,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         <section class="c-footer-links-section">
             <div>
                 <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>

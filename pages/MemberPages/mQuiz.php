@@ -353,7 +353,7 @@ $stmt->close();
                         </section>
 
                         <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php" class="active">Trade</a>
                         <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -365,7 +365,7 @@ $stmt->close();
             <!-- Menu Links Desktop + Tablet -->
             <nav class="c-navbar-desktop">
                 <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php" class="active">Trade</a>
                 <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -390,7 +390,7 @@ $stmt->close();
         <hr>
 
         <!-- Main Content -->
-        <main>
+        <main class="content" id="content">
             <div class="quiz-dashboard">
                 <!-- User Info Card -->
                 <div class="user-info-card">
@@ -445,6 +445,17 @@ $stmt->close();
                 </div>
             </div>
         </main>
+        <!-- Search & Results -->
+        <section class="search-container" id="searchContainer" style="display: none;">
+            <div class="tabs" id="tabs">
+                <div class="tab active" data-type="all">All</div>
+                <div class="tab" data-type="profiles">Profiles</div>
+                <div class="tab" data-type="blogs">Blogs</div>
+                <div class="tab" data-type="events">Events</div>
+                <div class="tab" data-type="trades">Trades</div>
+            </div>
+            <div class="results" id="results"></div>
+        </section>
 
         <hr>
         

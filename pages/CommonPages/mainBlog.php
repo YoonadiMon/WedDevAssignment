@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog</title>
+    <title>ReLeaf - Blog</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
     <link rel="stylesheet" href="../../style/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -426,23 +426,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
   <hr>
 
   <!-- Main Content -->
-  <main>
-    <!-- Search & Results -->
-    <section class="search-container" id="searchContainer" style="display: none;">
-      <!-- Tabs -->
-      <div class="tabs" id="tabs">
-        <div class="tab active" data-type="all">All</div>
-        <div class="tab" data-type="profiles">Profiles</div>
-        <div class="tab" data-type="blogs">Blogs</div>
-        <div class="tab" data-type="events">Events</div>
-        <div class="tab" data-type="trades">Trades</div>
-      </div>
-
-      <!-- Results -->
-      <div class="results" id="results"></div>
-    </section>
-  </main>
-
+  <main class="content" id="content">
     <section class="hero">
         <h5>OUR BLOGS</h5>
         <h1>Find all our blogs from here</h1>
@@ -488,7 +472,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <?php endforeach; ?>
         </div>
     </section>
-
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
+  </main>
+  
     <footer>
         <section class="c-footer-info-section">
             <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
@@ -511,7 +507,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
             </div>
             <div>

@@ -705,231 +705,222 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <hr>
 
     <!-- Main Content -->
-    <main>
-        <section class="content" id="content">
-            <div class="create-event-wrapper">
-                <?php if ($hasError): ?>
-                    <div class="error-message">
-                        <strong>Failed to create event</strong>
-                    </div>
-                <?php endif; ?>
+    <main class="content" id="content">
+        <section class="create-event-wrapper">
+            <?php if ($hasError): ?>
+                <div class="error-message">
+                    <strong>Failed to create event</strong>
+                </div>
+            <?php endif; ?>
 
-                <?php if (isset($_SESSION['success_message'])): ?>
-                    <div class="success-message">
-                        <?php echo htmlspecialchars($_SESSION['success_message']); ?>
-                    </div>
-                    <?php unset($_SESSION['success_message']); ?>
-                <?php endif; ?>
+            <?php if (isset($_SESSION['success_message'])): ?>
+                <div class="success-message">
+                    <?php echo htmlspecialchars($_SESSION['success_message']); ?>
+                </div>
+                <?php unset($_SESSION['success_message']); ?>
+            <?php endif; ?>
 
-                <a href="mainEvent.php" class="back-button">← Back to Events</a>
+            <a href="mainEvent.php" class="back-button">← Back to Events</a>
+            
+            <form class="form-container" method="POST" enctype="multipart/form-data" id="createEventForm">
+                <div class="form-header">
+                    <img src="../../assets/images/Logo.png" alt="Logo">
+                    <h2>Create Your Event</h2>
+                    <p>Start by filling up the form below.</p>
+                </div>
                 
-                <form class="form-container" method="POST" enctype="multipart/form-data" id="createEventForm">
-                    <div class="form-header">
-                        <img src="../../assets/images/Logo.png" alt="Logo">
-                        <h2>Create Your Event</h2>
-                        <p>Start by filling up the form below.</p>
-                    </div>
-                    
-                    <!-- Title Field -->
-                    <div class="form-group full-width <?php echo isset($errors['title']) ? 'has-error' : ''; ?>">
-                        <label>Event Title <span class="required">*</span></label>
-                        <input class="c-input" type="text" name="title" placeholder="Enter event title" 
-                            value="<?php echo htmlspecialchars($formData['title'] ?? ''); ?>" required />
-                        <?php if (isset($errors['title'])): ?>
-                            <span class="field-error"><?php echo htmlspecialchars($errors['title']); ?></span>
+                <!-- Title Field -->
+                <div class="form-group full-width <?php echo isset($errors['title']) ? 'has-error' : ''; ?>">
+                    <label>Event Title <span class="required">*</span></label>
+                    <input class="c-input" type="text" name="title" placeholder="Enter event title" 
+                        value="<?php echo htmlspecialchars($formData['title'] ?? ''); ?>" required />
+                    <?php if (isset($errors['title'])): ?>
+                        <span class="field-error"><?php echo htmlspecialchars($errors['title']); ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Description Field -->
+                <div class="form-group full-width <?php echo isset($errors['description']) ? 'has-error' : ''; ?>">
+                    <label>Description <span class="required">*</span></label>
+                    <textarea class="c-input" name="description" placeholder="Describe your event" required><?php echo htmlspecialchars($formData['description'] ?? ''); ?></textarea>
+                    <?php if (isset($errors['description'])): ?>
+                        <span class="field-error"><?php echo htmlspecialchars($errors['description']); ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Date Fields Row -->
+                <div class="form-row">
+                    <div class="form-group <?php echo isset($errors['startDate']) ? 'has-error' : ''; ?>">
+                        <label>Start Date <span class="required">*</span> <small>(When your event begins)</small></label>
+                        <input class="c-input" type="date" name="startDate" id="startDate" 
+                            value="<?php echo htmlspecialchars($formData['startDate'] ?? ''); ?>" required />
+                        <?php if (isset($errors['startDate'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['startDate']); ?></span>
                         <?php endif; ?>
                     </div>
-
-                    <!-- Description Field -->
-                    <div class="form-group full-width <?php echo isset($errors['description']) ? 'has-error' : ''; ?>">
-                        <label>Description <span class="required">*</span></label>
-                        <textarea class="c-input" name="description" placeholder="Describe your event" required><?php echo htmlspecialchars($formData['description'] ?? ''); ?></textarea>
-                        <?php if (isset($errors['description'])): ?>
-                            <span class="field-error"><?php echo htmlspecialchars($errors['description']); ?></span>
+                    <div class="form-group <?php echo isset($errors['endDate']) ? 'has-error' : ''; ?>">
+                        <label>End Date <span class="required">*</span> <small>(When your event ends)</small></label>
+                        <input class="c-input" type="date" name="endDate" id="endDate" 
+                            value="<?php echo htmlspecialchars($formData['endDate'] ?? ''); ?>" required />
+                        <?php if (isset($errors['endDate'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['endDate']); ?></span>
                         <?php endif; ?>
                     </div>
+                </div>
 
-                    <!-- Date Fields Row -->
-                    <div class="form-row">
-                        <div class="form-group <?php echo isset($errors['startDate']) ? 'has-error' : ''; ?>">
-                            <label>Start Date <span class="required">*</span> <small>(When your event begins)</small></label>
-                            <input class="c-input" type="date" name="startDate" id="startDate" 
-                                value="<?php echo htmlspecialchars($formData['startDate'] ?? ''); ?>" required />
-                            <?php if (isset($errors['startDate'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['startDate']); ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="form-group <?php echo isset($errors['endDate']) ? 'has-error' : ''; ?>">
-                            <label>End Date <span class="required">*</span> <small>(When your event ends)</small></label>
-                            <input class="c-input" type="date" name="endDate" id="endDate" 
-                                value="<?php echo htmlspecialchars($formData['endDate'] ?? ''); ?>" required />
-                            <?php if (isset($errors['endDate'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['endDate']); ?></span>
-                            <?php endif; ?>
-                        </div>
+                <!-- Time & Duration Row -->
+                <div class="form-row">
+                    <div class="form-group <?php echo isset($errors['time']) ? 'has-error' : ''; ?>">
+                        <label>Time <span class="required">*</span> <small>(Event start time)</small></label>
+                        <input class="c-input" type="time" name="time" id="time" 
+                            value="<?php echo htmlspecialchars($formData['time'] ?? ''); ?>" required />
+                        <?php if (isset($errors['time'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['time']); ?></span>
+                        <?php endif; ?>
                     </div>
-
-                    <!-- Time & Duration Row -->
-                    <div class="form-row">
-                        <div class="form-group <?php echo isset($errors['time']) ? 'has-error' : ''; ?>">
-                            <label>Time <span class="required">*</span> <small>(Event start time)</small></label>
-                            <input class="c-input" type="time" name="time" id="time" 
-                                value="<?php echo htmlspecialchars($formData['time'] ?? ''); ?>" required />
-                            <?php if (isset($errors['time'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['time']); ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="form-group <?php echo isset($errors['duration']) ? 'has-error' : ''; ?>">
-                            <label>Duration <span class="required">*</span> <small>(Total number of hours per day)</small></label>
-                            <input class="c-input" type="number" name="duration" min="1" max="24" 
-                                placeholder="Must be between 1 and 24 hours" 
-                                value="<?php echo htmlspecialchars($formData['duration'] ?? ''); ?>" required />
-                            <?php if (isset($errors['duration'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['duration']); ?></span>
-                            <?php endif; ?>
-                        </div>
+                    <div class="form-group <?php echo isset($errors['duration']) ? 'has-error' : ''; ?>">
+                        <label>Duration <span class="required">*</span> <small>(Total number of hours per day)</small></label>
+                        <input class="c-input" type="number" name="duration" min="1" max="24" 
+                            placeholder="Must be between 1 and 24 hours" 
+                            value="<?php echo htmlspecialchars($formData['duration'] ?? ''); ?>" required />
+                        <?php if (isset($errors['duration'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['duration']); ?></span>
+                        <?php endif; ?>
                     </div>
+                </div>
 
-                    <!-- Days & Max Participants Row -->
-                    <div class="form-row">
-                        <div class="form-group <?php echo isset($errors['day']) ? 'has-error' : ''; ?>">
-                            <label>Number of Days <span class="required">*</span> <small>(Total event duration)</small></label>
-                            <input class="c-input" type="number" name="day" min="1" max="60" 
-                                value="<?php echo htmlspecialchars($formData['day'] ?? '1'); ?>" required />
-                            <?php if (isset($errors['day'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['day']); ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="form-group <?php echo isset($errors['maxPax']) ? 'has-error' : ''; ?>">
-                            <label>Maximum Participants <span class="required">*</span></label>
-                            <input class="c-input" type="number" name="maxPax" min="1" 
-                                placeholder="Must be at least 20" 
-                                value="<?php echo htmlspecialchars($formData['maxPax'] ?? ''); ?>" required />
-                            <?php if (isset($errors['maxPax'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['maxPax']); ?></span>
-                            <?php endif; ?>
-                        </div>
+                <!-- Days & Max Participants Row -->
+                <div class="form-row">
+                    <div class="form-group <?php echo isset($errors['day']) ? 'has-error' : ''; ?>">
+                        <label>Number of Days <span class="required">*</span> <small>(Total event duration)</small></label>
+                        <input class="c-input" type="number" name="day" min="1" max="60" 
+                            value="<?php echo htmlspecialchars($formData['day'] ?? '1'); ?>" required />
+                        <?php if (isset($errors['day'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['day']); ?></span>
+                        <?php endif; ?>
                     </div>
+                    <div class="form-group <?php echo isset($errors['maxPax']) ? 'has-error' : ''; ?>">
+                        <label>Maximum Participants <span class="required">*</span></label>
+                        <input class="c-input" type="number" name="maxPax" min="1" 
+                            placeholder="Must be at least 20" 
+                            value="<?php echo htmlspecialchars($formData['maxPax'] ?? ''); ?>" required />
+                        <?php if (isset($errors['maxPax'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['maxPax']); ?></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
-                    <!-- Location & Country Row -->
-                    <div class="form-row">
-                        <div class="form-group <?php echo isset($errors['location']) ? 'has-error' : ''; ?>">
-                            <label>Location <span class="required">*</span></label>
-                            <input class="c-input" type="text" name="location" placeholder="Event location or 'Online'" 
-                                value="<?php echo htmlspecialchars($formData['location'] ?? ''); ?>" required />
-                            <?php if (isset($errors['location'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['location']); ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="form-group <?php echo isset($errors['country']) ? 'has-error' : ''; ?>">
-                            <label>Country <span class="required">*</span></label>
-                            <select class="c-input c-input-select" id="registerCountry" name="country" required>
-                                <option value="" disabled <?php echo empty($formData['country']) ? 'selected' : ''; ?>>Select your Country</option>
-                                <?php 
-                                $query = "SELECT country FROM tblusers WHERE userID = ?";
-                                $stmt = $connection->prepare($query);
-                                $stmt->bind_param("i", $userID);
-                                $stmt->execute();
-                                $stmt->bind_result($userCountry);
-                                $stmt->fetch();
-                                $stmt->close();
+                <!-- Location & Country Row -->
+                <div class="form-row">
+                    <div class="form-group <?php echo isset($errors['location']) ? 'has-error' : ''; ?>">
+                        <label>Location <span class="required">*</span></label>
+                        <input class="c-input" type="text" name="location" placeholder="Event location or 'Online'" 
+                            value="<?php echo htmlspecialchars($formData['location'] ?? ''); ?>" required />
+                        <?php if (isset($errors['location'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['location']); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="form-group <?php echo isset($errors['country']) ? 'has-error' : ''; ?>">
+                        <label>Country <span class="required">*</span></label>
+                        <select class="c-input c-input-select" id="registerCountry" name="country" required>
+                            <option value="" disabled <?php echo empty($formData['country']) ? 'selected' : ''; ?>>Select your Country</option>
+                            <?php 
+                            $query = "SELECT country FROM tblusers WHERE userID = ?";
+                            $stmt = $connection->prepare($query);
+                            $stmt->bind_param("i", $userID);
+                            $stmt->execute();
+                            $stmt->bind_result($userCountry);
+                            $stmt->fetch();
+                            $stmt->close();
 
-                                foreach ($countries as $country) {
-                                    $selected = '';
-                                    if (!empty($formData['country'])) {
-                                        $selected = ($formData['country'] == $country) ? 'selected' : '';
-                                    } elseif ($userCountry == $country) {
-                                        $selected = 'selected';
-                                    }
-                                    echo "<option value=\"$country\" $selected>$country</option>";
+                            foreach ($countries as $country) {
+                                $selected = '';
+                                if (!empty($formData['country'])) {
+                                    $selected = ($formData['country'] == $country) ? 'selected' : '';
+                                } elseif ($userCountry == $country) {
+                                    $selected = 'selected';
                                 }
-                                ?>
-                            </select>
-                            <?php if (isset($errors['country'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['country']); ?></span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
-                    <!-- Event Mode -->
-                    <div class="form-group <?php echo isset($errors['mode']) ? 'has-error' : ''; ?>">
-                        <label>Event Mode <span class="required">*</span></label>
-                        <div class="radio-group">
-                            <label><input type="radio" name="mode" value="online" 
-                                <?php echo ($formData['mode'] ?? '') === 'online' ? 'checked' : ''; ?> required /> Online</label>
-                            <label><input type="radio" name="mode" value="physical" 
-                                <?php echo ($formData['mode'] ?? '') === 'physical' ? 'checked' : ''; ?> /> Physical</label>
-                            <label><input type="radio" name="mode" value="hybrid" 
-                                <?php echo ($formData['mode'] ?? '') === 'hybrid' ? 'checked' : ''; ?> /> Hybrid</label>
-                        </div>
-                        <?php if (isset($errors['mode'])): ?>
-                            <span class="field-error"><?php echo htmlspecialchars($errors['mode']); ?></span>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- Event Type -->
-                    <div class="form-group <?php echo isset($errors['type']) ? 'has-error' : ''; ?>">
-                        <label>Event Type <span class="required">*</span></label>
-                        <select class="c-input c-input-select" name="type" required>
-                            <option value="" disabled <?php echo empty($formData['type']) ? 'selected' : ''; ?>>Select category</option>
-                            <option value="talk" <?php echo ($formData['type'] ?? '') === 'talk' ? 'selected' : ''; ?>>Talk</option>
-                            <option value="workshop" <?php echo ($formData['type'] ?? '') === 'workshop' ? 'selected' : ''; ?>>Workshop</option>
-                            <option value="seminar" <?php echo ($formData['type'] ?? '') === 'seminar' ? 'selected' : ''; ?>>Seminar</option>
-                            <option value="clean-up" <?php echo ($formData['type'] ?? '') === 'clean-up' ? 'selected' : ''; ?>>Clean-up</option>
-                            <option value="campaign" <?php echo ($formData['type'] ?? '') === 'campaign' ? 'selected' : ''; ?>>Campaign</option>
-                            <option value="competition" <?php echo ($formData['type'] ?? '') === 'competition' ? 'selected' : ''; ?>>Competition</option>
-                            <option value="tree-planting" <?php echo ($formData['type'] ?? '') === 'tree-planting' ? 'selected' : ''; ?>>Tree Planting</option>
-                            <option value="other" <?php echo ($formData['type'] ?? '') === 'other' ? 'selected' : ''; ?>>Other</option>
+                                echo "<option value=\"$country\" $selected>$country</option>";
+                            }
+                            ?>
                         </select>
-                        <?php if (isset($errors['type'])): ?>
-                            <span class="field-error"><?php echo htmlspecialchars($errors['type']); ?></span>
+                        <?php if (isset($errors['country'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['country']); ?></span>
                         <?php endif; ?>
                     </div>
+                </div>
 
-                    <!-- Event Banner -->
-                    <div class="form-group <?php echo isset($errors['banner']) ? 'has-error' : ''; ?>">
-                        <label>Event Banner <small>(Optional - PNG, JPG, JPEG)</small></label>
-                        <div id="fileStatus"></div>
-                        <div class="file-upload-area" id="fileUploadArea">
-                            <input type="file" name="banner" id="fileInput" accept="image/*" />
-                            <div class="file-upload-text" id="uploadText">Click to upload or drag and drop</div>
-                            <div class="file-upload-hint">Best viewed at 1200×400px | PNG, JPG, JPEG (Max 5MB)</div>
-                        </div>
-                        <div class="preview-container" id="previewContainer">
-                            <img id="imagePreview" class="preview-image" />
-                            <button type="button" class="replace-btn" id="replaceBtn">Replace Image</button>
-                        </div>
-                        <?php if (isset($errors['banner'])): ?>
-                            <span class="field-error"><?php echo htmlspecialchars($errors['banner']); ?></span>
-                        <?php endif; ?>
+                <!-- Event Mode -->
+                <div class="form-group <?php echo isset($errors['mode']) ? 'has-error' : ''; ?>">
+                    <label>Event Mode <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="mode" value="online" 
+                            <?php echo ($formData['mode'] ?? '') === 'online' ? 'checked' : ''; ?> required /> Online</label>
+                        <label><input type="radio" name="mode" value="physical" 
+                            <?php echo ($formData['mode'] ?? '') === 'physical' ? 'checked' : ''; ?> /> Physical</label>
+                        <label><input type="radio" name="mode" value="hybrid" 
+                            <?php echo ($formData['mode'] ?? '') === 'hybrid' ? 'checked' : ''; ?> /> Hybrid</label>
                     </div>
+                    <?php if (isset($errors['mode'])): ?>
+                        <span class="field-error"><?php echo htmlspecialchars($errors['mode']); ?></span>
+                    <?php endif; ?>
+                </div>
 
-                    <button type="submit" class="save-btn">Create Event</button>
-                </form>
-            </div>
-        </section>
+                <!-- Event Type -->
+                <div class="form-group <?php echo isset($errors['type']) ? 'has-error' : ''; ?>">
+                    <label>Event Type <span class="required">*</span></label>
+                    <select class="c-input c-input-select" name="type" required>
+                        <option value="" disabled <?php echo empty($formData['type']) ? 'selected' : ''; ?>>Select category</option>
+                        <option value="talk" <?php echo ($formData['type'] ?? '') === 'talk' ? 'selected' : ''; ?>>Talk</option>
+                        <option value="workshop" <?php echo ($formData['type'] ?? '') === 'workshop' ? 'selected' : ''; ?>>Workshop</option>
+                        <option value="seminar" <?php echo ($formData['type'] ?? '') === 'seminar' ? 'selected' : ''; ?>>Seminar</option>
+                        <option value="clean-up" <?php echo ($formData['type'] ?? '') === 'clean-up' ? 'selected' : ''; ?>>Clean-up</option>
+                        <option value="campaign" <?php echo ($formData['type'] ?? '') === 'campaign' ? 'selected' : ''; ?>>Campaign</option>
+                        <option value="competition" <?php echo ($formData['type'] ?? '') === 'competition' ? 'selected' : ''; ?>>Competition</option>
+                        <option value="tree-planting" <?php echo ($formData['type'] ?? '') === 'tree-planting' ? 'selected' : ''; ?>>Tree Planting</option>
+                        <option value="other" <?php echo ($formData['type'] ?? '') === 'other' ? 'selected' : ''; ?>>Other</option>
+                    </select>
+                    <?php if (isset($errors['type'])): ?>
+                        <span class="field-error"><?php echo htmlspecialchars($errors['type']); ?></span>
+                    <?php endif; ?>
+                </div>
 
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="tickets">Tickets</div>
-                <?php endif; ?>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="faqs">FAQ</div>
-                <?php endif; ?>
-            </div>
+                <!-- Event Banner -->
+                <div class="form-group <?php echo isset($errors['banner']) ? 'has-error' : ''; ?>">
+                    <label>Event Banner <small>(Optional - PNG, JPG, JPEG)</small></label>
+                    <div id="fileStatus"></div>
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <input type="file" name="banner" id="fileInput" accept="image/*" />
+                        <div class="file-upload-text" id="uploadText">Click to upload or drag and drop</div>
+                        <div class="file-upload-hint">Best viewed at 1200×400px | PNG, JPG, JPEG (Max 5MB)</div>
+                    </div>
+                    <div class="preview-container" id="previewContainer">
+                        <img id="imagePreview" class="preview-image" />
+                        <button type="button" class="replace-btn" id="replaceBtn">Replace Image</button>
+                    </div>
+                    <?php if (isset($errors['banner'])): ?>
+                        <span class="field-error"><?php echo htmlspecialchars($errors['banner']); ?></span>
+                    <?php endif; ?>
+                </div>
 
-            <!-- Results -->
-            <div class="results" id="results"></div>
+                <button type="submit" class="save-btn">Create Event</button>
+            </form>
         </section>
     </main>
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <!-- Tabs -->
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results"></div>
+    </section>
 
     <?php if (!$isAdmin): ?>
     <!-- Footer (Member Only) -->

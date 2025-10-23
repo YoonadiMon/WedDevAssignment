@@ -602,7 +602,7 @@ if (!$connection->ping()) {
                         </a>
                     </section>
                     <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                     <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -613,7 +613,7 @@ if (!$connection->ping()) {
 
         <nav class="c-navbar-desktop">
             <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-            <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+            <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -633,8 +633,8 @@ if (!$connection->ping()) {
     <hr>
 
     <!-- Main Content -->
-    <main>
-        <div class="content manage-users-container">
+    <main class="content" id="content">
+        <div class="manage-users-container">
             <a href="../../pages/adminPages/adminIndex.php" class="back-button">
                 ← Back to Dashboard
             </a>
@@ -731,6 +731,17 @@ if (!$connection->ping()) {
             </div>
         </div>
     </main>
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
 
     <!-- Delete Confirmation Modal -->
     <div class="modal-overlay" id="deleteModal">
@@ -762,7 +773,7 @@ if (!$connection->ping()) {
         </div>
     </div>
 
-    <script>const isAdmin = true;</script>
+    <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
     <script src="../../javascript/mainScript.js"></script>
     <script>
         function showDeleteModal(userId, fullName, username) {

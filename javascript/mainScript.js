@@ -129,224 +129,319 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// disable search for now
-// // Fake data
-// const profiles = [
-//     {UserID:"u1", AvatarURL:"https://i.pravatar.cc/50?img=1", Username:"jdoe", FirstName:"John", LastName:"Doe"},
-//     {UserID:"u2", AvatarURL:"https://i.pravatar.cc/50?img=2", Username:"asmith", FirstName:"Alice", LastName:"Smith"}
-// ];
 
-// const blogs = [
-//     {BlogID:"b1", PostID:"p1", Title:"Intro to Web Dev", Preview:"Learn how to build modern websites", DateTime: "2025-07-29 16:20:00"},
-//     {BlogID:"b2", PostID:"p2", Title:"CSS Tricks", Preview:"Make your designs shine with these tips", DateTime: "2025-08-29 16:20:00"}
-// ];
+// Search Functionality
+let currentType = 'all';
+let currentQuery = '';
+let currentPage = 1;
+let isLoading = false;
+let hasMore = true;
 
-// const events = [
-//     {EventID:"e1", PostID:"p3", Title:"Recycling Talk", Location:"KL", StartDate:"2025-09-21", ImageURL:"https://via.placeholder.com/50", DateTime: "2025-07-29 16:20:00"},
-//     {EventID:"e2", PostID:"p4", Title:"DIY Workshop", Location:"KL", StartDate:"2025-10-10", ImageURL:"https://via.placeholder.com/50", DateTime: "2025-08-29 16:20:00"}
-// ];
+const searchBars = document.querySelectorAll('input[placeholder="Search..."]');
+const searchContainer = document.getElementById("searchContainer");
+const resultsContainer = document.getElementById("results");
+const tabs = document.querySelectorAll(".tab");
+const tabsContainer = document.querySelector(".tabs");
+const content = document.getElementById("content");
 
-// const trades = [
-//     {ListingID:"li1", MemberID:"u1", Title:"Cute Hoodie", Tags:"High Quality Cloth, Cute Heart Pattern", ImageURL:"https://via.placeholder.com/50", DateTime: "2025-07-29 16:20:00"},
-//     {ListingID:"li2", MemberID:"u2", Title:"Used Iphone", Tags:"Still in good condition", ImageURL:"https://via.placeholder.com/50", DateTime: "2025-08-29 16:20:00"}
-// ];
+const SEARCH_API = '../../php/globalSearch.php'; 
 
-// const tickets = [
-//     {TicketID: "t1", MemberID: "m1", Category: "Payment", Subject: "Payment not reflected", DateTime: "2025-08-29 16:20:00", Status: "Open"},
-//     {TicketID: "t2", MemberID: "m2", Category: "Event", Subject: "Registration Issue", DateTime: "2025-08-29 16:20:00", Status: "Close"}
-// ];
+// Fetch search results from API
+async function fetchSearchResults(type, query, page = 1) {
+    if (!query.trim()) return null;
 
-// const faqs = [
-//     {FaqID: "f1", AdminID: "a1", Category: "Account Issues", Question: "How to reset my password?", DateUpdated: "2025-06-29 14:32:00"}
-// ];
+    try {
+        const params = new URLSearchParams({
+            type: type,
+            query: query,
+            page: page
+        });
 
-// // for all search bars
-// const searchBars = document.querySelectorAll('input[placeholder="Search..."]');
+        const response = await fetch(`${SEARCH_API}?${params}`);
+        const data = await response.json();
 
-// const searchContainer = document.getElementById("searchContainer");
-// const resultsContainer = document.getElementById("results");
-// const tabs = document.querySelectorAll(".tab");
-// const tabsContainer = document.querySelector(".tabs");
-// const content = document.getElementById("content");
+        if (data.success) {
+            return data;
+        } else {
+            throw new Error(data.message || 'Search failed');
+        }
+    } catch (error) {
+        console.error('Search error:', error);
+        showError('Failed to fetch search results');
+        return null;
+    }
+}
 
-// // Render results
-// function renderResults(type, query) {
-//     if (!resultsContainer) return;
+function renderResults(data, append = false) {
+    if (!resultsContainer || !data) return;
     
-//     resultsContainer.innerHTML = "";
-//     const lowerQuery = query.toLowerCase();
+    // Remove existing load more button before rendering
+    const existingLoadMoreBtn = resultsContainer.querySelector('.load-more-btn');
+    if (existingLoadMoreBtn) {
+        existingLoadMoreBtn.remove();
+    }
+    
+    if (!append) {
+        resultsContainer.innerHTML = "";
+    }
 
-//     function match(text) {
-//         return text && text.toLowerCase().includes(lowerQuery);
-//     }
+    const { results, type, query } = data;
+    let items = [];
 
-//     let items = [];
+    // profiles
+    if ((type === 'all' || type === 'profiles') && results.profiles && results.profiles.length > 0) {
+        results.profiles.forEach(profile => {
+            items.push(`
+                <div class="result-item clickable" data-url="../../pages/CommonPages/viewProfile.php?userID=${profile.id}">
+                    <div class="avatar-initials">${profile.initials}</div>
+                    <div>
+                        <h4>${profile.title}</h4>
+                        <p>${profile.subtitle} • ${profile.description}</p>
+                        <p>${profile.bio}</p>
+                    </div>
+                </div>
+            `);
+        });
+    }
 
-//     if (isAdmin && (type === "all" || type === "tickets")) {
-//         items.push(
-//             ...tickets
-//                 .filter((t) => match(t.TicketID)|| match(t.MemberID) || match(t.Subject))
-//                 .map(
-//                     (t) => `
-//                     <div class="result-item clickable" onclick="window.location.href='../../pages/adminPages/aHelpTicket.php?ticketId=${t.TicketID}'">
-//                         <div>
-//                             <h4>${t.Subject} #${t.TicketID}</h4>
-//                             <p>Status: ${t.Status}</p>
-//                         </div>
-//                     </div>`
-//                 )
-//         );
-//     }
+    // blogs
+    if ((type === 'all' || type === 'blogs') && results.blogs && results.blogs.length > 0) {
+        results.blogs.forEach(blog => {
+            items.push(`
+                <div class="result-item clickable" data-url="../../pages/CommonPages/readBlog.php?id=${blog.id}">
+                    <div>
+                        <h4>${blog.title}</h4>
+                        <p>${blog.subtitle} • ${blog.category}</p>
+                        <p class="description">${blog.description}</p>
+                    </div>
+                </div>
+            `);
+        });
+    }
 
-//     if (type === "all" || type === "profiles") {
-//         items.push(
-//             ...profiles
-//                 .filter((p) => match(p.Username) || match(p.FirstName) || match(p.LastName))
-//                 .map(
-//                     (p) => `
-//                     <div class="result-item clickable" onclick="window.location.href='../../pages/MemberPages/mProfile.html?id=${p.UserID}'">
-//                         <img src="${p.AvatarURL}" alt="${p.Username}">
-//                         <div>
-//                             <h4>${p.FirstName} ${p.LastName}</h4>
-//                             <p>@${p.Username}</p>
-//                         </div>
-//                     </div>`
-//                 )
-//         );
-//     }
+    // events
+    if ((type === 'all' || type === 'events') && results.events && results.events.length > 0) {
+        results.events.forEach(event => {
+            items.push(`
+                <div class="result-item clickable" data-url="../../pages/CommonPages/joinEvent.php?id=${event.id}">
+                    <div>
+                        <h4>${event.title}</h4>
+                        <p>${event.subtitle} • ${event.eventType}</p>
+                        <p class="description">${event.location} • ${event.date}</p>
+                    </div>
+                </div>
+            `);
+        });
+    }
 
-//     if (type === "all" || type === "blogs") {
-//         items.push(
-//             ...blogs
-//                 .filter((b) => match(b.Title) || match(b.Preview))
-//                 .map(
-//                     (b) => `
-//                     <div class="result-item clickable" onclick="window.location.href='../../pages/CommonPages/readBlog.html?blogId=${b.BlogID}'">
-//                         <div>
-//                             <h4>${b.Title}</h4>
-//                             <p>${b.Preview}</p>
-//                         </div>
-//                     </div>`
-//                 )
-//         );
-//     }
+    // trades
+    if ((type === 'all' || type === 'trades') && results.trades && results.trades.length > 0) {
+        results.trades.forEach(trade => {
+            items.push(`
+                <div class="result-item clickable" data-url="../../pages/CommonPages/mainTrade.php?id=${trade.id}">
+                    <div>
+                        <h4>${trade.title}</h4>
+                        <p>${trade.subtitle} • ${trade.category}</p>
+                        <p class="description">${trade.description}</p>
+                    </div>
+                </div>
+            `);
+        });
+    }
 
-//     if (type === "all" || type === "events") {
-//         items.push(
-//             ...events
-//                 .filter((e) => match(e.Title) || match(e.Location))
-//                 .map(
-//                     (e) => `
-//                     <div class="result-item clickable" onclick="window.location.href='../../pages/CommonPages/joinEvent.html?eventId=${e.EventID}'">
-//                     <img src="${e.ImageURL}" alt="${e.Title}">
-//                         <div>
-//                             <h4>${e.Title}</h4>
-//                             <p>>>> ${e.Location}</p>
-//                         </div>
-//                     </div>`
-//                 )
-//         );
-//     }
-
-//     if (type === "all" || type === "trades") {
-//         items.push(
-//             ...trades
-//                 .filter((tr) => match(tr.Title) || match(tr.Tags))
-//                 .map(
-//                     (tr) => `
-//                     <div class="result-item clickable" onclick="window.location.href='../../pages/CommonPages/mainTrade.php?listingId=${tr.ListingID}'">
-//                         <img src="${tr.ImageURL}" alt="${tr.Title}">
-//                         <div>
-//                             <h4>${tr.Title}</h4>
-//                             <p># ${tr.Tags}</p>
-//                         </div>
-//                     </div>`
-//                 )
-//         );
-//     }
-
-//     if (isAdmin && (type === "all" || type === "faqs")) {
-//         items.push(
-//             ...faqs
-//                 .filter((f) => match(f.FaqID)|| match(f.Category) || match(f.Question))
-//                 .map(
-//                     (f) => `
-//                     <div class="result-item clickable" onclick="window.location.href='../../pages/adminPages/FAQ.html?FaqId=${f.FaqID}'">
-//                         <div>
-//                             <h4>FAQ #${f.FaqID}</h4>
-//                             <p>Q: ${f.Question}</p>
-//                         </div>
-//                     </div>`
-//                 )
-//         );
-//     }
-
-//     resultsContainer.innerHTML = items.join("") || "<p>No results found.</p>";
-// }
-
-// // Handle search input
-// function handleSearchInput(e) {
-//     const query = e.target.value.trim();
-
-//     // Show content, hide search
-//     if (query.length === 0) {
-//         if (content) content.style.display = "block";
-//         if (searchContainer) searchContainer.style.display = "none";
-//         if (tabsContainer) tabsContainer.style.display = "none";
-//         if (resultsContainer) resultsContainer.style.display = "none";
-//         return;
-//     }
-
-//     // Hide content, show search
-//     if (content) content.style.display = "none";
-//     if (searchContainer) searchContainer.style.display = "block";
-//     if (tabsContainer) tabsContainer.style.display = "flex";
-//     if (resultsContainer) resultsContainer.style.display = "flex";
-
-//     // Always start with "all"
-//     const activeTab = document.querySelector(".tab.active");
-//     if (activeTab) activeTab.classList.remove("active");
-//     const allTab = document.querySelector('.tab[data-type="all"]');
-//     if (allTab) allTab.classList.add("active");
-
-//     renderResults("all", query);
-// }
-
-// // Tab switching
-// tabs.forEach((tab) => {
-//     tab.addEventListener("click", () => {
-//         const activeTab = document.querySelector(".tab.active");
-//         if (activeTab) activeTab.classList.remove("active");
-//         tab.classList.add("active");
-
-//         const type = tab.getAttribute("data-type");
-//         // Get the current query from any search bar that has a value
-//         let query = "";
-//         searchBars.forEach(searchBar => {
-//             if (searchBar && searchBar.value.trim()) {
-//                 query = searchBar.value.trim();
-//             }
-//         });
+    if (items.length === 0 && !append) {
+        resultsContainer.innerHTML = '<p class="no-results">No results found.</p>';
+    } else {
+        // Append or replace content
+        resultsContainer.innerHTML += items.join("");
         
-//         if (query.length > 0) {
-//             renderResults(type, query);
-//         }
-//     });
-// });
+        // Add load more button if there are more results
+        if (data.hasMore) {
+            const loadMoreBtn = document.createElement('button');
+            loadMoreBtn.className = 'load-more-btn';
+            loadMoreBtn.textContent = 'Load More Results';
+            loadMoreBtn.onclick = loadMoreResults;
+            resultsContainer.appendChild(loadMoreBtn);
+        }
+    }
+}
 
-// // Attach listeners 
-// searchBars.forEach(searchBar => {
-//     if (searchBar) {
-//         searchBar.addEventListener("input", handleSearchInput);
+// Show error message
+function showError(message) {
+    if (resultsContainer) {
+        resultsContainer.innerHTML = `<p class="error-message">${message}</p>`;
+    }
+}
+
+// Handle search input with debouncing
+let searchTimeout;
+function handleSearchInput(e) {
+    const query = e.target.value.trim();
+
+    clearTimeout(searchTimeout);
+
+    // Show content, hide search if query is empty
+    if (query.length === 0) {
+        if (content) content.style.display = "block";
+        if (searchContainer) searchContainer.style.display = "none";
+        if (tabsContainer) tabsContainer.style.display = "none";
+        if (resultsContainer) resultsContainer.style.display = "none";
+        return;
+    }
+
+    // Set timeout for debouncing (300ms)
+    searchTimeout = setTimeout(async () => {
+        currentQuery = query;
+        currentPage = 1;
+        hasMore = true;
+
+        // Hide content, show search
+        if (content) content.style.display = "none";
+        if (searchContainer) searchContainer.style.display = "block";
+        if (tabsContainer) tabsContainer.style.display = "flex";
+        if (resultsContainer) resultsContainer.style.display = "flex";
+
+        // Reset to "all" tab
+        const activeTab = document.querySelector(".tab.active");
+        if (activeTab) activeTab.classList.remove("active");
+        const allTab = document.querySelector('.tab[data-type="all"]');
+        if (allTab) allTab.classList.add("active");
+
+        // Show loading state
+        resultsContainer.innerHTML = '<p class="loading">Searching...</p>';
+
+        // Fetch and render results
+        const data = await fetchSearchResults('all', query);
+        if (data) {
+            renderResults(data);
+            updateTabCounts(data.counts);
+        }
+    }, 300);
+}
+
+// Load more results
+async function loadMoreResults() {
+    if (isLoading || !hasMore) return;
+
+    isLoading = true;
+    currentPage++;
+
+    const loadMoreBtn = document.querySelector('.load-more-btn');
+    if (loadMoreBtn) {
+        loadMoreBtn.textContent = 'Loading...';
+        loadMoreBtn.disabled = true;
+    }
+
+    const data = await fetchSearchResults(currentType, currentQuery, currentPage);
+    
+    if (data) {
+        hasMore = data.hasMore;
+        renderResults(data, true);
+    } else {
+        currentPage--;
+    }
+
+    isLoading = false;
+    
+    if (loadMoreBtn && hasMore) {
+        loadMoreBtn.textContent = 'Load More Results';
+        loadMoreBtn.disabled = false;
+    }
+}
+
+// Update tab counts
+function updateTabCounts(counts) {
+    tabs.forEach(tab => {
+        const type = tab.getAttribute('data-type');
+        const count = counts[type] || 0;
         
-//         // Also sync the search bars - when you type in one, update the other
-//         searchBar.addEventListener("input", (e) => {
-//             const currentValue = e.target.value;
-//             searchBars.forEach(otherSearchBar => {
-//                 if (otherSearchBar !== e.target) {
-//                     otherSearchBar.value = currentValue;
-//                 }
-//             });
-//         });
-//     }
-// });
+        // Remove existing count badge
+        const existingBadge = tab.querySelector('.count-badge');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+        
+        // Add new count badge if count > 0
+        if (count > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'count-badge';
+            badge.textContent = count;
+            tab.appendChild(badge);
+        }
+    });
+}
+
+// Tab switching
+tabs.forEach((tab) => {
+    tab.addEventListener("click", async () => {
+        if (!currentQuery) return;
+
+        const activeTab = document.querySelector(".tab.active");
+        if (activeTab) activeTab.classList.remove("active");
+        tab.classList.add("active");
+
+        const type = tab.getAttribute("data-type");
+        currentType = type;
+        currentPage = 1;
+        hasMore = true;
+
+        // Show loading state
+        resultsContainer.innerHTML = '<p class="loading">Searching...</p>';
+
+        // Fetch and render results for specific type
+        const data = await fetchSearchResults(type, currentQuery);
+        if (data) {
+            renderResults(data);
+        }
+    });
+});
+
+// Sync search bars
+function syncSearchBars(value) {
+    searchBars.forEach(searchBar => {
+        if (searchBar.value !== value) {
+            searchBar.value = value;
+        }
+    });
+}
+
+// Attach listeners to all search bars
+searchBars.forEach(searchBar => {
+    if (searchBar) {
+        searchBar.addEventListener("input", (e) => {
+            const currentValue = e.target.value;
+            syncSearchBars(currentValue);
+            handleSearchInput(e);
+        });
+        
+        // Handle Enter key press
+        searchBar.addEventListener("keypress", (e) => {
+            if (e.key === 'Enter') {
+                handleSearchInput(e);
+            }
+        });
+    }
+});
+
+// Initialize - hide search container by default
+if (searchContainer) {
+    searchContainer.style.display = "none";
+}
+if (tabsContainer) {
+    tabsContainer.style.display = "none";
+}
+if (resultsContainer) {
+    resultsContainer.style.display = "none";
+}
+
+if (resultsContainer) {
+    resultsContainer.addEventListener('click', function(e) {
+        const resultItem = e.target.closest('.result-item.clickable');
+        if (resultItem) {
+            const url = resultItem.getAttribute('data-url');
+            if (url) {
+                window.location.href = url;
+            }
+        }
+    });
+}

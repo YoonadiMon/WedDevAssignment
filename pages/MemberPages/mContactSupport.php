@@ -402,7 +402,7 @@ $ticketCount = mysqli_num_rows($result);
                         </section>
 
                         <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -414,7 +414,7 @@ $ticketCount = mysqli_num_rows($result);
             <!-- Menu Links Desktop + Tablet -->
             <nav class="c-navbar-desktop">
                 <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -441,7 +441,7 @@ $ticketCount = mysqli_num_rows($result);
         <hr>
 
         <!-- Main Content -->
-        <main class="support-container">
+        <main class="content support-container" id="content">
             <!-- Content Section -->
             <!-- Help Section -->
             <div class="help-section">
@@ -568,23 +568,18 @@ $ticketCount = mysqli_num_rows($result);
                     <?php endif; ?>
                 </div>
             </div>
-
-            <!-- Search & Results -->
-            <section class="search-container" id="searchContainer" style="display: none;">
-                <!-- Tabs -->
-                <div class="tabs" id="tabs">
-                    <div class="tab active" data-type="all">All</div>
-                    <div class="tab" data-type="profiles">Profiles</div>
-                    <div class="tab" data-type="blogs">Blogs</div>
-                    <div class="tab" data-type="events">Events</div>
-                    <div class="tab" data-type="trades">Trades</div>
-                </div>
-
-                <!-- Results -->
-                <div class="results" id="results"></div>
-            </section>
         </main>
-
+        <!-- Search & Results -->
+        <section class="search-container" id="searchContainer" style="display: none;">
+            <div class="tabs" id="tabs">
+                <div class="tab active" data-type="all">All</div>
+                <div class="tab" data-type="profiles">Profiles</div>
+                <div class="tab" data-type="blogs">Blogs</div>
+                <div class="tab" data-type="events">Events</div>
+                <div class="tab" data-type="trades">Trades</div>
+            </div>
+            <div class="results" id="results"></div>
+        </section>
         <hr>
         <!-- Footer -->
         <footer>
@@ -622,7 +617,7 @@ $ticketCount = mysqli_num_rows($result);
                 <div>
                     <b>Community</b><br>
                     <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
-                    <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blogs</a><br>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 </div>
             </section>

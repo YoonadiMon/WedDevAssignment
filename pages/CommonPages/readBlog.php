@@ -446,7 +446,7 @@ $nextBlog = mysqli_fetch_assoc($nextResult);
     <hr />
 
     <!-- Main Content -->
-    <main>
+    <main class="content" id="content">
         <!-- Blog Header -->
         <article class="read-blog-header">
             <div class="blog-meta">
@@ -487,6 +487,17 @@ $nextBlog = mysqli_fetch_assoc($nextResult);
             <?php endif; ?>
         </div>
     </main>
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
 
     <!-- Footer -->
     <footer>
@@ -511,7 +522,7 @@ $nextBlog = mysqli_fetch_assoc($nextResult);
             <div>
                 <b>Helps</b><br />
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br />
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br />
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br />
                 <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
             </div>
             <div>

@@ -786,232 +786,221 @@ if ($userStmt = $connection->prepare($userQuery)) {
     <hr>
 
     <!-- Main Content -->
-    <main>
-        <section class="content" id="content">
-            <div class="event-detail-container">
-                <a href="mainEvent.php" class="back-button">← Back to Events</a>
+    <main class="content" id="content">
+        <section class="event-detail-container">
+            <a href="mainEvent.php" class="back-button">← Back to Events</a>
 
-                <?php if ($registrationSuccess): ?>
-                    <div class="alert alert-success">
-                        Registration successful! You are now registered for this event.
-                    </div>
-                <?php elseif ($registrationMessage && !$registrationSuccess): ?>
-                    <div class="alert alert-error">
-                        <?php echo htmlspecialchars($registrationMessage); ?>
-                    </div>
+            <?php if ($registrationSuccess): ?>
+                <div class="alert alert-success">
+                    Registration successful! You are now registered for this event.
+                </div>
+            <?php elseif ($registrationMessage && !$registrationSuccess): ?>
+                <div class="alert alert-error">
+                    <?php echo htmlspecialchars($registrationMessage); ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Event Header -->
+            <div class="event-header">
+                <?php
+                if (!empty($event['bannerFilePath'])): ?>
+                    <img src="<?php echo htmlspecialchars($event['bannerFilePath']); ?>" 
+                        alt="<?php echo htmlspecialchars($event['title']); ?>" 
+                        class="event-banner" 
+                        onerror="this.src='../../assets/images/Logo.png'; this.classList.add('event-banner-placeholder')">
+                <?php else: ?>
+                    <img src="../../assets/images/Logo.png" 
+                        alt="<?php echo htmlspecialchars($event['title']); ?>" 
+                        class="event-banner event-banner-placeholder">
                 <?php endif; ?>
+                <div class="event-header-content">
+                    <h1 class="event-title"><?php echo htmlspecialchars($event['title']); ?></h1>
+                    
+                    <div class="event-meta">
+                        <div class="event-meta-item">
+                            <span class="event-meta-icon">📅</span>
+                            <span>
+                                <?php 
+                                if ($startDate != $endDate){
+                                    echo $startDate . " - " . $endDate;
+                                } else {
+                                    echo $startDate;
+                                }
+                                ?>
+                            </span>
+                        </div>
+                        <div class="event-meta-item">
+                            <span class="event-meta-icon">🕐</span>
+                            <span><?php echo $time; ?></span>
+                        </div>
+                        <div class="event-meta-item">
+                            <span class="event-meta-icon">📍</span>
+                            <span><?php echo htmlspecialchars($event['location'] . ", " . $event['country']); ?></span>
+                        </div>
+                    </div>
+                                
+                    <div class="event-host">
+                        <div class="event-host-avatar"><?php echo $hostInitial; ?></div>
+                        <div class="event-host-info">
+                            <h4>Hosted by 
+                            <span><a href="../../pages/CommonPages/viewProfile.php?userID=<?php echo $event['userID']; ?>">
+                                <?php echo htmlspecialchars($event['hostName']); ?>
+                            </a></span>
+                        </h4>
+                            <p><?php echo htmlspecialchars($event['hostEmail']); ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                <!-- Event Header -->
-                <div class="event-header">
-                    <?php
-                    if (!empty($event['bannerFilePath'])): ?>
-                        <img src="<?php echo htmlspecialchars($event['bannerFilePath']); ?>" 
-                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
-                            class="event-banner" 
-                            onerror="this.src='../../assets/images/Logo.png'; this.classList.add('event-banner-placeholder')">
-                    <?php else: ?>
-                        <img src="../../assets/images/Logo.png" 
-                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
-                            class="event-banner event-banner-placeholder">
-                    <?php endif; ?>
-                    <div class="event-header-content">
-                        <h1 class="event-title"><?php echo htmlspecialchars($event['title']); ?></h1>
-                        
-                        <div class="event-meta">
-                            <div class="event-meta-item">
-                                <span class="event-meta-icon">📅</span>
-                                <span>
-                                    <?php 
-                                    if ($startDate != $endDate){
-                                        echo $startDate . " - " . $endDate;
-                                    } else {
-                                        echo $startDate;
-                                    }
-                                    ?>
+            <!-- Event Content -->
+            <div class="event-content">
+                <!-- Main Content -->
+                <div class="event-main">
+                    <div class="event-section">
+                        <h3>About This Event</h3>
+                        <p class="event-description">
+                            <?php echo nl2br(htmlspecialchars($event['description'])); ?>
+                        </p>
+                        <br><br>
+                        <h3>Capacity</h3>
+                        <p class="event-description">
+                            --> <?php echo $event['maxPax']; ?> maximum participants
+                        </p>
+                        <br><br>
+                        <h3>Event Mode</h3>
+                        <p class="event-description">
+                            --> <?php echo ucfirst($event['mode']); ?> Event
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <aside class="event-sidebar">
+                    <div class="event-card-sticky">
+                        <div class="event-attendees">
+                            <div class="event-attendees-count"><?php echo $attendeeCount; ?></div>
+                            <div class="event-attendees-label">Registered Attendees</div>
+                        </div>
+
+                        <ul class="event-info-list">
+                            <li class="event-info-item">
+                                <span class="event-info-label">Status</span>
+                                <span class="event-info-value">
+                                    <?php echo ucfirst($event['status']); ?>
                                 </span>
+                            </li>
+                            <li class="event-info-item">
+                                <span class="event-info-label">Time Zone</span>
+                                <span class="event-info-value"><?php echo $event['timeZone']; ?></span>
+                            </li>
+                            <li class="event-info-item">
+                                <span class="event-info-label">Event Type</span>
+                                <span class="event-info-value"><?php echo ucwords(str_replace('-', ' ', $event['type'])); ?></span>
+                            </li>
+                            <li class="event-info-item">
+                                <span class="event-info-label">Duration</span>
+                                <span class="event-info-value"><?php echo $daysText; ?></span>
+                            </li>
+                        </ul>
+
+                        <?php if ($isAdmin): ?>
+                            <div class="warning-notice">
+                                <img src="../../assets/images/warning-icon.svg" alt=""> Admins cannot register for events
                             </div>
-                            <div class="event-meta-item">
-                                <span class="event-meta-icon">🕐</span>
-                                <span><?php echo $time; ?></span>
+                            <button class="register-button" disabled>Admin Account</button>
+                        <?php elseif ($isHost): ?>
+                            <div class="warning-notice">
+                                <img src="../../assets/images/warning-icon.svg" alt=""> Host cannot register for own events
                             </div>
-                            <div class="event-meta-item">
-                                <span class="event-meta-icon">📍</span>
-                                <span><?php echo htmlspecialchars($event['location'] . ", " . $event['country']); ?></span>
-                            </div>
-                        </div>
-                                    
-                        <div class="event-host">
-                            <div class="event-host-avatar"><?php echo $hostInitial; ?></div>
-                            <div class="event-host-info">
-                                <h4>Hosted by 
-                                <span><a href="../../pages/CommonPages/viewProfile.php?userID=<?php echo $event['userID']; ?>">
-                                    <?php echo htmlspecialchars($event['hostName']); ?>
-                                </a></span>
-                            </h4>
-                                <p><?php echo htmlspecialchars($event['hostEmail']); ?></p>
-                            </div>
-                        </div>
+                            <button class="register-button" disabled>Host Account</button>
+                        <?php elseif ($isClosed): ?>
+                            <button class="register-button" disabled>Registration Ended</button>
+                        <?php elseif ($isFull): ?>
+                            <button class="register-button" disabled>Registration Full</button>
+                        <?php elseif ($isRegistered): ?>
+                            <button class="register-button registered" disabled>Already Registered</button>
+                        <?php else: ?>
+                            <button class="register-button" onclick="showConfirmation()">Register for Event</button>
+                        <?php endif; ?>
                     </div>
-                </div>
-
-                <!-- Event Content -->
-                <div class="event-content">
-                    <!-- Main Content -->
-                    <div class="event-main">
-                        <div class="event-section">
-                            <h3>About This Event</h3>
-                            <p class="event-description">
-                                <?php echo nl2br(htmlspecialchars($event['description'])); ?>
-                            </p>
-                            <br><br>
-                            <h3>Capacity</h3>
-                            <p class="event-description">
-                                --> <?php echo $event['maxPax']; ?> maximum participants
-                            </p>
-                            <br><br>
-                            <h3>Event Mode</h3>
-                            <p class="event-description">
-                                --> <?php echo ucfirst($event['mode']); ?> Event
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Sidebar -->
-                    <aside class="event-sidebar">
-                        <div class="event-card-sticky">
-                            <div class="event-attendees">
-                                <div class="event-attendees-count"><?php echo $attendeeCount; ?></div>
-                                <div class="event-attendees-label">Registered Attendees</div>
-                            </div>
-
-                            <ul class="event-info-list">
-                                <li class="event-info-item">
-                                    <span class="event-info-label">Status</span>
-                                    <span class="event-info-value">
-                                        <?php echo ucfirst($event['status']); ?>
-                                    </span>
-                                </li>
-                                <li class="event-info-item">
-                                    <span class="event-info-label">Time Zone</span>
-                                    <span class="event-info-value"><?php echo $event['timeZone']; ?></span>
-                                </li>
-                                <li class="event-info-item">
-                                    <span class="event-info-label">Event Type</span>
-                                    <span class="event-info-value"><?php echo ucwords(str_replace('-', ' ', $event['type'])); ?></span>
-                                </li>
-                                <li class="event-info-item">
-                                    <span class="event-info-label">Duration</span>
-                                    <span class="event-info-value"><?php echo $daysText; ?></span>
-                                </li>
-                            </ul>
-
-                            <?php if ($isAdmin): ?>
-                                <div class="warning-notice">
-                                    <img src="../../assets/images/warning-icon.svg" alt=""> Admins cannot register for events
-                                </div>
-                                <button class="register-button" disabled>Admin Account</button>
-                            <?php elseif ($isHost): ?>
-                                <div class="warning-notice">
-                                    <img src="../../assets/images/warning-icon.svg" alt=""> Host cannot register for own events
-                                </div>
-                                <button class="register-button" disabled>Host Account</button>
-                            <?php elseif ($isClosed): ?>
-                                <button class="register-button" disabled>Registration Ended</button>
-                            <?php elseif ($isFull): ?>
-                                <button class="register-button" disabled>Registration Full</button>
-                            <?php elseif ($isRegistered): ?>
-                                <button class="register-button registered" disabled>Already Registered</button>
-                            <?php else: ?>
-                                <button class="register-button" onclick="showConfirmation()">Register for Event</button>
-                            <?php endif; ?>
-                        </div>
-                    </aside>
-                </div>
+                </aside>
             </div>
-            <br>
         </section>
-
-        <!-- Confirmation Modal -->
-        <div class="modal-overlay" id="confirmModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title">Confirm Registration</h2>
-                    <p class="modal-message">
-                        You are about to register for this event. Please review your details below:
-                    </p>
-                </div>
-
-                <div class="modal-details">
-                    <div class="modal-detail-item">
-                        <span class="modal-detail-label">Name:</span>
-                        <span class="modal-detail-value" id="userName"><?php echo htmlspecialchars($userInfo['fullName']); ?></span>
-                    </div>
-                    <div class="modal-detail-item">
-                        <span class="modal-detail-label">Email:</span>
-                        <span class="modal-detail-value" id="userEmail"><?php echo htmlspecialchars($userInfo['email']); ?></span>
-                    </div>
-                    <div class="modal-detail-item">
-                        <span class="modal-detail-label">Event:</span>
-                        <span class="modal-detail-value" id="modalEventName"><?php echo htmlspecialchars($event['title']); ?></span>
-                    </div>
-                    <div class="modal-detail-item">
-                        <span class="modal-detail-label">Date:</span>
-                        <span class="modal-detail-value"><?php echo $startDate; ?></span>
-                    </div>
-                    <div class="modal-detail-item">
-                        <span class="modal-detail-label">Time:</span>
-                        <span class="modal-detail-value"><?php echo $time; ?></span>
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button class="modal-btn modal-btn-cancel" onclick="hideConfirmation()">Cancel</button>
-                    <form method="POST" id="registrationForm" style="display: none;">
-                        <input type="hidden" name="register" value="1">
-                    </form>
-                    <button class="modal-btn modal-btn-confirm" onclick="confirmRegistration()">Confirm Registration</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Success Modal -->
-        <div class="modal-overlay" id="successModal">
-            <div class="modal-content success-modal">
-                <div class="modal-header">
-                    <h2 class="modal-title">Registration Successful!</h2>
-                    <p class="modal-message">
-                        You have successfully registered for <strong id="successEventName"><?php echo htmlspecialchars($event['title']); ?></strong>. 
-                        A confirmation email has been sent to <strong id="successUserEmail"><?php echo htmlspecialchars($userInfo['email']); ?></strong>.
-                    </p>
-                </div>
-
-                <div class="modal-actions">
-                    <button class="modal-btn modal-btn-confirm" onclick="closeSuccess()">Got it!</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="tickets">Tickets</div>
-                <?php endif; ?>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="faqs">FAQ</div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Results -->
-            <div class="results" id="results"></div>
-        </section>
+        <br>
     </main>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirm Registration</h2>
+                <p class="modal-message">
+                    You are about to register for this event. Please review your details below:
+                </p>
+            </div>
+
+            <div class="modal-details">
+                <div class="modal-detail-item">
+                    <span class="modal-detail-label">Name:</span>
+                    <span class="modal-detail-value" id="userName"><?php echo htmlspecialchars($userInfo['fullName']); ?></span>
+                </div>
+                <div class="modal-detail-item">
+                    <span class="modal-detail-label">Email:</span>
+                    <span class="modal-detail-value" id="userEmail"><?php echo htmlspecialchars($userInfo['email']); ?></span>
+                </div>
+                <div class="modal-detail-item">
+                    <span class="modal-detail-label">Event:</span>
+                    <span class="modal-detail-value" id="modalEventName"><?php echo htmlspecialchars($event['title']); ?></span>
+                </div>
+                <div class="modal-detail-item">
+                    <span class="modal-detail-label">Date:</span>
+                    <span class="modal-detail-value"><?php echo $startDate; ?></span>
+                </div>
+                <div class="modal-detail-item">
+                    <span class="modal-detail-label">Time:</span>
+                    <span class="modal-detail-value"><?php echo $time; ?></span>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="hideConfirmation()">Cancel</button>
+                <form method="POST" id="registrationForm" style="display: none;">
+                    <input type="hidden" name="register" value="1">
+                </form>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmRegistration()">Confirm Registration</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-content success-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Registration Successful!</h2>
+                <p class="modal-message">
+                    You have successfully registered for <strong id="successEventName"><?php echo htmlspecialchars($event['title']); ?></strong>. 
+                    A confirmation email has been sent to <strong id="successUserEmail"><?php echo htmlspecialchars($userInfo['email']); ?></strong>.
+                </p>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-confirm" onclick="closeSuccess()">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
 
     <?php if (!$isAdmin): ?>
     <!-- Footer (Member Only) -->

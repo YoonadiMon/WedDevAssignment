@@ -5,7 +5,7 @@ include("../../php/sessionCheck.php");
 
 // Check if user is logged in
 if (!isset($_SESSION['userID'])) {
-    header("Location: ../../pages/MemberPages/login.php");
+    header("Location: ../../pages/MemberPages/signUpPage.php");
     exit;
 }
 
@@ -578,7 +578,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
     <hr>
 
     <!-- Main Content -->
-    <main>
+    <<main class="content" id="content">
         <section class="page-header">
             <div class="header-top">
                 <a href="mainBlog.php" class="back-to-blogs" title="Back to Blogs">
@@ -664,6 +664,17 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
             </div>
         </form>
     </main>
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
 
     <!-- Footer -->
     <footer>
@@ -688,7 +699,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
             </div>
             <div>

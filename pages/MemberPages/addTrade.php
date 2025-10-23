@@ -431,7 +431,7 @@
                     </section>
 
                     <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php" class="active">Trade</a>
                     <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -443,7 +443,7 @@
         <!-- Menu Links Desktop + Tablet -->
         <nav class="c-navbar-desktop">
             <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-            <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+            <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php" class="active">Trade</a>
             <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -469,7 +469,7 @@
     <hr>
 
     <!-- Main Content -->
-    <main>
+    <main class="content" id="content">
         <div class="add-listing-container">
             <!-- Back Button -->
             <a href="../../pages/CommonPages/mainTrade.php" class="back-button">
@@ -766,23 +766,18 @@
                 </div>
             </form>
         </div>
-
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-            </div>
-
-            <!-- Results -->
-            <div class="results" id="results"></div>
-        </section>
     </main>
-
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
     <hr>
 
     <!-- Footer -->
@@ -821,7 +816,7 @@
             <div>
                 <b>Community</b><br>
                 <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
-                <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
+                <a href="../../pages/CommonPages/mainBlog.php">Blogs</a><br>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             </div>
         </section>
