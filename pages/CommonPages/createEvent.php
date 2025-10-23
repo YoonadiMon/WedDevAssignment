@@ -622,7 +622,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <?php if ($isAdmin): ?>
                             <!-- Admin Navigation Icons -->
-                            <a href="../../pages/adminPages/aProfile.html">
+                            <a href="../../pages/adminPages/aProfile.php">
                                 <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
                         <?php else: ?>
@@ -645,7 +645,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
                         <!-- Member Menu Items -->
@@ -667,7 +667,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
                 <!-- Member Desktop Menu -->
@@ -687,7 +687,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php if ($isAdmin): ?>
                 <!-- Admin Navbar More -->
-                <a href="../../pages/adminPages/aProfile.html">
+                <a href="../../pages/adminPages/aProfile.php">
                     <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
                 </a>
             <?php else: ?>
@@ -954,14 +954,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <section class="c-footer-links-section">
             <div>
                 <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>

@@ -44,7 +44,7 @@ include("../../php/sessionCheck.php");
 
                         <?php if ($isAdmin): ?>
                             <!-- Admin Navigation Icons -->
-                            <a href="../../pages/adminPages/aProfile.html">
+                            <a href="../../pages/adminPages/aProfile.php">
                                 <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
                         <?php else: ?>
@@ -55,7 +55,7 @@ include("../../php/sessionCheck.php");
                                 </a>
                                 <span class="c-notification-badge" id="chatBadgeMobile"></span>
                             </div>
-                            <a href="../../pages/MemberPages/mSetting.html">
+                            <a href="../../pages/MemberPages/mSetting.php">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a>
                         <?php endif; ?>
@@ -67,7 +67,7 @@ include("../../php/sessionCheck.php");
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
                         <!-- Member Menu Items -->
@@ -89,7 +89,7 @@ include("../../php/sessionCheck.php");
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
                 <!-- Member Desktop Menu -->
@@ -109,7 +109,7 @@ include("../../php/sessionCheck.php");
 
             <?php if ($isAdmin): ?>
                 <!-- Admin Navbar More -->
-                <a href="../../pages/adminPages/aProfile.html">
+                <a href="../../pages/adminPages/aProfile.php">
                     <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
                 </a>
             <?php else: ?>
@@ -118,7 +118,7 @@ include("../../php/sessionCheck.php");
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                     <span class="c-notification-badge" id="chatBadgeDesktop"></span>
                 </a>
-                <a href="../../pages/MemberPages/mSetting.html">
+                <a href="../../pages/MemberPages/mSetting.php">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a>
             <?php endif; ?>
@@ -178,15 +178,15 @@ include("../../php/sessionCheck.php");
         <section class="c-footer-links-section">
             <div>
                 <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>

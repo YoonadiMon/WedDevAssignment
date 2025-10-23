@@ -727,7 +727,7 @@ if ($userRank == 0 && isset($userData['point'])) {
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>

@@ -609,14 +609,14 @@ $ticketCount = mysqli_num_rows($result);
             <section class="c-footer-links-section">
                 <div>
                     <b>My Account</b><br>
-                    <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                    <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                     <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
                     <a href="../../pages/MemberPages/mSetting.html">Settings</a>
                 </div>
                 <div>
                     <b>Helps</b><br>
                     <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                    <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                    <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                     <a href="../../pages/MemberPages/mSetting.html">Settings</a>
                 </div>
                 <div>

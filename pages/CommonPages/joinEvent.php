@@ -1,109 +1,132 @@
 <?php
-session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
+$eventID = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+if ($eventID <= 0) {
+    header("Location: mainEvent.php");
+    exit();
+}
+
 // Initialize variables
-$filterMode = isset($_GET['mode']) ? (array)$_GET['mode'] : [];
-$filterType = isset($_GET['type']) ? (array)$_GET['type'] : [];
-$filterStatus = isset($_GET['status']) ? (array)$_GET['status'] : [];
-$sortBy = isset($_GET['sortBy']) ? $_GET['sortBy'] : 'newest';
-$searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
-$events = [];
-$eventCount = 0;
+$event = [];
+$isRegistered = false;
+$isClosed = false;
+$isHost = false;
+$isFull = false;
+$attendeeCount = 0;
+$registrationMessage = '';
+$registrationSuccess = false;
 
-// Auto-close expired events
-$autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
-if (!$connection->query($autoCloseQuery)) {
-    error_log("Auto-close events failed: " . $connection->error);
-}
-
-$query = "SELECT * FROM tblevents WHERE 1=1";
-$params = [];
-$types = "";
-
-// Apply search filter
-if (!empty($searchQuery)) {
-    $query .= " AND (title LIKE ? OR description LIKE ? OR location LIKE ?)";
-    $searchParam = "%{$searchQuery}%";
-    $params = array_merge($params, [$searchParam, $searchParam, $searchParam]);
-    $types .= "sss";
-}
-
-// Apply filters with validation
-$validModes = ['online', 'physical', 'hybrid'];
-$validTypes = ['clean-up', 'workshop', 'tree-planting', 'campaign', 'talk', 'seminar', 'competition', 'other'];
-$validStatuses = ['open', 'closed'];
-
-if (!empty($filterMode)) {
-    $filterMode = array_intersect($filterMode, $validModes);
-    if (!empty($filterMode)) {
-        $placeholders = implode(',', array_fill(0, count($filterMode), '?'));
-        $query .= " AND mode IN ($placeholders)";
-        $params = array_merge($params, $filterMode);
-        $types .= str_repeat('s', count($filterMode));
-    }
-}
-
-if (!empty($filterType)) {
-    $filterType = array_intersect($filterType, $validTypes);
-    if (!empty($filterType)) {
-        $placeholders = implode(',', array_fill(0, count($filterType), '?'));
-        $query .= " AND type IN ($placeholders)";
-        $params = array_merge($params, $filterType);
-        $types .= str_repeat('s', count($filterType));
-    }
-}
-
-if (!empty($filterStatus)) {
-    $filterStatus = array_intersect($filterStatus, $validStatuses);
-    if (!empty($filterStatus)) {
-        $placeholders = implode(',', array_fill(0, count($filterStatus), '?'));
-        $query .= " AND status IN ($placeholders)";
-        $params = array_merge($params, $filterStatus);
-        $types .= str_repeat('s', count($filterStatus));
-    }
-}
-
-// Apply sorting with validation
-$validSortOptions = ['newest', 'oldest', 'popular', 'date'];
-$sortBy = in_array($sortBy, $validSortOptions) ? $sortBy : 'newest';
-
-switch($sortBy) {
-    case 'oldest':
-        $query .= " ORDER BY eventID ASC";
-        break;
-    case 'popular':
-        $query .= " ORDER BY maxPax DESC";
-        break;
-    case 'date':
-        $query .= " ORDER BY startDate ASC";
-        break;
-    case 'newest':
-    default:
-        $query .= " ORDER BY eventID DESC";
-        break;
-}
-
-if ($stmt = $connection->prepare($query)) {
-    if (!empty($params)) {
-        $stmt->bind_param($types, ...$params);
+$eventQuery = "SELECT e.*, u.fullName AS hostName, u.email AS hostEmail 
+               FROM tblevents e
+               JOIN tblusers u ON e.userID = u.userID
+               WHERE e.eventID = ?";
+               
+if ($eventStmt = $connection->prepare($eventQuery)) {
+    $eventStmt->bind_param("i", $eventID);
+    $eventStmt->execute();
+    $eventResult = $eventStmt->get_result();
+    
+    if ($eventResult->num_rows == 0) {
+        header("Location: mainEvent.php");
+        exit();
     }
     
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        $events = $result->fetch_all(MYSQLI_ASSOC);
-        $eventCount = count($events);
-    } else {
-        error_log("Event query execution failed: " . $stmt->error);
-        $events = [];
-        $eventCount = 0;
-    }
-    $stmt->close();
+    $event = $eventResult->fetch_assoc();
+    $eventStmt->close();
 } else {
-    error_log("Event query preparation failed: " . $connection->error);
-    $events = [];
-    $eventCount = 0;
+    header("Location: mainEvent.php");
+    exit();
+}
+
+$eventBanner = $event['bannerFilePath'];
+
+// Check if user is already registered
+if (!$isAdmin) {
+    $checkQuery = "SELECT * FROM tblregistration 
+                   WHERE eventID = ? AND userID = ? AND status = 'active'";
+    if ($checkStmt = $connection->prepare($checkQuery)) {
+        $checkStmt->bind_param("ii", $eventID, $userID);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        $isRegistered = $checkResult->num_rows > 0;
+        $checkStmt->close();
+    }
+}
+
+$isClosed = ($event['status'] == 'closed');
+$isHost = ($event['userID'] == $userID);
+
+// Count total attendees
+$countQuery = "SELECT COUNT(*) as total FROM tblregistration 
+               WHERE eventID = ? AND status = 'active'";
+if ($countStmt = $connection->prepare($countQuery)) {
+    $countStmt->bind_param("i", $eventID);
+    $countStmt->execute();
+    $countResult = $countStmt->get_result();
+    $countData = $countResult->fetch_assoc();
+    $attendeeCount = $countData['total'] ?? 0;
+    $countStmt->close();
+}
+
+$isFull = ($event['maxPax'] <= $attendeeCount);
+if ($isFull) {
+    $updateQuery = "UPDATE tblevents SET status = 'closed' WHERE eventID = ? AND userID = ?";
+    if ($updateStmt = $connection->prepare($updateQuery)) {
+        $updateStmt->bind_param("ii", $eventID, $userID);
+        $updateStmt->execute();
+        $updateStmt->close();
+    }
+}
+
+// Handle registration
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register']) && !$isAdmin && !$isHost && !$isClosed) {
+    if (!$isRegistered) {
+        $insertQuery = "INSERT INTO tblregistration (eventID, userID, datetimeRegistered, status) 
+                        VALUES (?, ?, NOW(), 'active')";
+        if ($insertStmt = $connection->prepare($insertQuery)) {
+            $insertStmt->bind_param("ii", $eventID, $userID);
+            if ($insertStmt->execute()) {
+                $registrationSuccess = true;
+                $isRegistered = true;
+                $attendeeCount++;
+                $registrationMessage = 'Registration successful!';
+            } else {
+                $registrationMessage = 'Registration failed. Please try again.';
+            }
+            $insertStmt->close();
+        } else {
+            $registrationMessage = 'Registration failed. Please try again.';
+        }
+    } else {
+        $registrationMessage = 'You are already registered for this event.';
+    }
+}
+
+// Format date/time
+$startDate = date('M d, Y', strtotime($event['startDate']));
+$endDate = date('M d, Y', strtotime($event['endDate']));
+$time = date('g:i A', strtotime($event['time']));
+
+// Calculate event duration for display
+$durationText = $event['duration'] . ' hour' . ($event['duration'] > 1 ? 's' : '');
+$daysText = $event['day'] . ' day' . ($event['day'] > 1 ? 's' : '');
+
+// Get host avatar initial
+$hostInitial = strtoupper(substr($event['hostName'], 0, 1));
+
+// Get user info for modal
+$userQuery = "SELECT fullName, email FROM tblusers WHERE userID = ?";
+if ($userStmt = $connection->prepare($userQuery)) {
+    $userStmt->bind_param("i", $userID);
+    $userStmt->execute();
+    $userResult = $userStmt->get_result();
+    $userInfo = $userResult->fetch_assoc();
+    $userStmt->close();
+} else {
+    $userInfo = ['fullName' => 'User', 'email' => ''];
 }
 ?>
 
@@ -112,7 +135,7 @@ if ($stmt = $connection->prepare($query)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReLeaf - Events</title>
+    <title>ReLeaf - Join Event</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
     <link rel="stylesheet" href="../../style/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -120,421 +143,541 @@ if ($stmt = $connection->prepare($query)) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
     <style>
-        /* Additional styling unique to page */
-        .event-browse-container {
-            display: flex;
-            padding-left: 1rem;
-            padding-right: 1rem;
-            gap: 2rem;
-            margin-top: 1rem;
+        /* Event Detail Page Styles */
+        .event-detail-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
         }
 
-        .btn-wrapper {
-            display: flex;
-            justify-content: space-between;
+        /* Back Button */
+        .back-button {
+            display: inline-flex;
             align-items: center;
-            background: transparent;
-            padding: 1rem;  
             gap: 0.5rem;
-            flex-wrap: wrap;
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
         }
 
-        .top-btn {
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        
-        .btn-left-group {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
+        .back-button:hover {
+            color: var(--MainGreen);
+            text-decoration: underline;
         }
 
-        .filter-toggle {
-            display: none;
-        }
-
-        /* Filter Sidebar */
-        .filter-sidebar {
-            width: 260px;
-            flex-shrink: 0;
+        /* Event Header */
+        .event-header {
             background: var(--bg-color);
             border: 1px solid var(--Gray);
-            border-radius: 12px;
-            padding: 1.5rem;
-            height: fit-content;
-            position: sticky;
-            top: 1rem;
-        }
-
-        .filter-sidebar h3 {
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-            color: var(--text-color);
-            font-weight: 600;
-        }
-
-        .filter-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .filter-group h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-color);
-            margin-bottom: 0.75rem;
-        }
-
-        .filter-option {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-        }
-
-        .filter-option input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin-right: 0.5rem;
-            cursor: pointer;
-            accent-color: var(--DarkerGray);
-        }
-
-        .dark-mode .filter-option input[type="checkbox"] {
-            accent-color: var(--LowGreen);
-        }
-
-        .filter-option label {
-            font-size: 0.9rem;
-            color: var(--text-color);
-            cursor: pointer;
-            margin: 0;
-            font-weight: 400;
-        }
-
-        .filter-clear {
-            color: var(--MainGreen);
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: underline;
-            background: none;
-            border: none;
-            padding: 0;
-            margin-top: 1rem;
-        }
-
-        .no-results-text {
-            grid-column: 1/-1; 
-            text-align: center; 
-            padding: 3rem; 
-            color: var(--DarkerGray);
-        }
-        
-        .dark-mode .no-results-text {
-            color: var(--Gray);
-        }
-
-        /* Event Content */
-        .event-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .event-search-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .event-top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .event-sort-bar {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--Gray);
-        }
-
-        .event-count {
-            font-size: 1rem;
-            color: var(--text-color);
-            font-weight: 500;
-        }
-
-        .search-input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex: 1;
-            max-width: 400px;
-        }
-
-        .event-search-input {
-            flex: 1;
-            padding: 0.6rem 1rem;
-            font-size: 0.95rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .event-search-input:focus {
-            outline: none;
-            border-color: var(--MainGreen);
-        }
-
-        .search-btn {
-            padding: 0.6rem 1rem;
-            background: var(--MainGreen);
-            color: var(--Black);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .search-btn:hover {
-            opacity: 0.8;
-            transform: scale(1.05);
-        }
-
-        .sort-control {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .sort-control label {
-            font-size: 1rem;
-            color: var(--text-color);
-            font-weight: 300;
-            margin: 0;
-            white-space: nowrap;
-        }
-
-        .sort-control select {
-            width: 180px;
-            font-size: 0.9rem;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid var(--text-color);
-        }
-
-        /* Event Grid */
-        .event-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-        }
-
-        /* Event Card */
-        .event-card {
-            background: var(--bg-color);
-            border: 2px solid var(--Gray);
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px var(--Gray);
         }
 
-        .event-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 16px var(--MainGreen);
-            border: 2px solid var(--MainGreen);
-        }
-
-        .event-card-banner {
+        .event-banner {
             width: 100%;
-            height: 180px;
+            height: 400px;
             object-fit: cover;
             background: var(--LowGreen);
             flex-shrink: 0;
         }
 
-        .event-card-placeholder {
+        .event-banner-placeholder {
             object-fit: contain;
         }
 
-        .event-card-content {
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
+        .event-header-content {
+            padding: 2rem;
         }
 
-        .event-card-date {
-            font-size: 0.8rem;
+        .event-title {
+            font-size: 2.5rem;
+            font-weight: 700;
             color: var(--MainGreen);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
+            margin-bottom: 1rem;
+            line-height: 1.2;
         }
 
-        .event-card-title {
-            font-size: 1.15rem;
-            font-weight: 600;
+        .event-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
             color: var(--text-color);
-            margin-bottom: 0.5rem;
-            line-height: 1.3;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
         }
 
-        .event-card-location {
-            font-size: 0.85rem;
-            color: var(--DarkerGray);
-            margin-bottom: 0.75rem;
+        .event-meta-item {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.5rem;
         }
 
-        .dark-mode .event-card-location {
+        .event-meta-icon {
+            font-size: 1.2rem;
+        }
+
+        .event-host {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--LowGreen), var(--bg-color));
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .event-host-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--MainGreen);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--White);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .event-host-info h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .event-host-info p {
+            font-size: 0.85rem;
+            color: var(--DarkerGray);
+        }
+
+        .dark-mode .event-host-info p {
             color: var(--Gray);
         }
-        
-        .event-card-description {
-            font-size: 0.9rem;
+
+        .event-host-info a {
             color: var(--text-color);
-            line-height: 1.5;
-            margin-bottom: 1rem;
-            overflow: hidden;
-            flex-grow: 1;
+            text-decoration: none;
         }
 
-        .event-card-footer {
+        .event-host-info a:hover {
+            text-decoration: underline;
+        }
+
+        .event-host-info a:visited {
+            color: var(--text-color);
+        }
+
+        /* Event Content */
+        .event-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        .event-main {
+            background: var(--bg-color);
+            border: 1px solid var(--Gray);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px var(--Gray);
+        }
+
+        .event-section {
+            margin-bottom: 2rem;
+        }
+
+        .event-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .event-section h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--MainGreen);
+        }
+
+        .event-description {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-color);
+        }
+
+        .event-details-grid {
+            display: grid;
+            grid-template-columns: minmax(250px, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .event-detail-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 3px dotted var(--MainGreen);
+        }
+
+        .event-detail-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .event-detail-card p {
+            font-size: 0.9rem;
+            color: var(--Gray);
+            margin: 0;
+        }
+
+        .event-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .event-tag {
+            background: var(--MainGreen);
+            color: var(--White);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Event Sidebar */
+        .event-sidebar {
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+        }
+
+        .event-card-sticky {
+            background: var(--bg-color);
+            border: 1px solid var(--Gray);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px var(--Gray);
+        }
+
+        .event-attendees {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--LightGreen);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .event-attendees-count {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .dark-mode .event-attendees {
+            background: var(--LowGreen);
+        }
+
+        .event-attendees-label {
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        .event-info-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .event-info-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding-top: 0.75rem;
-            border-top: 1px solid var(--Gray);
-            margin-top: auto;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--Gray);
+            font-size: 0.9rem;
         }
 
-        .event-card-attendees {
-            font-size: 0.85rem;
+        .event-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-info-label {
+            color: var(--Gray);
+            font-weight: 500;
+        }
+
+        .event-info-value {
+            color: var(--text-color);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* Register Button */
+        .register-button {
+            width: 100%;
+            background: var(--MainGreen);
+            color: var(--White);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 900;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px var(--LowGreen);
+        }
+
+        .register-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .register-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .register-button:disabled {
+            background: var(--Gray);
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.6;
+        }
+
+        .register-button.registered {
+            background: var(--Gray);
+            box-shadow: none;
+        }
+
+        .warning-notice {
+            background: var(--Yellow);
+            color: var(--White);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            justify-content: center;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .warning-notice img {
+            width: 20px;  
+            height: 20px;
+            flex-shrink: 0; 
+        }
+
+        .dark-mode .warning-notice {
+            background: var(--LowYellow);
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: var(--bg-color);
+            color: var(--MainGreen);
+            border: 1px solid var(--MainGreen);
+        }
+
+        .alert-error {
+            background: var(--bg-color);
+            color: var(--Red);
+            border: 1px solid var(--Red);
+        }
+
+        /* Confirmation Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-color);
+            border: 2px solid var(--text-color);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-message {
+            font-size: 1rem;
+            color: var(--DarkerGray);
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .dark-mode .modal-message {
             color: var(--Gray);
         }
-        
-        .event-card-mode {
-            background: var(--sec-bg-color);
-            color: var(--MainGreen);
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
+
+        .modal-details {
+            background: var(--LightGreen);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+        }
+
+        .dark-mode .modal-details {
+            background: var(--LowGreen);
+        }
+
+        .modal-detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .modal-detail-label {
+            color: var(--text-color);
+        }
+
+        .modal-detail-value {
+            color: var(--text-color);
             font-weight: 600;
-            text-transform: capitalize;
         }
 
-        .dark-mode .event-card-mode {
-            color: var(--DarkerGray);
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
         }
 
+        .modal-btn {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn-cancel {
+            background: var(--Gray);
+            color: var(--White);
+        }
+
+        .modal-btn-cancel:hover {
+            background: var(--DarkerGray);
+            color: var(--White);
+        }
+
+        .modal-btn-confirm {
+            background: var(--MainGreen);
+            color: var(--White);
+        }
+
+        .modal-btn-confirm:hover {
+            transform: scale(1.05);
+        }
+
+        /* Success Modal */
+        .success-modal {
+            color: var(--MainGreen);
+        }
+
+        .success-modal .modal-btn-confirm {
+            width: 100%;
+        }
+
+        /* Responsive */
         @media (max-width: 1024px) {
-            .event-browse-container {
-                flex-direction: column;
-            }
-
-            .btn-wrapper {
-                justify-content: space-between;
-            }
-
-            .filter-sidebar {
-                display: none;
-                width: 100%;
-                position: static;
-            }
-            
-            .filter-sidebar.active {
-                display: block;
-            }
-
-            .filter-toggle {
-                display: block;
-            }
-
-            .event-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            }
-        }
-
-        @media (max-width: 760px) {
-            .event-grid {
+            .event-content {
                 grid-template-columns: 1fr;
             }
 
-            .event-top-bar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .event-search-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-input-wrapper {
-                max-width: 100%;
-            }
-
-            .sort-control select {
-                width: 150px;
+            .event-sidebar {
+                position: static;
             }
         }
 
-        @media (max-width: 480px) {
-            .btn-left-group {
-                display: flex;
-                justify-content: space-between;
+        @media (max-width: 768px) {
+            .event-title {
+                font-size: 2rem;
+            }
+
+            .event-banner {
+                height: 250px;
+            }
+
+            .event-header-content {
+                padding: 1.5rem;
+            }
+
+            .event-main {
+                padding: 1.5rem;
+            }
+
+            .event-meta {
                 gap: 1rem;
-                margin-bottom: 0.5rem;
             }
 
-            .top-btn {
-                font-size: 0.85rem;
-                padding: 0.6rem 1.2rem;
-            }
-
-            .filter-toggle {
-                width: 100%;
-            }
-
-            .sort-control {
-                display: block;
-            }
-
-            .sort-control select{
-                margin: 1rem 0 1rem 0;
-            }
-        }
-
-        @media (max-width: 320px) {
-            .top-btn {
-                font-size: 0.75rem;
-                padding: 0.5rem 1rem;
+            .modal-content {
+                padding: 1.5rem;
             }
         }
     </style>
 </head>
-
 <body>
     <div id="cover" class="" onclick="hideMenu()"></div>
-
+    
     <!-- Logo + Name & Navbar -->
     <header>
         <!-- Logo + Name -->
@@ -560,7 +703,7 @@ if ($stmt = $connection->prepare($query)) {
 
                         <?php if ($isAdmin): ?>
                             <!-- Admin Navigation Icons -->
-                            <a href="../../pages/adminPages/aProfile.html">
+                            <a href="../../pages/adminPages/aProfile.php">
                                 <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
                         <?php else: ?>
@@ -583,7 +726,7 @@ if ($stmt = $connection->prepare($query)) {
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
                         <!-- Member Menu Items -->
@@ -605,7 +748,7 @@ if ($stmt = $connection->prepare($query)) {
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
                 <!-- Member Desktop Menu -->
@@ -625,7 +768,7 @@ if ($stmt = $connection->prepare($query)) {
 
             <?php if ($isAdmin): ?>
                 <!-- Admin Navbar More -->
-                <a href="../../pages/adminPages/aProfile.html">
+                <a href="../../pages/adminPages/aProfile.php">
                     <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
                 </a>
             <?php else: ?>
@@ -645,189 +788,208 @@ if ($stmt = $connection->prepare($query)) {
     <!-- Main Content -->
     <main>
         <section class="content" id="content">
-            <section class="btn-wrapper">
-                <div class="btn-left-group">
-                    <a href="../../pages/CommonPages/createEvent.php" class="c-btn c-btn-primary top-btn">Host an Event</a>
-                    <a href="../../pages/CommonPages/myEvents.php" class="c-btn c-btn-primary top-btn">My Events</a>
+            <div class="event-detail-container">
+                <a href="mainEvent.php" class="back-button">← Back to Events</a>
+
+                <?php if ($registrationSuccess): ?>
+                    <div class="alert alert-success">
+                        Registration successful! You are now registered for this event.
+                    </div>
+                <?php elseif ($registrationMessage && !$registrationSuccess): ?>
+                    <div class="alert alert-error">
+                        <?php echo htmlspecialchars($registrationMessage); ?>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Event Header -->
+                <div class="event-header">
+                    <?php
+                    if (!empty($event['bannerFilePath'])): ?>
+                        <img src="<?php echo htmlspecialchars($event['bannerFilePath']); ?>" 
+                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
+                            class="event-banner" 
+                            onerror="this.src='../../assets/images/Logo.png'; this.classList.add('event-banner-placeholder')">
+                    <?php else: ?>
+                        <img src="../../assets/images/Logo.png" 
+                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
+                            class="event-banner event-banner-placeholder">
+                    <?php endif; ?>
+                    <div class="event-header-content">
+                        <h1 class="event-title"><?php echo htmlspecialchars($event['title']); ?></h1>
+                        
+                        <div class="event-meta">
+                            <div class="event-meta-item">
+                                <span class="event-meta-icon">📅</span>
+                                <span>
+                                    <?php 
+                                    if ($startDate != $endDate){
+                                        echo $startDate . " - " . $endDate;
+                                    } else {
+                                        echo $startDate;
+                                    }
+                                    ?>
+                                </span>
+                            </div>
+                            <div class="event-meta-item">
+                                <span class="event-meta-icon">🕐</span>
+                                <span><?php echo $time; ?></span>
+                            </div>
+                            <div class="event-meta-item">
+                                <span class="event-meta-icon">📍</span>
+                                <span><?php echo htmlspecialchars($event['location'] . ", " . $event['country']); ?></span>
+                            </div>
+                        </div>
+                                    
+                        <div class="event-host">
+                            <div class="event-host-avatar"><?php echo $hostInitial; ?></div>
+                            <div class="event-host-info">
+                                <h4>Hosted by 
+                                <span><a href="../../pages/CommonPages/viewProfile.php?userID=<?php echo $event['userID']; ?>">
+                                    <?php echo htmlspecialchars($event['hostName']); ?>
+                                </a></span>
+                            </h4>
+                                <p><?php echo htmlspecialchars($event['hostEmail']); ?></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button class="c-btn c-btn-primary top-btn filter-toggle" onclick="toggleFilters()">Show Filters</button>
-            </section>
-
-            <div class="event-browse-container">
-                <!-- Filter Sidebar -->
-                <aside class="filter-sidebar" id="filterSidebar">
-                    <h3>Filters</h3>
-
-                    <form method="GET" action="" id="filterForm">
-                        <div class="filter-group">
-                            <h4>Mode</h4>
-                            <div class="filter-option">
-                                <input type="checkbox" id="online" name="mode[]" value="online" 
-                                    <?php echo in_array('online', $filterMode) ? 'checked' : ''; ?>>
-                                <label for="online">Online</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="physical" name="mode[]" value="physical" 
-                                    <?php echo in_array('physical', $filterMode) ? 'checked' : ''; ?>>
-                                <label for="physical">Physical</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="hybrid" name="mode[]" value="hybrid" 
-                                    <?php echo in_array('hybrid', $filterMode) ? 'checked' : ''; ?>>
-                                <label for="hybrid">Hybrid</label>
-                            </div>
-                        </div>
-
-                        <div class="filter-group">
-                            <h4>Type</h4>
-                            <div class="filter-option">
-                                <input type="checkbox" id="cleanup" name="type[]" value="clean-up" 
-                                    <?php echo in_array('clean-up', $filterType) ? 'checked' : ''; ?>>
-                                <label for="cleanup">Clean-up Drive</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="workshop" name="type[]" value="workshop" 
-                                    <?php echo in_array('workshop', $filterType) ? 'checked' : ''; ?>>
-                                <label for="workshop">Workshop</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="planting" name="type[]" value="tree-planting" 
-                                    <?php echo in_array('tree-planting', $filterType) ? 'checked' : ''; ?>>
-                                <label for="planting">Tree Planting</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="campaign" name="type[]" value="campaign" 
-                                    <?php echo in_array('campaign', $filterType) ? 'checked' : ''; ?>>
-                                <label for="campaign">Campaign</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="talk" name="type[]" value="talk" 
-                                    <?php echo in_array('talk', $filterType) ? 'checked' : ''; ?>>
-                                <label for="talk">Talk</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="seminar" name="type[]" value="seminar" 
-                                    <?php echo in_array('seminar', $filterType) ? 'checked' : ''; ?>>
-                                <label for="seminar">Seminar</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="competition" name="type[]" value="competition" 
-                                    <?php echo in_array('competition', $filterType) ? 'checked' : ''; ?>>
-                                <label for="competition">Competition</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="other" name="type[]" value="other" 
-                                    <?php echo in_array('other', $filterType) ? 'checked' : ''; ?>>
-                                <label for="other">Other</label>
-                            </div>
-                        </div>
-
-                        <div class="filter-group">
-                            <h4>Status</h4>
-                            <div class="filter-option">
-                                <input type="checkbox" id="open" name="status[]" value="open" 
-                                    <?php echo in_array('open', $filterStatus) ? 'checked' : ''; ?>>
-                                <label for="open">Open</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="closed" name="status[]" value="closed" 
-                                    <?php echo in_array('closed', $filterStatus) ? 'checked' : ''; ?>>
-                                <label for="Closed">Closed</label>
-                            </div>
-                        </div>
-                        <input type="hidden" name="search" value="<?php echo htmlspecialchars($searchQuery); ?>">
-                        <input type="hidden" name="sortBy" value="<?php echo htmlspecialchars($sortBy); ?>">
-                    </form>
-
-                    <button class="filter-clear" onclick="clearFilters()">Clear All Filters</button>
-                </aside>
 
                 <!-- Event Content -->
-                <div class="event-content">                    
-                    <!-- Search Bar -->
-                    <div class="event-search-bar">
-                        <div class="event-count">Showing <span id="eventCount"><?php echo $eventCount; ?></span> events</div>
-                        <div class="search-input-wrapper">
-                            <input type="text" id="eventSearch" placeholder="Search events..." class="c-input event-search-input" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
-                            <button onclick="performSearch()" class="search-btn">Search</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Sort Bar -->
-                    <div class="event-sort-bar">
-                        <div class="sort-control">
-                            <label for="sortBy">Sort by:</label>
-                            <select class="c-input c-input-select" id="sortBy" name="sortBy" onchange="updateSort()">
-                                <option value="newest" <?php echo $sortBy == 'newest' ? 'selected' : ''; ?>>Newest First</option>
-                                <option value="oldest" <?php echo $sortBy == 'oldest' ? 'selected' : ''; ?>>Oldest First</option>
-                                <option value="popular" <?php echo $sortBy == 'popular' ? 'selected' : ''; ?>>Most Popular</option>
-                                <option value="date" <?php echo $sortBy == 'date' ? 'selected' : ''; ?>>Event Date</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Event Grid -->
-                    <div class="event-grid" id="eventGrid">
-                        <?php if ($eventCount == 0): ?>
-                            <p class="no-results-text">
-                                No events found matching your filters.
+                <div class="event-content">
+                    <!-- Main Content -->
+                    <div class="event-main">
+                        <div class="event-section">
+                            <h3>About This Event</h3>
+                            <p class="event-description">
+                                <?php echo nl2br(htmlspecialchars($event['description'])); ?>
                             </p>
-                        <?php else: ?>
-                            <?php foreach ($events as $event): ?>
-                                <a href="joinEvent.php?id=<?php echo $event['eventID']; ?>" class="event-card">
-                                    <?php if (!empty($event['bannerFilePath'])): ?>
-                                        <img src="<?php echo htmlspecialchars($event['bannerFilePath']); ?>" 
-                                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
-                                            class="event-card-banner" 
-                                            onerror="this.src='../../assets/images/Logo.png'; this.classList.add('event-card-placeholder')">
-                                    <?php else: ?>
-                                        <img src="../../assets/images/Logo.png" 
-                                            alt="<?php echo htmlspecialchars($event['title']); ?>" 
-                                            class="event-card-banner event-card-placeholder">
-                                    <?php endif; ?>
-                                    <?php
-                                        $maxDescriptionLength = 250; // characters
-                                        $maxLocationLength = 70; // characters
-
-                                        $description = $event['description'];
-                                        if (strlen($description) > $maxDescriptionLength) {
-                                            $description = substr($description, 0, $maxDescriptionLength) . '...';
-                                        }
-
-                                        $location = $event['location'] . ", " . $event['country'];
-                                        if (strlen($location) > $maxLocationLength) {
-                                            $location = substr($location, 0, $maxLocationLength) . '...';
-                                        }
-                                    ?>
-
-                                    <div class="event-card-content">
-                                        <div class="event-card-date">
-                                            <?php echo date('M d, Y', strtotime($event['startDate'])); ?>
-                                        </div>
-                                        <h3 class="event-card-title"><?php echo htmlspecialchars($event['title']); ?></h3>
-                                        <div class="event-card-location">
-                                            📍 <?php echo htmlspecialchars($location); ?>
-                                        </div>
-                                        <p class="event-card-description">
-                                            <?php echo htmlspecialchars($description); ?>
-                                        </p>
-                                        <div class="event-card-footer">
-                                            <div class="event-card-attendees">
-                                                👥 <?php echo $event['maxPax']; ?> max attendees
-                                            </div>
-                                            <div class="event-card-mode">
-                                                <?php echo htmlspecialchars($event['mode']); ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                            <br><br>
+                            <h3>Capacity</h3>
+                            <p class="event-description">
+                                --> <?php echo $event['maxPax']; ?> maximum participants
+                            </p>
+                            <br><br>
+                            <h3>Event Mode</h3>
+                            <p class="event-description">
+                                --> <?php echo ucfirst($event['mode']); ?> Event
+                            </p>
+                        </div>
                     </div>
+
+                    <!-- Sidebar -->
+                    <aside class="event-sidebar">
+                        <div class="event-card-sticky">
+                            <div class="event-attendees">
+                                <div class="event-attendees-count"><?php echo $attendeeCount; ?></div>
+                                <div class="event-attendees-label">Registered Attendees</div>
+                            </div>
+
+                            <ul class="event-info-list">
+                                <li class="event-info-item">
+                                    <span class="event-info-label">Status</span>
+                                    <span class="event-info-value">
+                                        <?php echo ucfirst($event['status']); ?>
+                                    </span>
+                                </li>
+                                <li class="event-info-item">
+                                    <span class="event-info-label">Time Zone</span>
+                                    <span class="event-info-value"><?php echo $event['timeZone']; ?></span>
+                                </li>
+                                <li class="event-info-item">
+                                    <span class="event-info-label">Event Type</span>
+                                    <span class="event-info-value"><?php echo ucwords(str_replace('-', ' ', $event['type'])); ?></span>
+                                </li>
+                                <li class="event-info-item">
+                                    <span class="event-info-label">Duration</span>
+                                    <span class="event-info-value"><?php echo $daysText; ?></span>
+                                </li>
+                            </ul>
+
+                            <?php if ($isAdmin): ?>
+                                <div class="warning-notice">
+                                    <img src="../../assets/images/warning-icon.svg" alt=""> Admins cannot register for events
+                                </div>
+                                <button class="register-button" disabled>Admin Account</button>
+                            <?php elseif ($isHost): ?>
+                                <div class="warning-notice">
+                                    <img src="../../assets/images/warning-icon.svg" alt=""> Host cannot register for own events
+                                </div>
+                                <button class="register-button" disabled>Host Account</button>
+                            <?php elseif ($isClosed): ?>
+                                <button class="register-button" disabled>Registration Ended</button>
+                            <?php elseif ($isFull): ?>
+                                <button class="register-button" disabled>Registration Full</button>
+                            <?php elseif ($isRegistered): ?>
+                                <button class="register-button registered" disabled>Already Registered</button>
+                            <?php else: ?>
+                                <button class="register-button" onclick="showConfirmation()">Register for Event</button>
+                            <?php endif; ?>
+                        </div>
+                    </aside>
                 </div>
             </div>
             <br>
         </section>
+
+        <!-- Confirmation Modal -->
+        <div class="modal-overlay" id="confirmModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Confirm Registration</h2>
+                    <p class="modal-message">
+                        You are about to register for this event. Please review your details below:
+                    </p>
+                </div>
+
+                <div class="modal-details">
+                    <div class="modal-detail-item">
+                        <span class="modal-detail-label">Name:</span>
+                        <span class="modal-detail-value" id="userName"><?php echo htmlspecialchars($userInfo['fullName']); ?></span>
+                    </div>
+                    <div class="modal-detail-item">
+                        <span class="modal-detail-label">Email:</span>
+                        <span class="modal-detail-value" id="userEmail"><?php echo htmlspecialchars($userInfo['email']); ?></span>
+                    </div>
+                    <div class="modal-detail-item">
+                        <span class="modal-detail-label">Event:</span>
+                        <span class="modal-detail-value" id="modalEventName"><?php echo htmlspecialchars($event['title']); ?></span>
+                    </div>
+                    <div class="modal-detail-item">
+                        <span class="modal-detail-label">Date:</span>
+                        <span class="modal-detail-value"><?php echo $startDate; ?></span>
+                    </div>
+                    <div class="modal-detail-item">
+                        <span class="modal-detail-label">Time:</span>
+                        <span class="modal-detail-value"><?php echo $time; ?></span>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn-cancel" onclick="hideConfirmation()">Cancel</button>
+                    <form method="POST" id="registrationForm" style="display: none;">
+                        <input type="hidden" name="register" value="1">
+                    </form>
+                    <button class="modal-btn modal-btn-confirm" onclick="confirmRegistration()">Confirm Registration</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div class="modal-overlay" id="successModal">
+            <div class="modal-content success-modal">
+                <div class="modal-header">
+                    <h2 class="modal-title">Registration Successful!</h2>
+                    <p class="modal-message">
+                        You have successfully registered for <strong id="successEventName"><?php echo htmlspecialchars($event['title']); ?></strong>. 
+                        A confirmation email has been sent to <strong id="successUserEmail"><?php echo htmlspecialchars($userInfo['email']); ?></strong>.
+                    </p>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn-confirm" onclick="closeSuccess()">Got it!</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Search & Results -->
         <section class="search-container" id="searchContainer" style="display: none;">
@@ -874,14 +1036,14 @@ if ($stmt = $connection->prepare($query)) {
         <section class="c-footer-links-section">
             <div>
                 <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
@@ -893,83 +1055,43 @@ if ($stmt = $connection->prepare($query)) {
         </section>
     </footer>
     <?php endif; ?>
-    
+
     <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
     <script src="../../javascript/mainScript.js"></script>
     <script>
-        // Toggle filters on mobile
-        function toggleFilters() {
-            const sidebar = document.getElementById('filterSidebar');
-            sidebar.classList.toggle('active');
-            
-            const button = document.querySelector('.filter-toggle');
-            if (sidebar.classList.contains('active')) {
-                button.textContent = 'Hide Filters';
-                localStorage.setItem('filterSidebarOpen', 'true');
-            } else {
-                button.textContent = 'Show Filters';
-                localStorage.setItem('filterSidebarOpen', 'false');
-            }
+        // Modal functions
+        function showConfirmation() {
+            document.getElementById('confirmModal').classList.add('active');
         }
 
+        function hideConfirmation() {
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+
+        function confirmRegistration() {
+            // Submit the form programmatically
+            document.getElementById('registrationForm').submit();
+        }
+
+        function closeSuccess() {
+            document.getElementById('successModal').classList.remove('active');
+        }
+
+        // Show success modal if registration was successful
+        <?php if ($registrationSuccess): ?>
         document.addEventListener('DOMContentLoaded', function() {
-            const filterState = localStorage.getItem('filterSidebarOpen');
-            const sidebar = document.getElementById('filterSidebar');
-            const button = document.querySelector('.filter-toggle');
-            
-            if (filterState === 'true' && window.innerWidth <= 1024) {
-                sidebar.classList.add('active');
-                button.textContent = 'Hide Filters';
-            }
+            document.getElementById('successModal').classList.add('active');
         });
+        <?php endif; ?>
 
-        // Clear all filters
-        function clearFilters() {
-            window.location.href = window.location.pathname;
-        }
-
-        // Update sort
-        function updateSort() {
-            const sortValue = document.getElementById('sortBy').value;
-            const url = new URL(window.location);
-            url.searchParams.set('sortBy', sortValue);
-            window.location.href = url.toString();
-        }
-
-        // Auto-submit form when checkbox changes
-        document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                document.getElementById('filterForm').submit();
-            });
-        });
-
-        // Perform search
-        function performSearch() {
-            const searchValue = document.getElementById('eventSearch').value;
-            const url = new URL(window.location);
-            
-            if (searchValue.trim() !== '') {
-                url.searchParams.set('search', searchValue);
-            } else {
-                url.searchParams.delete('search');
-            }
-            
-            // Preserve existing filter parameters
-            const existingParams = new URLSearchParams(window.location.search);
-            ['mode[]', 'type[]', 'status[]', 'sortBy'].forEach(param => {
-                if (existingParams.has(param)) {
-                    url.searchParams.set(param, existingParams.get(param));
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            const modals = document.querySelectorAll('.modal-overlay.active');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.classList.remove('active');
                 }
             });
-            
-            window.location.href = url.toString();
-        }
-
-        // Allow Enter key to trigger search
-        document.getElementById('eventSearch').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                performSearch();
-            }
         });
     </script>
 </body>

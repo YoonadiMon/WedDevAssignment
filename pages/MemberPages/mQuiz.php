@@ -471,13 +471,13 @@ $stmt->close();
                     <b>My Account</b><br>
                     <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                     <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
-                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                    <a href="../../pages/MemberPages/mSetting.html">Settings</a>
                 </div>
                 <div>
                     <b>Helps</b><br>
                     <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                     <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                    <a href="../../pages/MemberPages/mSetting.html">Settings</a>
                 </div>
                 <div>
                     <b>Community</b><br>

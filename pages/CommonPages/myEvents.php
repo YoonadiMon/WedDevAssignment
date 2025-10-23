@@ -164,11 +164,21 @@ $registeredSql = "
     WHERE r.userID = ? AND r.status = 'active' AND e.title LIKE ?
     ORDER BY e.startDate DESC
 ";
-$stmt = $connection->prepare($registeredSql);
+
+// Check if prepare was successful
+$stmt_registered = $connection->prepare($registeredSql);
+if ($stmt_registered === false) {
+    die("Error preparing registered events query: " . $connection->error);
+}
+
 $searchParam = "%$search%";
-$stmt->bind_param("is", $userID, $searchParam);
-$stmt->execute();
-$registeredEvents = $stmt->get_result();
+$stmt_registered->bind_param("is", $userID, $searchParam);
+
+if (!$stmt_registered->execute()) {
+    die("Error executing registered events query: " . $stmt_registered->error);
+}
+
+$registeredEvents = $stmt_registered->get_result();
 
 // Fetch Hosted Events 
 $searchHost = $_GET['searchHosted'] ?? '';
@@ -177,12 +187,21 @@ $hostedSql = "
     WHERE userID = ? AND title LIKE ?
     ORDER BY startDate DESC
 ";
-$stmt2 = $connection->prepare($hostedSql);
-$searchHostParam = "%$searchHost%";
-$stmt2->bind_param("is", $userID, $searchHostParam);
-$stmt2->execute();
-$hostedEvents = $stmt2->get_result();
 
+// Check if prepare was successful
+$stmt_hosted = $connection->prepare($hostedSql);
+if ($stmt_hosted === false) {
+    die("Error preparing hosted events query: " . $connection->error);
+}
+
+$searchHostParam = "%$searchHost%";
+$stmt_hosted->bind_param("is", $userID, $searchHostParam);
+
+if (!$stmt_hosted->execute()) {
+    die("Error executing hosted events query: " . $stmt_hosted->error);
+}
+
+$hostedEvents = $stmt_hosted->get_result();
 
 ?>
 
@@ -767,7 +786,7 @@ $hostedEvents = $stmt2->get_result();
 
                         <?php if ($isAdmin): ?>
                             <!-- Admin Navigation Icons -->
-                            <a href="../../pages/adminPages/aProfile.html">
+                            <a href="../../pages/adminPages/aProfile.php">
                                 <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
                         <?php else: ?>
@@ -790,7 +809,7 @@ $hostedEvents = $stmt2->get_result();
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
                         <!-- Member Menu Items -->
@@ -812,7 +831,7 @@ $hostedEvents = $stmt2->get_result();
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
                 <!-- Member Desktop Menu -->
@@ -832,7 +851,7 @@ $hostedEvents = $stmt2->get_result();
 
             <?php if ($isAdmin): ?>
                 <!-- Admin Navbar More -->
-                <a href="../../pages/adminPages/aProfile.html">
+                <a href="../../pages/adminPages/aProfile.php">
                     <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
                 </a>
             <?php else: ?>
@@ -1095,14 +1114,14 @@ $hostedEvents = $stmt2->get_result();
         <section class="c-footer-links-section">
             <div>
                 <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>

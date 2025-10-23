@@ -2,7 +2,7 @@
 session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
-include("../../php/errorPopup.php");
+include("../../php/errorPopUp.php");
 
 $indexUrl = $isAdmin ? '../../pages/adminPages/adminIndex.php' : '../../pages/MemberPages/memberIndex.php';
 
@@ -24,6 +24,11 @@ $previousPage = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $in
 if ($profileUserID <= 0) {
     showErrorPopup("Invalid user profile requested.", $previousPage);
 } else {
+    $isViewingOwnProfile = ($profileUserID == $currentUserID);
+    if ($isViewingOwnProfile) {
+        header("Location: " . $indexUrl);
+        exit();
+    }
     // Fetch profile user data with proper error handling
     $query = "SELECT fullName, username, bio, point, tradesCompleted, country, userType FROM tblusers WHERE userID = ?";
     
@@ -403,7 +408,7 @@ if ($profileUserID <= 0) {
 
                         <?php if ($isAdmin): ?>
                             <!-- Admin Navigation Icons -->
-                            <a href="../../pages/adminPages/aProfile.html">
+                            <a href="../../pages/adminPages/aProfile.php">
                                 <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
                         <?php else: ?>
@@ -426,7 +431,7 @@ if ($profileUserID <= 0) {
                         <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
                         <!-- Member Menu Items -->
@@ -448,7 +453,7 @@ if ($profileUserID <= 0) {
                 <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
                 <!-- Member Desktop Menu -->
@@ -468,7 +473,7 @@ if ($profileUserID <= 0) {
 
             <?php if ($isAdmin): ?>
                 <!-- Admin Navbar More -->
-                <a href="../../pages/adminPages/aProfile.html">
+                <a href="../../pages/adminPages/aProfile.php">
                     <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
                 </a>
             <?php else: ?>
@@ -486,8 +491,8 @@ if ($profileUserID <= 0) {
     <hr>
     
     <!-- Main Content -->
-    <main class="content">
-        <section class="profile-container">
+    <main>
+        <section class="profile-container content">
             <!-- Back Button -->
             <a href="javascript:history.back()" class="back-button">
                 ← Back
@@ -522,16 +527,12 @@ if ($profileUserID <= 0) {
                     </div>
                 </div>
                 <!-- only show action buttons if that user is not admin or own profile -->
-                <?php if ($profileUserIsAdmin || ($profileUserID === $currentUserID)): ?>
+                <?php if ($profileUserID !== $currentUserID && !$profileUserIsAdmin): ?>
                 <div class="action-buttons">
-                    <a href="../../pages/MemberPages/mCreateTicket.php" 
-                       class="action-btn" 
-                       title="Report User">
+                    <a href="../../pages/MemberPages/mCreateTicket.php" class="action-btn" title="Report User">
                         <img src="../../assets/images/report-icon-light.svg" alt="Report" class="report-icon">
                     </a>
-                    <a href="../../pages/MemberPages/mChat.html" 
-                       class="action-btn" 
-                       title="Chat">
+                    <a href="../../pages/MemberPages/mChat.html" class="action-btn" title="Chat">
                         <img src="../../assets/images/chat-light.svg" alt="Chat" class="chat-icon">
                     </a>
                 </div>
@@ -605,14 +606,14 @@ if ($profileUserID <= 0) {
         <section class="c-footer-links-section">
             <div>
                 <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>

@@ -560,7 +560,7 @@ if ($stmt = $connection->prepare($query)) {
 
                         <?php if ($isAdmin): ?>
                             <!-- Admin Navigation Icons -->
-                            <a href="../../pages/adminPages/aProfile.html">
+                            <a href="../../pages/adminPages/aProfile.php">
                                 <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
                         <?php else: ?>
@@ -580,15 +580,15 @@ if ($stmt = $connection->prepare($query)) {
                     <?php if ($isAdmin): ?>
                         <!-- Admin Menu Items -->
                         <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                         <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                     <?php else: ?>
                         <!-- Member Menu Items -->
                         <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -602,15 +602,15 @@ if ($stmt = $connection->prepare($query)) {
             <?php if ($isAdmin): ?>
                 <!-- Admin Desktop Menu -->
                 <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
                 <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
             <?php else: ?>
                 <!-- Member Desktop Menu -->
                 <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/aboutUs.html">About</a>
@@ -625,7 +625,7 @@ if ($stmt = $connection->prepare($query)) {
 
             <?php if ($isAdmin): ?>
                 <!-- Admin Navbar More -->
-                <a href="../../pages/adminPages/aProfile.html">
+                <a href="../../pages/adminPages/aProfile.php">
                     <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
                 </a>
             <?php else: ?>
@@ -683,7 +683,7 @@ if ($stmt = $connection->prepare($query)) {
                             <div class="filter-option">
                                 <input type="checkbox" id="cleanup" name="type[]" value="clean-up" 
                                     <?php echo in_array('clean-up', $filterType) ? 'checked' : ''; ?>>
-                                <label for="cleanup">Clean-up Drive</label>
+                                <label for="cleanup">Clean-up</label>
                             </div>
                             <div class="filter-option">
                                 <input type="checkbox" id="workshop" name="type[]" value="workshop" 
@@ -874,20 +874,20 @@ if ($stmt = $connection->prepare($query)) {
         <section class="c-footer-links-section">
             <div>
                 <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>
                 <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
-                <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
+                <a href="../../pages/CommonPages/mainBlog.php">Blogs</a><br>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             </div>
         </section>

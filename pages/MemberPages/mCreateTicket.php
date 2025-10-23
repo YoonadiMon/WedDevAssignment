@@ -566,7 +566,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
             <div class="info-section">
                 <h3>Before Submitting Your Ticket</h3>
                 <ul class="info-list">
-                    <li>Please check our <a href="../../pages/CommonPages/mainFAQ.html" style="color: var(--MainGreen);">FAQs</a> to see if your question has already been answered</li>
+                    <li>Please check our <a href="../../pages/CommonPages/mainFAQ.php" style="color: var(--MainGreen);">FAQs</a> to see if your question has already been answered</li>
                     <li>Provide as much detail as possible to help us resolve your issue quickly</li>
                     <li>Include any error messages you're receiving</li>
                     <li>For technical issues, mention your device and browser information</li>
@@ -616,14 +616,14 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
         <section class="c-footer-links-section">
             <div>
                 <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
