@@ -160,8 +160,7 @@ try {
     if ($type === 'all' || $type === 'events') {
         // Get count
         $countSql = "SELECT COUNT(*) as total FROM tblevents e 
-                     WHERE (e.title LIKE ? OR e.description LIKE ? OR e.location LIKE ? OR e.country LIKE ?)
-                     AND e.status = 'open'";
+                     WHERE (e.title LIKE ? OR e.description LIKE ? OR e.location LIKE ? OR e.country LIKE ?)";
         $stmt = mysqli_prepare($connection, $countSql);
         if ($stmt) {
             mysqli_stmt_bind_param($stmt, "ssss", $searchQuery, $searchQuery, $searchQuery, $searchQuery);
