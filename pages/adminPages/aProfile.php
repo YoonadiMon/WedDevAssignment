@@ -250,7 +250,7 @@ $connection->close();
                         </section>
 
                         <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                         <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
@@ -263,7 +263,7 @@ $connection->close();
             <!-- Menu Links Desktop + Tablet -->
             <nav class="c-navbar-desktop">
                 <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                 <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a>
