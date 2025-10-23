@@ -20,63 +20,185 @@ if (isset($_POST['delete_user'])) {
         // Start transaction
         $connection->begin_transaction();
         
+        $deleteSuccess = true;
+        $errorMessage = "";
+        
         try {
-            // Delete user's related data first (if needed)
-            // Delete tickets
-            $stmt = $connection->prepare("DELETE FROM tbltickets WHERE userID = ?");
-            $stmt->bind_param("i", $userIDToDelete);
-            $stmt->execute();
-            $stmt->close();
+            // Define deletion operations in correct order
+            $deletionOperations = [
+                // ticket responses
+                "DELETE FROM tblticket_responses WHERE responderId = ?",
+                
+                // ticket attachments  
+                "DELETE FROM tblticket_attachments WHERE uploadedBy = ?",
+                
+                // tickets
+                "DELETE FROM tbltickets WHERE userID = ?",
+                
+                // trade listings
+                "DELETE FROM tbltrade_listings WHERE userID = ?",
+                
+                // event registrations
+                "DELETE FROM tblregistration WHERE userID = ?",
+                
+                // events created by user
+                "DELETE FROM tblevents WHERE userID = ?",
+                
+                // blog tags associations
+                "DELETE tblblogtag FROM tblblogtag 
+                 INNER JOIN tblblog ON tblblogtag.blogID = tblblog.blogID 
+                 WHERE tblblog.userID = ?",
+                
+                // blogs
+                "DELETE FROM tblblog WHERE userID = ?",
+                
+                // quiz progress
+                "DELETE FROM tbluser_quiz_progress WHERE userID = ?",
+                
+                // delete the user
+                "DELETE FROM tblusers WHERE userID = ? AND userType = 'member'"
+            ];
             
-            // Delete trade listings
-            $stmt = $connection->prepare("DELETE FROM tbltrade_listings WHERE userID = ?");
-            $stmt->bind_param("i", $userIDToDelete);
-            $stmt->execute();
-            $stmt->close();
+            // Execute each deletion operation
+            foreach ($deletionOperations as $sql) {
+                $stmt = $connection->prepare($sql);
+                if (!$stmt) {
+                    throw new Exception("Failed to prepare statement: " . $connection->error);
+                }
+                
+                $stmt->bind_param("i", $userIDToDelete);
+                $result = $stmt->execute();
+                
+                if (!$result) {
+                    throw new Exception("Failed to execute deletion: " . $stmt->error);
+                }
+                $stmt->close();
+            }
             
-            // Delete the user
-            $stmt = $connection->prepare("DELETE FROM tblusers WHERE userID = ? AND userType = 'member'");
-            $stmt->bind_param("i", $userIDToDelete);
-            $stmt->execute();
-            $stmt->close();
+            // Check if user was actually deleted
+            $checkStmt = $connection->prepare("SELECT COUNT(*) as count FROM tblusers WHERE userID = ?");
+            $checkStmt->bind_param("i", $userIDToDelete);
+            $checkStmt->execute();
+            $checkResult = $checkStmt->get_result();
+            $userStillExists = $checkResult->fetch_assoc()['count'] > 0;
+            $checkStmt->close();
             
+            if ($userStillExists) {
+                throw new Exception("User deletion failed - user still exists in database");
+            }
+            
+            // Commit transaction if all operations succeeded
             $connection->commit();
-            $success = "User deleted successfully!";
+            $success = "User and all associated data deleted successfully!";
+            
         } catch (Exception $e) {
+            // Rollback transaction on any error
             $connection->rollback();
             $error = "Error deleting user: " . $e->getMessage();
+            $deleteSuccess = false;
+            
+            error_log("User deletion error for userID $userIDToDelete: " . $e->getMessage());
+        }
+        
+        // verify connection is still alive
+        if (!$connection->ping()) {
+            $error = "Database connection lost during deletion. Please check if user was deleted.";
+            $deleteSuccess = false;
         }
     }
 }
 
 // Fetch all users with search functionality
 $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
-$query = "SELECT userID, fullName, username, email, gender, country, userType, point, createdAt, lastLogin 
-          FROM tblusers 
-          WHERE userType = 'member'";
+$users = [];
+$totalUsers = 0;
+try {
+    // Build the base query
+    $query = "SELECT userID, fullName, username, email, gender, country, userType, point, createdAt, lastLogin 
+              FROM tblusers 
+              WHERE userType = 'member'";
 
-if (!empty($searchTerm)) {
-    $query .= " AND (fullName LIKE ? OR username LIKE ? OR email LIKE ? OR country LIKE ?)";
+    if (!empty($searchTerm)) {
+        $query .= " AND (fullName LIKE ? OR username LIKE ? OR email LIKE ? OR country LIKE ?)";
+    }
+
+    $query .= " ORDER BY createdAt DESC";
+
+    // Prepare statement
+    $stmt = $connection->prepare($query);
+    if (!$stmt) {
+        throw new Exception("Failed to prepare user query: " . $connection->error);
+    }
+
+    // Bind parameters if search term exists
+    if (!empty($searchTerm)) {
+        $searchParam = "%$searchTerm%";
+        $bindResult = $stmt->bind_param("ssss", $searchParam, $searchParam, $searchParam, $searchParam);
+        if (!$bindResult) {
+            throw new Exception("Failed to bind search parameters: " . $stmt->error);
+        }
+    }
+
+    // Execute query
+    $executeResult = $stmt->execute();
+    if (!$executeResult) {
+        throw new Exception("Failed to execute user query: " . $stmt->error);
+    }
+
+    // Get results
+    $result = $stmt->get_result();
+    if (!$result) {
+        throw new Exception("Failed to get result set: " . $stmt->error);
+    }
+
+    $users = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    // Get total user count
+    $totalQuery = "SELECT COUNT(*) as total FROM tblusers WHERE userType = 'member'";
+    $totalStmt = $connection->prepare($totalQuery);
+    if (!$totalStmt) {
+        throw new Exception("Failed to prepare count query: " . $connection->error);
+    }
+
+    $executeResult = $totalStmt->execute();
+    if (!$executeResult) {
+        throw new Exception("Failed to execute count query: " . $totalStmt->error);
+    }
+
+    $totalResult = $totalStmt->get_result();
+    if (!$totalResult) {
+        throw new Exception("Failed to get count result: " . $totalStmt->error);
+    }
+
+    $totalData = $totalResult->fetch_assoc();
+    $totalUsers = $totalData['total'] ?? 0;
+    $totalStmt->close();
+
+} catch (Exception $e) {
+    error_log("Database query error: " . $e->getMessage());
+    
+    // Set default values on error
+    $users = [];
+    $totalUsers = 0;
+    
+    $error = "Unable to load user data. Please try again.";
+    
+    // Clean up any open statements
+    if (isset($stmt) && $stmt) {
+        $stmt->close();
+    }
+    if (isset($totalStmt) && $totalStmt) {
+        $totalStmt->close();
+    }
 }
 
-$query .= " ORDER BY createdAt DESC";
-
-$stmt = $connection->prepare($query);
-
-if (!empty($searchTerm)) {
-    $searchParam = "%$searchTerm%";
-    $stmt->bind_param("ssss", $searchParam, $searchParam, $searchParam, $searchParam);
+// Connection check
+if (!$connection->ping()) {
+    $error = "Database connection issue. Please refresh the page.";
+    $users = [];
+    $totalUsers = 0;
 }
-
-$stmt->execute();
-$result = $stmt->get_result();
-$users = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
-
-// Get total user count
-$totalQuery = "SELECT COUNT(*) as total FROM tblusers WHERE userType = 'member'";
-$totalResult = $connection->query($totalQuery);
-$totalUsers = $totalResult->fetch_assoc()['total'];
 ?>
 
 <!DOCTYPE html>
@@ -243,9 +365,17 @@ $totalUsers = $totalResult->fetch_assoc()['total'];
             background: var(--LightGreen);
         }
 
-
         .dark-mode .users-table tbody tr:hover {
             background: var(--DarkerGray);
+        }
+
+        .users-table tbody tr td a {
+            text-decoration: none;
+        }
+
+        .users-table tbody tr td a:hover {
+            text-decoration: underline;
+            color: var(--MainGreen);
         }
 
         .user-info {
@@ -472,7 +602,7 @@ $totalUsers = $totalResult->fetch_assoc()['total'];
                         </a>
                     </section>
                     <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                    <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                     <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -483,7 +613,7 @@ $totalUsers = $totalResult->fetch_assoc()['total'];
 
         <nav class="c-navbar-desktop">
             <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-            <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+            <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -504,7 +634,7 @@ $totalUsers = $totalResult->fetch_assoc()['total'];
 
     <!-- Main Content -->
     <main>
-        <div class="manage-users-container">
+        <div class="content manage-users-container">
             <a href="../../pages/adminPages/adminIndex.php" class="back-button">
                 ← Back to Dashboard
             </a>
@@ -550,14 +680,15 @@ $totalUsers = $totalResult->fetch_assoc()['total'];
                         </thead>
                         <tbody>
                             <?php foreach ($users as $user): ?>
-                                <tr>
-                                    <td class="user">
+                                <tr><td class="user">
+                                        <a href="../../pages/CommonPages/viewProfile.php?userID=<?php echo $user['userID'];?>">
                                         <div class="user-info"> 
                                             <div class="user-details">
                                                 <h4><?php echo htmlspecialchars($user['fullName']); ?></h4>
                                                 <p>@<?php echo htmlspecialchars($user['username']); ?></p>
                                             </div>
                                         </div>
+                                        </a>
                                     </td>
                                     <td><?php echo htmlspecialchars($user['email']); ?></td>
                                     <td><?php echo htmlspecialchars(ucfirst($user['gender'])); ?></td>
@@ -579,6 +710,7 @@ $totalUsers = $totalResult->fetch_assoc()['total'];
                                                 '<?php echo htmlspecialchars($user['username']); ?>'
                                             )">Delete
                                         </button>
+                                    
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
