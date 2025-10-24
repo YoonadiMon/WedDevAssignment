@@ -1,10 +1,13 @@
 <?php
+session_start();
 include("../../php/dbConn.php");
+include("../../php/sessionCheck.php");
 
 // Initialize variables
+$currentUserID = $_SESSION['userID']; 
+
 $success_message = "";
 $error_message = "";
-$currentUserID = 4; // Assuming current user ID is 6
 
 // Process form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
