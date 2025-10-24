@@ -33,7 +33,7 @@
     <header>
         <!-- Logo + Name -->
         <section class="c-logo-section">
-            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.php'; ?>" class="c-logo-link">
+            <a href="../../pages/MemberPages/memberIndex.php" class="c-logo-link">
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
             </a>
