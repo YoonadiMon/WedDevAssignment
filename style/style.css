@@ -764,7 +764,7 @@ Desktop (e.g., ~1150px - 1200px) */
 @media (min-width: 1150px) {
     /* Desktop styles here */
     * {
-        font-size: 24px;
+        font-size: 16px;
     }
 
     footer section {
