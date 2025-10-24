@@ -3,52 +3,93 @@ session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
-// Full list of countries
 $countries = [
-    'Malaysia', 'Singapore', 'China', 'Hong Kong', 'Taiwan', 'Philippines', 
-    'Australia', 'Japan', 'South Korea', 'Indonesia', 'Thailand', 'Vietnam', 
-    'India', 'Sri Lanka', 'Pakistan', 'Bangladesh', 'United States', 'Canada', 
-    'United Kingdom', 'Germany', 'France', 'Italy', 'Spain', 'Netherlands', 
-    'Brazil', 'Mexico', 'Russia', 'South Africa', 'Egypt', 'Saudi Arabia', 
-    'United Arab Emirates', 'New Zealand'
+    'Afghanistan', 'Åland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra',
+    'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia',
+    'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh',
+    'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia',
+    'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory',
+    'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon',
+    'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile',
+    'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo',
+    'Congo, The Democratic Republic of The', 'Cook Islands', 'Costa Rica', "Cote D'ivoire",
+    'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica',
+    'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea',
+    'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland',
+    'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon',
+    'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada',
+    'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-bissau', 'Guyana',
+    'Haiti', 'Heard Island and Mcdonald Islands', 'Holy See (Vatican City State)', 'Honduras',
+    'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of',
+    'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey',
+    'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of",
+    'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic",
+    'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libyan Arab Jamahiriya', 'Liechtenstein',
+    'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, The Former Yugoslav Republic of',
+    'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands',
+    'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of',
+    'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco',
+    'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'Netherlands Antilles',
+    'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island',
+    'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied',
+    'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland',
+    'Portugal', 'Puerto Rico', 'Qatar', 'Reunion', 'Romania', 'Russian Federation', 'Rwanda',
+    'Saint Helena', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Pierre and Miquelon',
+    'Saint Vincent and The Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe',
+    'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore',
+    'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa',
+    'South Georgia and The South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan',
+    'Suriname', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland',
+    'Syrian Arab Republic', 'Taiwan', 'Tajikistan', 'Tanzania, United Republic of',
+    'Thailand', 'Timor-leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago',
+    'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu',
+    'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States',
+    'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu',
+    'Venezuela', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.',
+    'Wallis and Futuna', 'Western Sahara', 'Yemen', 'Zambia', 'Zimbabwe'
 ];
 
 // Function to get timezone by country
 function getTimezoneByCountry($country) {
-    $countryTimezones = [
-        'Malaysia' => 'UTC+08:00', 
-        'Singapore' => 'UTC+08:00', 
-        'China' => 'UTC+08:00',
-        'Hong Kong' => 'UTC+08:00', 
-        'Taiwan' => 'UTC+08:00', 
-        'Philippines' => 'UTC+08:00',
-        'Australia' => 'UTC+10:00', 
-        'Japan' => 'UTC+09:00', 
-        'South Korea' => 'UTC+09:00',
-        'Indonesia' => 'UTC+07:00', 
-        'Thailand' => 'UTC+07:00', 
-        'Vietnam' => 'UTC+07:00',
-        'India' => 'UTC+05:30', 
-        'Sri Lanka' => 'UTC+05:30', 
-        'Pakistan' => 'UTC+05:00',
-        'Bangladesh' => 'UTC+06:00', 
-        'United States' => 'UTC-05:00', 
-        'Canada' => 'UTC-05:00',
-        'United Kingdom' => 'UTC+00:00', 
-        'Germany' => 'UTC+01:00', 
-        'France' => 'UTC+01:00',
-        'Italy' => 'UTC+01:00', 
-        'Spain' => 'UTC+01:00', 
-        'Netherlands' => 'UTC+01:00',
-        'Brazil' => 'UTC-03:00', 
-        'Mexico' => 'UTC-06:00', 
-        'Russia' => 'UTC+03:00',
-        'South Africa' => 'UTC+02:00', 
-        'Egypt' => 'UTC+02:00', 
-        'Saudi Arabia' => 'UTC+03:00',
-        'United Arab Emirates' => 'UTC+04:00', 
-        'New Zealand' => 'UTC+12:00',
+    $timezoneGroups = [
+        'UTC+13:00' => ['Samoa', 'Tonga'],
+        'UTC+12:00' => ['Fiji', 'Kiribati', 'Marshall Islands', 'Nauru', 'New Zealand', 'Tuvalu', 'Wallis and Futuna'],
+        'UTC+11:00' => ['New Caledonia', 'Norfolk Island', 'Solomon Islands', 'Vanuatu'],
+        'UTC+10:00' => ['Australia', 'Guam', 'Micronesia, Federated States of', 'Northern Mariana Islands', 'Papua New Guinea'],
+        'UTC+09:00' => ['Japan', 'Korea, Democratic People\'s Republic of', 'Korea, Republic of', 'Palau', 'Timor-leste'],
+        'UTC+08:00' => ['China', 'Hong Kong', 'Macao', 'Malaysia', 'Philippines', 'Singapore', 'Taiwan', 'Brunei Darussalam', 'Mongolia'],
+        'UTC+07:00' => ['Cambodia', 'Christmas Island', 'Indonesia', 'Lao People\'s Democratic Republic', 'Thailand', 'Viet Nam'],
+        'UTC+06:30' => ['Cocos (Keeling) Islands', 'Myanmar'],
+        'UTC+06:00' => ['Bangladesh', 'Bhutan', 'British Indian Ocean Territory', 'Kazakhstan', 'Kyrgyzstan'],
+        'UTC+05:45' => ['Nepal'],
+        'UTC+05:30' => ['India', 'Sri Lanka'],
+        'UTC+05:00' => ['Maldives', 'Pakistan', 'French Southern Territories', 'Heard Island and Mcdonald Islands', 'Tajikistan', 'Turkmenistan', 'Uzbekistan'],
+        'UTC+04:30' => ['Afghanistan'],
+        'UTC+04:00' => ['Armenia', 'Azerbaijan', 'Georgia', 'Mauritius', 'Oman', 'Reunion', 'Seychelles', 'United Arab Emirates'],
+        'UTC+03:30' => ['Iran, Islamic Republic of'],
+        'UTC+03:00' => ['Bahrain', 'Belarus', 'Comoros', 'Djibouti', 'Eritrea', 'Ethiopia', 'Iraq', 'Jordan', 'Kenya', 'Kuwait', 'Madagascar', 'Mayotte', 'Qatar', 'Russian Federation', 'Saudi Arabia', 'Somalia', 'South Africa', 'Sudan', 'Syrian Arab Republic', 'Tanzania, United Republic of', 'Turkey', 'Uganda', 'Yemen'],
+        'UTC+02:00' => ['Åland Islands', 'Botswana', 'Bulgaria', 'Burundi', 'Cyprus', 'Egypt', 'Estonia', 'Finland', 'Greece', 'Israel', 'Latvia', 'Lebanon', 'Lesotho', 'Libyan Arab Jamahiriya', 'Lithuania', 'Malawi', 'Moldova, Republic of', 'Mozambique', 'Namibia', 'Palestinian Territory, Occupied', 'Romania', 'Rwanda', 'Swaziland', 'Ukraine', 'Zambia', 'Zimbabwe'],
+        'UTC+01:00' => ['Albania', 'Algeria', 'Andorra', 'Angola', 'Austria', 'Belgium', 'Benin', 'Bosnia and Herzegovina', 'Cameroon', 'Central African Republic', 'Chad', 'Congo', 'Congo, The Democratic Republic of The', 'Croatia', 'Czech Republic', 'Denmark', 'Equatorial Guinea', 'France', 'Gabon', 'Germany', 'Gibraltar', 'Holy See (Vatican City State)', 'Hungary', 'Italy', 'Liechtenstein', 'Luxembourg', 'Macedonia, The Former Yugoslav Republic of', 'Malta', 'Monaco', 'Montenegro', 'Morocco', 'Netherlands', 'Niger', 'Nigeria', 'Norway', 'Poland', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'Tunisia', 'United Kingdom', 'Western Sahara'],
+        'UTC+00:00' => ['Bouvet Island', 'Burkina Faso', 'Cote D\'ivoire', 'Faroe Islands', 'Gambia', 'Ghana', 'Greenland', 'Guernsey', 'Guinea', 'Guinea-bissau', 'Iceland', 'Ireland', 'Isle of Man', 'Jersey', 'Liberia', 'Mali', 'Mauritania', 'Portugal', 'Saint Helena', 'Sao Tome and Principe', 'Senegal', 'Sierra Leone', 'Svalbard and Jan Mayen', 'Togo', 'Tokelau'],
+        'UTC-01:00' => ['Cape Verde'],
+        'UTC-02:00' => ['South Georgia and The South Sandwich Islands'],
+        'UTC-03:00' => ['Antarctica', 'Argentina', 'Brazil', 'Falkland Islands (Malvinas)', 'French Guiana', 'Paraguay', 'Saint Pierre and Miquelon', 'Suriname', 'Uruguay'],
+        'UTC-04:00' => ['Anguilla', 'Antigua and Barbuda', 'Aruba', 'Barbados', 'Bermuda', 'Bolivia', 'Chile', 'Dominica', 'Dominican Republic', 'Grenada', 'Guadeloupe', 'Guyana', 'Martinique', 'Montserrat', 'Netherlands Antilles', 'Puerto Rico', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and The Grenadines', 'Trinidad and Tobago', 'Venezuela', 'Virgin Islands, British', 'Virgin Islands, U.S.'],
+        'UTC-05:00' => ['Bahamas', 'Canada', 'Cayman Islands', 'Colombia', 'Cuba', 'Ecuador', 'Haiti', 'Jamaica', 'Panama', 'Peru', 'Turks and Caicos Islands', 'United States'],
+        'UTC-06:00' => ['Belize', 'Costa Rica', 'El Salvador', 'Guatemala', 'Honduras', 'Mexico', 'Nicaragua'],
+        'UTC-08:00' => ['Pitcairn'],
+        'UTC-10:00' => ['Cook Islands', 'French Polynesia'],
+        'UTC-11:00' => ['American Samoa', 'Niue', 'United States Minor Outlying Islands'],
     ];
+
+    // Create a flattened array for quick lookup
+    $countryTimezones = [];
+    foreach ($timezoneGroups as $timezone => $countries) {
+        foreach ($countries as $countryName) {
+            $countryTimezones[$countryName] = $timezone;
+        }
+    }
+
     return $countryTimezones[$country] ?? 'UTC+08:00';
 }
 
