@@ -673,7 +673,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
             <?php if ($isAdmin): ?>
                 <!-- Admin Navbar More -->
-                <a href="../../pages/adminPages/aProfile.html">
+                <a href="../../pages/adminPages/aProfile.php">
                     <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
                 </a>
             <?php else: ?>
