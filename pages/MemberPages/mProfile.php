@@ -247,7 +247,7 @@ $connection->close();
                             </a>
                             <span class="c-notification-badge" id="chatBadgeMobile"></span>
                         </div>
-                        <a href="../../pages/MemberPages/mSetting.html">
+                        <a href="../../pages/MemberPages/mSetting.php">
                             <img src="../../assets/images/setting-light.svg" alt="Settings">
                         </a>
                     </section>
@@ -278,7 +278,7 @@ $connection->close();
                 <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                 <span class="c-notification-badge" id="chatBadgeDesktop"></span>
             </a>
-            <a href="../../pages/MemberPages/mSetting.html">
+            <a href="../../pages/MemberPages/mSetting.php">
                 <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
             </a>
         </section>
@@ -291,7 +291,7 @@ $connection->close();
             <main>
                 <div class="left">
                     <div class="back-button-container">
-                        <a href="../../pages/MemberPages/mSetting.html" class="btn-back-mProfile" title="Back to Settings">
+                        <a href="../../pages/MemberPages/mSetting.php" class="btn-back-mProfile" title="Back to Settings">
                             <img src="../../assets/images/icon-back-light.svg" alt="Back icon" />
                         </a>
                     </div>

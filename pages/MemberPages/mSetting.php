@@ -63,7 +63,7 @@
                             <span class="c-notification-badge" id="chatBadgeMobile"></span>
                         </div>
 
-                        <!-- <a href="../../pages/MemberPages/mSetting.html">
+                        <!-- <a href="../../pages/MemberPages/mSetting.php">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a> -->
                     </section>
@@ -98,7 +98,7 @@
             </a>
 
 
-            <!-- <a href="../../pages/MemberPages/mSetting.html">
+            <!-- <a href="../../pages/MemberPages/mSetting.php">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a> -->
         </section>

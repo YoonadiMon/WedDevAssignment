@@ -538,7 +538,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
                             </a>
                             <span class="c-notification-badge" id="chatBadgeMobile"></span>
                         </div>
-                        <a href="../../pages/MemberPages/mSetting.html">
+                        <a href="../../pages/MemberPages/mSetting.php">
                             <img src="../../assets/images/setting-light.svg" alt="Settings">
                         </a>
                     </section>
@@ -569,7 +569,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
                 <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                 <span class="c-notification-badge" id="chatBadgeDesktop"></span>
             </a>
-            <a href="../../pages/MemberPages/mSetting.html">
+            <a href="../../pages/MemberPages/mSetting.php">
                 <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
             </a>
         </section>
@@ -694,7 +694,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
