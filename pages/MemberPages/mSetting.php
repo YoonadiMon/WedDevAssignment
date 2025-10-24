@@ -1,3 +1,10 @@
+<?php
+    // Start the session
+    session_start();
+    include("../../php/sessionCheck.php");
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 

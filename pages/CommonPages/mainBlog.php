@@ -3,6 +3,8 @@ session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
+$user_type = $_SESSION['userType'];
+
 // Fetch all blogs with author info
 $query = "
     SELECT b.blogID, b.userID, b.title, b.excerpt, b.category, b.date, u.fullName
@@ -30,33 +32,33 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
 // Return JSON for AJAX
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
-    
+
     if ($_POST['action'] === 'getBlogs') {
         echo json_encode(['blogs' => $blogs, 'count' => count($blogs)]);
     } elseif ($_POST['action'] === 'getTags') {
         echo json_encode(['tags' => $tags]);
     } elseif ($_POST['action'] === 'searchBlogs') {
         $searchQuery = isset($_POST['query']) ? strtolower($_POST['query']) : '';
-        $filtered = array_filter($blogs, function($blog) use ($searchQuery) {
-            return stripos($blog['title'], $searchQuery) !== false || 
-                   stripos($blog['excerpt'], $searchQuery) !== false;
+        $filtered = array_filter($blogs, function ($blog) use ($searchQuery) {
+            return stripos($blog['title'], $searchQuery) !== false ||
+                stripos($blog['excerpt'], $searchQuery) !== false;
         });
         echo json_encode(['blogs' => array_values($filtered), 'count' => count($filtered)]);
     } elseif ($_POST['action'] === 'filterBlogs') {
         $filterType = isset($_POST['type']) ? $_POST['type'] : 'all';
         $filtered = $blogs;
-        
+
         if ($filterType === 'recent') {
             $threeDaysAgo = strtotime('-3 days');
-            $filtered = array_filter($blogs, function($blog) use ($threeDaysAgo) {
+            $filtered = array_filter($blogs, function ($blog) use ($threeDaysAgo) {
                 return strtotime($blog['date']) >= $threeDaysAgo;
             });
         }
-        
+
         echo json_encode(['blogs' => array_values($filtered), 'count' => count($filtered)]);
     } elseif ($_POST['action'] === 'filterByTag') {
         $tagName = isset($_POST['tag']) ? $_POST['tag'] : 'all';
-        
+
         if ($tagName === 'all') {
             $filtered = $blogs;
         } else {
@@ -69,16 +71,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             ";
             $tagResult = mysqli_query($connection, $tagQuery);
             $taggedBlogIds = [];
-            
+
             while ($row = mysqli_fetch_assoc($tagResult)) {
                 $taggedBlogIds[] = $row['blogID'];
             }
-            
-            $filtered = array_filter($blogs, function($blog) use ($taggedBlogIds) {
+
+            $filtered = array_filter($blogs, function ($blog) use ($taggedBlogIds) {
                 return in_array($blog['blogID'], $taggedBlogIds);
             });
         }
-        
+
         echo json_encode(['blogs' => array_values($filtered), 'count' => count($filtered)]);
     }
     exit;
@@ -87,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -140,6 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             transition: all 0.3s ease;
             margin-bottom: 0.5rem;
             font-size: 1rem;
+            display: inline-block;
         }
 
         .btn:hover {
@@ -147,7 +151,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             transform: translateY(-2px);
         }
 
-        .hero .search-bar {
+        /* Hero Search Bar */
+        .hero .search-bar-container {
             display: flex;
             max-width: 500px;
             margin: 0 auto;
@@ -156,9 +161,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            background-color: var(--bg-color);
         }
 
-        .hero .search-bar input {
+        .hero .search-bar-container input {
             flex: 1;
             padding: 1rem 1.5rem;
             border: none;
@@ -166,9 +172,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             color: var(--text-color);
             font-size: 1rem;
             outline: none;
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
         }
 
-        .hero .search-bar button {
+        .hero .search-bar-container input::placeholder {
+            color: var(--text-color-2);
+        }
+
+        .hero .search-bar-container button {
             background-color: var(--MainGreen);
             color: white;
             border: none;
@@ -176,10 +188,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             cursor: pointer;
             font-weight: 600;
             transition: background-color 0.3s;
+            white-space: nowrap;
         }
 
-        .hero .search-bar button:hover {
+        .hero .search-bar-container button:hover {
             background-color: var(--btn-color-hover);
+        }
+
+        .hero .search-bar-container button:active {
+            transform: scale(0.98);
         }
 
         /* Blog Section */
@@ -224,6 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             cursor: pointer;
             font-size: 0.875rem;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .sort button.active,
@@ -241,6 +259,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.875rem;
+            font-family: 'Inter', sans-serif;
         }
 
         .blog-grid {
@@ -336,96 +355,418 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             font-size: 1.1rem;
         }
 
+        /* Header Search Bar Responsive */
+        .search-bar {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--MainGreen);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .search-bar::placeholder {
+            color: var(--text-color-2);
+        }
+
+        .c-navbar-side .search-bar,
+        .c-navbar-more .search-bar {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Dark mode support */
+        .dark-mode .hero .search-bar-container input {
+            background-color: var(--bg-color-dark);
+            color: var(--text-color);
+        }
+
+        .dark-mode .search-bar {
+            background-color: var(--bg-color-dark);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .dark-mode .search-bar:focus {
+            border-color: var(--MainGreen);
+        }
+
+        .dark-mode .sort select {
+            background-color: var(--bg-color-dark);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .c-notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform: translate(50%, -50%);
+            background-color: var(--Red);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border-radius: 999px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            z-index: 2;
+        }
+
+        .c-navbar-side .c-notification-badge {
+            top: 6px;
+            right: 5px;
+        }
+
+        /* Tablet Responsive (768px - 1024px) */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .c-navbar-more .search-bar {
+                width: 200px;
+                padding: 0.75rem 1rem;
+            }
+
+            .hero .search-bar-container {
+                max-width: 100%;
+            }
+
+            .sort {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* Mobile Responsive (max 768px) */
         @media (max-width: 768px) {
-            .blog-grid {
-                grid-template-columns: 1fr;
+            .hero {
+                padding: 2.5rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 0.95rem;
+            }
+
+            .btn {
+                padding: 0.65rem 1.5rem;
+                font-size: 0.95rem;
+            }
+
+            .hero .search-bar-container {
+                max-width: 100%;
+                margin-top: 2rem;
+                flex-direction: row;
+            }
+
+            .hero .search-bar-container input {
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            .hero .search-bar-container button {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .blogs {
+                padding: 1.5rem;
             }
 
             .blog-header {
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 0.75rem;
             }
 
             .sort {
                 width: 100%;
-                justify-content: flex-start;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                align-items: center;
+            }
+
+            .sort button,
+            .sort select {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .blog-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .c-navbar-side .search-bar {
+                width: calc(100% - 2rem);
+                margin: 1rem 1rem 0 1rem;
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+                box-sizing: border-box;
+            }
+
+            .c-navbar-more .search-bar {
+                width: 100%;
+                padding: 0.75rem 1rem;
+                margin-bottom: 0.5rem;
+                box-sizing: border-box;
+            }
+        }
+
+        /* Extra small devices (max 480px) */
+        @media (max-width: 480px) {
+            .hero {
+                padding: 2rem 0.75rem;
+            }
+
+            .hero h5 {
+                font-size: 0.75rem;
+                letter-spacing: 1px;
+            }
+
+            .hero h1 {
+                font-size: 1.75rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .hero p {
+                font-size: 0.9rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .btn {
+                padding: 0.6rem 1.25rem;
+                font-size: 0.9rem;
+            }
+
+            .hero .search-bar-container {
+                max-width: 100%;
+                margin-top: 1.5rem;
+                border-radius: 8px;
+            }
+
+            .hero .search-bar-container input {
+                padding: 0.625rem 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .hero .search-bar-container button {
+                padding: 0.625rem 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .blogs {
+                padding: 1rem;
+            }
+
+            .blog-header {
+                gap: 0.5rem;
+            }
+
+            .blog-header p {
+                font-size: 0.9rem;
+            }
+
+            .sort {
+                gap: 0.4rem;
+                width: 100%;
+            }
+
+            .sort button {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+                flex: 1;
+                min-width: auto;
+            }
+
+            .sort select {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+                width: 100%;
+            }
+
+            .blog-grid {
+                gap: 1rem;
+            }
+
+            .blog-image {
+                height: 150px;
+                font-size: 1rem;
+            }
+
+            .blog-content {
+                padding: 1rem;
+            }
+
+            .blog-title {
+                font-size: 1.1rem;
+            }
+
+            .blog-excerpt {
+                font-size: 0.8rem;
+            }
+
+            .search-bar {
+                font-size: 0.9rem;
+                padding: 0.625rem 0.75rem;
+                box-sizing: border-box;
+            }
+
+            .c-navbar-side .search-bar {
+                width: calc(100% - 1.5rem);
+                margin: 0.75rem 0.75rem 0 0.75rem;
+                font-size: 0.9rem;
+                padding: 0.625rem 0.75rem;
             }
         }
     </style>
 </head>
+
 <body>
     <div id="cover" class="" onclick="hideMenu()"></div>
 
-  <!-- Logo + Name & Navbar -->
-  <header>
-    <!-- Logo + Name -->
-    <section class="c-logo-section">
-        <a href="../../pages/MemberPages/memberIndex.php" class="c-logo-link">
-            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
-            <div class="c-text">ReLeaf</div>
-        </a>
-    </section>
+    <!-- Dynamic Header based on user type -->
+    <header id="main-header">
+        <?php if ($user_type === 'admin'): ?>
+            <!-- Admin Header -->
+            <section class="c-logo-section">
+                <a href="../../pages/adminPages/adminIndex.php" class="c-logo-link">
+                    <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                    <div class="c-text">ReLeaf</div>
+                </a>
+            </section>
 
-    <!-- Menu Links Mobile -->
-    <nav class="c-navbar-side">
-      <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-      <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
-      <div id="sidebarNav" class="c-navbar-side-menu">
+            <!-- Menu Links Mobile -->
+            <nav class="c-navbar-side">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar" aria-label="Search">
+                <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
+                <div id="sidebarNav" class="c-navbar-side-menu">
 
-        <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
-        <div class="c-navbar-side-items">
-          <section class="c-navbar-side-more">
-            <button id="themeToggle1">
-              <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
-            </button>
+                    <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
+                    <div class="c-navbar-side-items">
+                        <section class="c-navbar-side-more">
+                            <button id="themeToggle1">
+                                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                            </button>
+                            <a href="../../pages/adminPages/aProfile.php">
+                                <img src="../../assets/images/profile-light.svg" alt="Profile">
+                            </a>
+                        </section>
 
-            <div class="c-chatbox" id="chatboxMobile">
-              <a href="../../pages/MemberPages/mChat.html">
-                <img src="../../assets/images/chat-light.svg" alt="Chatbox">
-              </a>
-              <span class="c-notification-badge" id="chatBadgeMobile"></span>
-            </div>
+                        <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
+                        <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
+                    </div>
+                </div>
+            </nav>
 
-            <a href="../../pages/MemberPages/mSetting.html">
-              <img src="../../assets/images/setting-light.svg" alt="Settings">
-            </a>
-          </section>
+            <!-- Menu Links Desktop + Tablet -->
+            <nav class="c-navbar-desktop">
+                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
+                <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
+            </nav>
+            <section class="c-navbar-more">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar" aria-label="Search">
+                <button id="themeToggle2">
+                    <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                </button>
+                <a href="../../pages/adminPages/aProfile.php">
+                    <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
+                </a>
+            </section>
+        <?php else: ?>
+            <!-- Member Header -->
+            <section class="c-logo-section">
+                <a href="../../pages/MemberPages/memberIndex.php" class="c-logo-link">
+                    <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                    <div class="c-text">ReLeaf</div>
+                </a>
+            </section>
 
-          <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-          <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
-          <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-          <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-          <a href="../../pages/CommonPages/aboutUs.php">About</a>
-        </div>
-      </div>
-    </nav>
+            <!-- Menu Links Mobile -->
+            <nav class="c-navbar-side">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar" aria-label="Search">
+                <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
+                    id="menuBtn">
+                <div id="sidebarNav" class="c-navbar-side-menu">
 
-    <!-- Menu Links Desktop + Tablet -->
-    <nav class="c-navbar-desktop">
-      <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-      <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-      <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-      <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-      <a href="../../pages/CommonPages/aboutUs.php">About</a>
-    </nav>
-    <section class="c-navbar-more">
-      <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                    <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
+                        class="close-btn">
+                    <div class="c-navbar-side-items">
+                        <section class="c-navbar-side-more">
+                            <button id="themeToggle1">
+                                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                            </button>
 
-      <button id="themeToggle2">
-        <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
-      </button>
-      <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
-        <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-        <span class="c-notification-badge" id="chatBadgeDesktop"></span>
-      </a>
+                            <div class="c-chatbox" id="chatboxMobile">
+                                <a href="../../pages/MemberPages/mChat.html">
+                                    <img src="../../assets/images/chat-light.svg" alt="Chatbox">
+                                </a>
+                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            </div>
 
-      <a href="../../pages/MemberPages/mSetting.html">
-        <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
-      </a>
-    </section>
-  </header>
+                            <a href="../../pages/MemberPages/mSetting.php">
+                                <img src="../../assets/images/setting-light.svg" alt="Settings">
+                            </a>
+                        </section>
 
-  <hr>
+                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                        <a href="../../pages/CommonPages/aboutUs.php">About</a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Menu Links Desktop + Tablet -->
+            <nav class="c-navbar-desktop">
+                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                <a href="../../pages/CommonPages/aboutUs.php">About</a>
+            </nav>
+            <section class="c-navbar-more">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar" aria-label="Search">
+
+                <button id="themeToggle2">
+                    <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                </button>
+                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                    <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                </a>
+
+                <a href="../../pages/MemberPages/mSetting.php">
+                    <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
+                </a>
+            </section>
+        <?php endif; ?>
+    </header>
+
+    <hr>
 
     <!-- Main Content -->
     <main class="content" id="content">
@@ -434,9 +775,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <h1>Find all our blogs from here</h1>
             <p>Explore insightful articles and stories from the ReLeaf community. Share your knowledge and join the conversation about sustainability and environmental conservation.</p>
             <a href="../../pages/CommonPages/addBlog.php" class="btn">Write A Blog</a>
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Search by Blog title or keyword">
-                <button onclick="searchBlogs()">🔍 Search</button>
+            <div class="search-bar-container">
+                <input type="text" id="searchInput" placeholder="Search by Blog title or keyword" aria-label="Search blogs">
+                <button onclick="searchBlogs()" aria-label="Search button">🔍 Search</button>
             </div>
         </section>
 
@@ -486,7 +827,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </div>
         <div class="results" id="results"></div>
     </section>
-  
+
     <footer>
         <section class="c-footer-info-section">
             <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
@@ -504,7 +845,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
@@ -521,89 +862,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </section>
     </footer>
 
-    <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false';?>;</script>
+    <script>
+        const isAdmin = <?php echo $user_type === 'admin' ? 'true' : 'false'; ?>;
+    </script>
     <script src="../../javascript/mainScript.js"></script>
     <script>
         function filterBlogs(type) {
             // Update active button
             document.querySelectorAll('.sort button').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
+
             // Reset tag filter
             document.getElementById('tagFilter').value = 'all';
-            
+
             // Fetch filtered blogs
             fetch('mainBlog.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'action=filterBlogs&type=' + encodeURIComponent(type)
-            })
-            .then(response => response.json())
-            .then(data => {
-                updateBlogDisplay(data.blogs, data.count);
-            })
-            .catch(error => console.error('Error:', error));
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'action=filterBlogs&type=' + encodeURIComponent(type)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    updateBlogDisplay(data.blogs, data.count);
+                })
+                .catch(error => console.error('Error:', error));
         }
 
         function filterByTag() {
             const tag = document.getElementById('tagFilter').value;
-            
+
             // Reset button filters
             document.querySelectorAll('.sort button').forEach(btn => btn.classList.remove('active'));
-            
+
             fetch('mainBlog.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'action=filterByTag&tag=' + encodeURIComponent(tag)
-            })
-            .then(response => response.json())
-            .then(data => {
-                updateBlogDisplay(data.blogs, data.count);
-            })
-            .catch(error => console.error('Error:', error));
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'action=filterByTag&tag=' + encodeURIComponent(tag)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    updateBlogDisplay(data.blogs, data.count);
+                })
+                .catch(error => console.error('Error:', error));
         }
 
         function searchBlogs() {
             const query = document.getElementById('searchInput').value;
-            
+
             if (query.trim() === '') {
                 alert('Please enter a search term');
                 return;
             }
-            
+
             // Reset filters
             document.querySelectorAll('.sort button').forEach(btn => btn.classList.remove('active'));
             document.getElementById('tagFilter').value = 'all';
-            
+
             fetch('mainBlog.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'action=searchBlogs&query=' + encodeURIComponent(query)
-            })
-            .then(response => response.json())
-            .then(data => {
-                updateBlogDisplay(data.blogs, data.count);
-            })
-            .catch(error => console.error('Error:', error));
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'action=searchBlogs&query=' + encodeURIComponent(query)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    updateBlogDisplay(data.blogs, data.count);
+                })
+                .catch(error => console.error('Error:', error));
         }
 
         function updateBlogDisplay(blogs, count) {
             const blogGrid = document.getElementById('blogGrid');
             const blogCount = document.getElementById('blogCount');
-            
+
             blogCount.textContent = count;
-            
+
             if (blogs.length === 0) {
                 blogGrid.innerHTML = '<div class="no-results">No blogs found. Try a different search or filter.</div>';
                 return;
             }
-            
+
             blogGrid.innerHTML = blogs.map(blog => `
                 <div class="blog-card" onclick="location.href='readBlog.php?id=${blog.blogID}'">
                     <div class="blog-image">📰</div>
@@ -622,7 +965,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         function formatDate(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
         }
 
         function escapeHtml(text) {
@@ -637,4 +984,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
     </script>
 </body>
+
 </html>
