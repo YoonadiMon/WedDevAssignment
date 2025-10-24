@@ -1,19 +1,14 @@
 <?php
 session_start();
 include("dbConn.php");
+include("sessionCheck.php");
 
 header('Content-Type: application/json');
-
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'User not logged in']);
-    exit;
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $listingID = mysqli_real_escape_string($connection, $_POST['listingID']);
     $reason = mysqli_real_escape_string($connection, $_POST['reason']);
-    $userID = $_SESSION['user_id'];
+    $userID = $_SESSION['userID'];
     
     try {
         // Update reported status to 1

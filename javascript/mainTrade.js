@@ -117,9 +117,6 @@ function getMemberModalContent(listing) {
         
         <div class="modal-actions">
             ${isOwner ? `
-                <button class="edit-btn" onclick="editListing(${listing.listingID})">
-                    Edit Listing
-                </button>
                 <button class="delete-btn" onclick="deleteOwnListing(${listing.listingID})">
                     Delete Listing
                 </button>
@@ -271,7 +268,7 @@ function reportListing(listingId) {
                     closeModal();
                     alert('Thank you for your report. Our admin team will review this listing.');
                 } else {
-                    alert('Error submitting report: ' + data.message);
+                    alert('Error submitting report: ' + data.message + 'userID=' + currentUserId);
                 }
             })
             .catch(error => {
@@ -605,12 +602,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial render
     applyFilters();
 });
-
-function editListing(listingId) {
-    // Redirect to edit listing page
-    alert(`Redirecting to edit listing page for ID: ${listingId}`);
-    // window.location.href = `../../pages/MemberPages/editTrade.php?id=${listingId}`;
-}
 
 function deleteOwnListing(listingId) {
     if (confirm('Are you sure you want to delete your listing? This action cannot be undone.')) {

@@ -1,8 +1,9 @@
 <?php
     include("../../php/dbConn.php");
-    
-    // Set current user ID 
-    $currentUserID = 4;
+    session_start();
+    include("../../php/sessionCheck.php");
+    // Initialize variables
+    $currentUserID = $_SESSION['userID']; 
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -136,7 +137,6 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: var(--sec-bg-color);
         }
 
         .file-upload:hover {
@@ -494,103 +494,123 @@
 
             <!-- PHP Form Processing -->
             <?php
-            
             // Process form submission
             $successMessage = "";
             $errorMessage = "";
-            
+            $imageUrl = "../../assets/images/placeholder-image.jpg"; // Default placeholder
+
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                // Collect and sanitize form data
-                $title = mysqli_real_escape_string($connection, $_POST['title']);
-                $description = mysqli_real_escape_string($connection, $_POST['description']);
-                $tags = mysqli_real_escape_string($connection, $_POST['tags']);
-                $category = mysqli_real_escape_string($connection, $_POST['category']);
-                $itemType = mysqli_real_escape_string($connection, $_POST['listingType']);
-                $itemCondition = mysqli_real_escape_string($connection, $_POST['condition']);
-                $lookingFor = mysqli_real_escape_string($connection, $_POST['lookingFor']);
-                
-                // Handle file upload
-                $imageUrl = "../../assets/images/placeholder-image.jpg"; // Default placeholder
-                
-                // if (isset($_FILES['fileInput']) && $_FILES['fileInput']['error'] === UPLOAD_ERR_OK) {
-                //     $uploadDir = "../../assets/uploads/";
-                    
-                //     // Create uploads directory if it doesn't exist
-                //     if (!is_dir($uploadDir)) {
-                //         mkdir($uploadDir, 0755, true);
-                //     }
-                    
-                //     // Generate unique filename
-                //     $fileName = time() . '_' . uniqid() . '_' . basename($_FILES['fileInput']['name']);
-
-                //     $targetFilePath = $uploadDir . $fileName;
-
-                //     // Simple file type check
-                //     $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
-                //     $imageFileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
-
-                //     if (in_array($imageFileType, $allowedTypes)) {
-                //         if (move_uploaded_file($_FILES['fileInput']['tmp_name'], $targetFilePath)) {
-                //             $imageUrl = $targetFilePath;
-                //         } else {
-                //             $errorMessage .= "Failed to upload file. ";
-                //         }
-                //     } else {
-                //         $errorMessage .= "Only JPG, JPEG, PNG & GIF files are allowed. ";
-                //     }
-                // } else {
-                //     // No file uploaded or upload error
-                //     if (isset($_FILES['fileInput'])) {
-                //         $uploadError = $_FILES['fileInput']['error'];
-                //         if ($uploadError != UPLOAD_ERR_NO_FILE) {
-                //             $errorMessage .= "File upload error: " . $uploadError . ". ";
-                //         }
-                //     }
-                // }
-                
-                // Handle type-specific fields
-                $species = "";
-                $growthStage = "";
-                $careInstructions = "";
-                $brand = "";
-                $dimensions = "";
-                $usageHistory = "";
-                
-                if ($itemType == 'plant') {
-                    $species = mysqli_real_escape_string($connection, $_POST['species']);
-                    $growthStage = mysqli_real_escape_string($connection, $_POST['growthStage']);
-                    $careInstructions = mysqli_real_escape_string($connection, $_POST['careInstructions']);
-                } else if ($itemType == 'item') {
-                    $brand = mysqli_real_escape_string($connection, $_POST['brand']);
-                    $dimensions = mysqli_real_escape_string($connection, $_POST['dimensions']);
-                    $usageHistory = mysqli_real_escape_string($connection, $_POST['usageHistory']);
+                // Handle file upload similar to event banner
+                if (isset($_FILES['fileInput']) && $_FILES['fileInput']['error'] !== UPLOAD_ERR_NO_FILE) {
+                    if ($_FILES['fileInput']['error'] === UPLOAD_ERR_OK) { // FIXED: Changed UPLIAD_ERR_OK to UPLOAD_ERR_OK
+                        $uploadDir = '../../uploads/tradeListings/';
+                        
+                        // Create upload directory if it doesn't exist
+                        if (!file_exists($uploadDir)) {
+                            if (!mkdir($uploadDir, 0755, true)) {
+                                $errorMessage = "Failed to create upload directory";
+                            }
+                        }
+                        
+                        // Only proceed if directory was created successfully or already exists
+                        if (empty($errorMessage)) {
+                            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+                            
+                            $fileType = $_FILES['fileInput']['type'];
+                            $fileName = $_FILES['fileInput']['name'];
+                            $fileSize = $_FILES['fileInput']['size'];
+                            $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                            
+                            if (!in_array($fileExtension, $allowedExtensions)) {
+                                $errorMessage = "Only JPG, JPEG, PNG, and GIF files are allowed";
+                            } elseif (!in_array($fileType, $allowedTypes)) {
+                                $errorMessage = "Invalid file type. Please upload a valid image file";
+                            } elseif ($fileSize > 5 * 1024 * 1024) {
+                                $errorMessage = "File size must be less than 5MB";
+                            } elseif (!getimagesize($_FILES['fileInput']['tmp_name'])) {
+                                $errorMessage = "File is not a valid image";
+                            } else {
+                                $uniqueFileName = 'trade_' . time() . '_' . uniqid() . '.' . $fileExtension;
+                                $targetPath = $uploadDir . $uniqueFileName;
+                                
+                                if (move_uploaded_file($_FILES['fileInput']['tmp_name'], $targetPath)) {
+                                    $imageUrl = $targetPath;
+                                } else {
+                                    $errorMessage = "Failed to upload file. Please try again.";
+                                }
+                            }
+                        }
+                    } else {
+                        $uploadErrors = [
+                            UPLOAD_ERR_INI_SIZE => 'File size too large. Maximum size is 5MB.',
+                            UPLOAD_ERR_FORM_SIZE => 'File size too large.',
+                            UPLOAD_ERR_PARTIAL => 'File was only partially uploaded.',
+                            UPLOAD_ERR_NO_TMP_DIR => 'Server configuration error.',
+                            UPLOAD_ERR_CANT_WRITE => 'Failed to save file.',
+                            UPLOAD_ERR_EXTENSION => 'File upload stopped by extension.'
+                        ];
+                        $errorMessage = $uploadErrors[$_FILES['fileInput']['error']] ?? 'File upload error occurred';
+                    }
                 }
-                
-                // Insert into database
-                $sql = "INSERT INTO tbltrade_listings (
-                    userID, title, description, tags, imageUrl, category, dateListed, 
-                    status, itemType, itemCondition, species, growthStage, careInstructions, 
-                    brand, dimensions, usageHistory, lookingFor
-                ) VALUES (
-                    '$currentUserID', '$title', '$description', '$tags', '$imageUrl', '$category', 
-                    CURDATE(), 'active', '$itemType', '$itemCondition', '$species', '$growthStage', 
-                    '$careInstructions', '$brand', '$dimensions', '$usageHistory', '$lookingFor'
-                )";
-                
-                if (mysqli_query($connection, $sql)) {
-                    $successMessage = "Your listing has been created successfully!";
-                } else {
-                    $errorMessage = "Error: " . $sql . "<br>" . mysqli_error($connection);
+
+                // Only proceed with database insertion if no file upload errors
+                if (empty($errorMessage)) {
+                    // Collect and sanitize form data
+                    $title = mysqli_real_escape_string($connection, $_POST['title']);
+                    $description = mysqli_real_escape_string($connection, $_POST['description']);
+                    $tags = mysqli_real_escape_string($connection, $_POST['tags']);
+                    $category = mysqli_real_escape_string($connection, $_POST['category']);
+                    $itemType = mysqli_real_escape_string($connection, $_POST['listingType']);
+                    $itemCondition = mysqli_real_escape_string($connection, $_POST['condition']);
+                    $lookingFor = mysqli_real_escape_string($connection, $_POST['lookingFor']);
+                    
+                    // Handle type-specific fields
+                    $species = "";
+                    $growthStage = "";
+                    $careInstructions = "";
+                    $brand = "";
+                    $dimensions = "";
+                    $usageHistory = "";
+                    
+                    if ($itemType == 'Plant') {
+                        $species = mysqli_real_escape_string($connection, $_POST['species']);
+                        $growthStage = mysqli_real_escape_string($connection, $_POST['growthStage']);
+                        $careInstructions = mysqli_real_escape_string($connection, $_POST['careInstructions']);
+                    } else if ($itemType == 'Item') {
+                        $brand = mysqli_real_escape_string($connection, $_POST['brand']);
+                        $dimensions = mysqli_real_escape_string($connection, $_POST['dimensions']);
+                        $usageHistory = mysqli_real_escape_string($connection, $_POST['usageHistory']);
+                    }
+                    
+                    // Insert into database
+                    $sql = "INSERT INTO tbltrade_listings (
+                        userID, title, description, tags, imageUrl, category, dateListed, 
+                        status, itemType, itemCondition, species, growthStage, careInstructions, 
+                        brand, dimensions, usageHistory, lookingFor
+                    ) VALUES (
+                        '$currentUserID', '$title', '$description', '$tags', '$imageUrl', '$category', 
+                        CURDATE(), 'active', '$itemType', '$itemCondition', '$species', '$growthStage', 
+                        '$careInstructions', '$brand', '$dimensions', '$usageHistory', '$lookingFor'
+                    )";
+                    
+                    if (mysqli_query($connection, $sql)) {
+                        $successMessage = "Your listing has been created successfully!";
+                        // Clear form fields on success
+                        $_POST = array();
+                    } else {
+                        $errorMessage = "Error creating listing: " . mysqli_error($connection);
+                    }
                 }
             }
-            
+
             // Display success or error message
             if (!empty($successMessage)) {
-                echo "<div style='background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px;'>$successMessage</div>";
+                echo "<div style='background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;'>$successMessage</div>";
             }
-            
+
             if (!empty($errorMessage)) {
-                echo "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px;'>$errorMessage</div>";
+                echo "<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;'>$errorMessage</div>";
             }
             ?>
 
@@ -864,41 +884,72 @@
                 itemFields.style.display = type === 'Item' ? 'block' : 'none';
             }
             
-            // File upload handling - SIMPLIFIED
+            // Enhanced file upload handling
             fileUploadArea.addEventListener('click', function() {
                 fileInput.click();
             });
             
-            fileInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    const file = this.files[0];
-                    
-                    // Check file size (5MB limit)
-                    if (file.size > 5 * 1024 * 1024) {
-                        alert('File size too large. Maximum size is 5MB.');
-                        this.value = '';
-                        return;
-                    }
-                    
-                    // Check file type
-                    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-                    if (!allowedTypes.includes(file.type)) {
-                        alert('File type not supported. Please upload JPG, PNG, or GIF files.');
-                        this.value = '';
-                        return;
-                    }
-                    
-                    // Update UI to show selected file
-                    fileUploadText.textContent = `Selected: ${file.name}`;
-                    updateFilePreview(file);
+            // Drag and drop functionality
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+            
+            fileUploadArea.addEventListener('dragleave', function() {
+                fileUploadArea.classList.remove('dragover');
+            });
+            
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelection();
                 }
             });
             
-            function updateFilePreview(file) {
-                attachmentsPreview.innerHTML = '';
-                
+            fileInput.addEventListener('change', handleFileSelection);
+            
+            function handleFileSelection() {
+                if (fileInput.files.length > 0) {
+                    const files = Array.from(fileInput.files);
+                    
+                    // Clear previous previews
+                    attachmentsPreview.innerHTML = '';
+                    
+                    // Process each file
+                    files.forEach((file, index) => {
+                        // Check file size (5MB limit)
+                        if (file.size > 5 * 1024 * 1024) {
+                            showFileError(`File "${file.name}" is too large. Maximum size is 5MB.`);
+                            return;
+                        }
+                        
+                        // Check file type
+                        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                        if (!allowedTypes.includes(file.type)) {
+                            showFileError(`File "${file.name}" type not supported. Please upload JPG, PNG, or GIF files.`);
+                            return;
+                        }
+                        
+                        // Create file preview
+                        createFilePreview(file, index);
+                    });
+                    
+                    // Update upload area text
+                    if (files.length === 1) {
+                        fileUploadText.textContent = `1 file selected`;
+                    } else {
+                        fileUploadText.textContent = `${files.length} files selected`;
+                    }
+                }
+            }
+            
+            function createFilePreview(file, index) {
                 const attachmentItem = document.createElement('div');
                 attachmentItem.className = 'attachment-item';
+                attachmentItem.dataset.fileIndex = index;
                 
                 // Create preview for images
                 if (file.type.startsWith('image/')) {
@@ -913,20 +964,52 @@
                                     <div class="attachment-size">${formatFileSize(file.size)}</div>
                                 </div>
                             </div>
-                            <button type="button" class="remove-attachment" id="removeFile">×</button>
+                            <button type="button" class="remove-attachment" data-file-index="${index}">×</button>
                         `;
                         
                         // Add event listener to remove button
-                        attachmentItem.querySelector('#removeFile').addEventListener('click', function() {
-                            fileInput.value = '';
-                            attachmentsPreview.innerHTML = '';
-                            fileUploadText.textContent = 'Click to select a photo';
+                        attachmentItem.querySelector('.remove-attachment').addEventListener('click', function() {
+                            removeFile(index);
                         });
                     };
                     reader.readAsDataURL(file);
                 }
                 
                 attachmentsPreview.appendChild(attachmentItem);
+            }
+            
+            function removeFile(index) {
+                // Create a new FileList without the removed file
+                const dt = new DataTransfer();
+                const files = Array.from(fileInput.files);
+                
+                files.forEach((file, i) => {
+                    if (i !== index) {
+                        dt.items.add(file);
+                    }
+                });
+                
+                fileInput.files = dt.files;
+                
+                // Update preview
+                if (fileInput.files.length === 0) {
+                    attachmentsPreview.innerHTML = '';
+                    fileUploadText.textContent = 'Drag & drop photos here or click to browse';
+                } else {
+                    handleFileSelection(); // Refresh preview
+                }
+            }
+            
+            function showFileError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = 'background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #f5c6cb;';
+                errorDiv.textContent = message;
+                attachmentsPreview.appendChild(errorDiv);
+                
+                // Remove error message after 5 seconds
+                setTimeout(() => {
+                    errorDiv.remove();
+                }, 5000);
             }
             
             function formatFileSize(bytes) {
@@ -952,7 +1035,7 @@
                 });
                 
                 // Initialize count
-                countElement.textContent = `0/${maxLength}`;
+                countElement.textContent = `${inputElement.value.length}/${maxLength}`;
             }
             
             // Form validation

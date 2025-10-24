@@ -21,6 +21,7 @@
     --LowYellow: hsla(48, 100%, 49%, 0.5);
     --Orange: hsla(25, 95%, 53%, 1);
     --LowGreen: hsla(145, 63%, 49%, 0.5);
+    --LowerGreen: hsla(145, 63%, 49%, 0.2);
     --DarkGray: hsla(145, 63%, 49%, 0.1);
     --DarkerGray: hsl(232, 6%, 24%);
 

@@ -508,7 +508,7 @@ try {
             gap: 20px;
             margin-bottom: 25px;
             padding: 20px;
-            background: var(--sec-bg-color);
+            background: var(--LowerGreen);
             border-radius: 8px;
         }
 
@@ -518,8 +518,8 @@ try {
         }
 
         .detail-label {
-            font-size: 12px;
-            color: var(--Gray);
+            font-size: 1rem;
+            color: var(--MainGreen);
             margin-bottom: 5px;
             font-weight: 500;
         }
@@ -534,7 +534,7 @@ try {
             align-items: center;
             gap: 15px;
             padding: 20px;
-            background: var(--sec-bg-color);
+            background: var(--LowerGreen);
             border-radius: 8px;
             margin-bottom: 25px;
         }
