@@ -247,7 +247,7 @@ $connection->close();
                             </a>
                             <span class="c-notification-badge" id="chatBadgeMobile"></span>
                         </div>
-                        <a href="../../pages/MemberPages/mSetting.html">
+                        <a href="../../pages/MemberPages/mSetting.php">
                             <img src="../../assets/images/setting-light.svg" alt="Settings">
                         </a>
                     </section>
@@ -255,7 +255,7 @@ $connection->close();
                     <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                    <a href="../../pages/CommonPages/aboutUs.php">About</a>
                 </div>
             </div>
         </nav>
@@ -266,7 +266,7 @@ $connection->close();
             <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-            <a href="../../pages/CommonPages/aboutUs.html">About</a>
+            <a href="../../pages/CommonPages/aboutUs.php">About</a>
         </nav>
 
         <section class="c-navbar-more">
@@ -278,7 +278,7 @@ $connection->close();
                 <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                 <span class="c-notification-badge" id="chatBadgeDesktop"></span>
             </a>
-            <a href="../../pages/MemberPages/mSetting.html">
+            <a href="../../pages/MemberPages/mSetting.php">
                 <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
             </a>
         </section>
@@ -286,12 +286,12 @@ $connection->close();
     <hr>
 
     <!-- Main Content -->
-    <main>
+    <main class="content" id="content">
         <div class="mprofile-container">
             <main>
                 <div class="left">
                     <div class="back-button-container">
-                        <a href="../../pages/MemberPages/mSetting.html" class="btn-back-mProfile" title="Back to Settings">
+                        <a href="../../pages/MemberPages/mSetting.php" class="btn-back-mProfile" title="Back to Settings">
                             <img src="../../assets/images/icon-back-light.svg" alt="Back icon" />
                         </a>
                     </div>
@@ -638,7 +638,17 @@ $connection->close();
             <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
         </div>
     </main>
-
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
     <!-- Scripts -->
     <script>const isAdmin = false;</script>
     <script src="../../javascript/mainScript.js"></script>

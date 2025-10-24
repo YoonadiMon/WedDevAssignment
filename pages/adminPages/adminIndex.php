@@ -128,10 +128,10 @@ if ($row = $result->fetch_assoc()) {
 }
 
 // Trade statistics 
-$query = "SELECT SUM(tradesCompleted) as totalTrades FROM tblusers WHERE userType = 'member'";
+$query = "SELECT SUM(tradesCompleted) AS totalTrades FROM tblusers WHERE userType = 'member'";
 $result = $connection->query($query);
 if ($row = $result->fetch_assoc()) {
-    $stats['tradesCompleted'] = $row['totalTrades'] ?? 0;
+    $stats['tradesCompleted'] = ($row['totalTrades'] ?? 0) / 2;
 }
 
 // Active trade listings
@@ -183,7 +183,7 @@ if ($row = $result->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReLeaf - Admin Dashboard</title>
+    <title>Admin Dashboard - ReLeaf</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
     <link rel="stylesheet" href="../../style/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -657,8 +657,8 @@ if ($row = $result->fetch_assoc()) {
     <hr>
 
     <!-- Main Content -->
-    <main>
-        <section class="content" id="content">
+    <main class="content" id="content">
+        <section >
             <!-- Profile Section -->
             <section class="profile-container">
                 <div class="profile-top">
@@ -810,23 +810,20 @@ if ($row = $result->fetch_assoc()) {
                 </div>
             </section>
         </section>
-
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <div class="tab" data-type="tickets">Tickets</div>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-                <div class="tab" data-type="faqs">FAQ</div>
-            </div>
-            <div class="results" id="results"></div>
-        </section>
     </main>
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
 
-    <script>const isAdmin = true;</script>
+    <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
     <script src="../../javascript/mainScript.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <script src="../../javascript/aDashboard.js"></script>

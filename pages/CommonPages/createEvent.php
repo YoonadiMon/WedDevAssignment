@@ -3,52 +3,93 @@ session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
-// Full list of countries
 $countries = [
-    'Malaysia', 'Singapore', 'China', 'Hong Kong', 'Taiwan', 'Philippines', 
-    'Australia', 'Japan', 'South Korea', 'Indonesia', 'Thailand', 'Vietnam', 
-    'India', 'Sri Lanka', 'Pakistan', 'Bangladesh', 'United States', 'Canada', 
-    'United Kingdom', 'Germany', 'France', 'Italy', 'Spain', 'Netherlands', 
-    'Brazil', 'Mexico', 'Russia', 'South Africa', 'Egypt', 'Saudi Arabia', 
-    'United Arab Emirates', 'New Zealand'
+    'Afghanistan', 'Åland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra',
+    'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia',
+    'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh',
+    'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia',
+    'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory',
+    'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon',
+    'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile',
+    'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo',
+    'Congo, The Democratic Republic of The', 'Cook Islands', 'Costa Rica', "Cote D'ivoire",
+    'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica',
+    'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea',
+    'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland',
+    'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon',
+    'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada',
+    'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-bissau', 'Guyana',
+    'Haiti', 'Heard Island and Mcdonald Islands', 'Holy See (Vatican City State)', 'Honduras',
+    'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of',
+    'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey',
+    'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of",
+    'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic",
+    'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libyan Arab Jamahiriya', 'Liechtenstein',
+    'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, The Former Yugoslav Republic of',
+    'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands',
+    'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of',
+    'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco',
+    'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'Netherlands Antilles',
+    'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island',
+    'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied',
+    'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland',
+    'Portugal', 'Puerto Rico', 'Qatar', 'Reunion', 'Romania', 'Russian Federation', 'Rwanda',
+    'Saint Helena', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Pierre and Miquelon',
+    'Saint Vincent and The Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe',
+    'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore',
+    'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa',
+    'South Georgia and The South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan',
+    'Suriname', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland',
+    'Syrian Arab Republic', 'Taiwan', 'Tajikistan', 'Tanzania, United Republic of',
+    'Thailand', 'Timor-leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago',
+    'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu',
+    'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States',
+    'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu',
+    'Venezuela', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.',
+    'Wallis and Futuna', 'Western Sahara', 'Yemen', 'Zambia', 'Zimbabwe'
 ];
 
 // Function to get timezone by country
 function getTimezoneByCountry($country) {
-    $countryTimezones = [
-        'Malaysia' => 'UTC+08:00', 
-        'Singapore' => 'UTC+08:00', 
-        'China' => 'UTC+08:00',
-        'Hong Kong' => 'UTC+08:00', 
-        'Taiwan' => 'UTC+08:00', 
-        'Philippines' => 'UTC+08:00',
-        'Australia' => 'UTC+10:00', 
-        'Japan' => 'UTC+09:00', 
-        'South Korea' => 'UTC+09:00',
-        'Indonesia' => 'UTC+07:00', 
-        'Thailand' => 'UTC+07:00', 
-        'Vietnam' => 'UTC+07:00',
-        'India' => 'UTC+05:30', 
-        'Sri Lanka' => 'UTC+05:30', 
-        'Pakistan' => 'UTC+05:00',
-        'Bangladesh' => 'UTC+06:00', 
-        'United States' => 'UTC-05:00', 
-        'Canada' => 'UTC-05:00',
-        'United Kingdom' => 'UTC+00:00', 
-        'Germany' => 'UTC+01:00', 
-        'France' => 'UTC+01:00',
-        'Italy' => 'UTC+01:00', 
-        'Spain' => 'UTC+01:00', 
-        'Netherlands' => 'UTC+01:00',
-        'Brazil' => 'UTC-03:00', 
-        'Mexico' => 'UTC-06:00', 
-        'Russia' => 'UTC+03:00',
-        'South Africa' => 'UTC+02:00', 
-        'Egypt' => 'UTC+02:00', 
-        'Saudi Arabia' => 'UTC+03:00',
-        'United Arab Emirates' => 'UTC+04:00', 
-        'New Zealand' => 'UTC+12:00',
+    $timezoneGroups = [
+        'UTC+13:00' => ['Samoa', 'Tonga'],
+        'UTC+12:00' => ['Fiji', 'Kiribati', 'Marshall Islands', 'Nauru', 'New Zealand', 'Tuvalu', 'Wallis and Futuna'],
+        'UTC+11:00' => ['New Caledonia', 'Norfolk Island', 'Solomon Islands', 'Vanuatu'],
+        'UTC+10:00' => ['Australia', 'Guam', 'Micronesia, Federated States of', 'Northern Mariana Islands', 'Papua New Guinea'],
+        'UTC+09:00' => ['Japan', 'Korea, Democratic People\'s Republic of', 'Korea, Republic of', 'Palau', 'Timor-leste'],
+        'UTC+08:00' => ['China', 'Hong Kong', 'Macao', 'Malaysia', 'Philippines', 'Singapore', 'Taiwan', 'Brunei Darussalam', 'Mongolia'],
+        'UTC+07:00' => ['Cambodia', 'Christmas Island', 'Indonesia', 'Lao People\'s Democratic Republic', 'Thailand', 'Viet Nam'],
+        'UTC+06:30' => ['Cocos (Keeling) Islands', 'Myanmar'],
+        'UTC+06:00' => ['Bangladesh', 'Bhutan', 'British Indian Ocean Territory', 'Kazakhstan', 'Kyrgyzstan'],
+        'UTC+05:45' => ['Nepal'],
+        'UTC+05:30' => ['India', 'Sri Lanka'],
+        'UTC+05:00' => ['Maldives', 'Pakistan', 'French Southern Territories', 'Heard Island and Mcdonald Islands', 'Tajikistan', 'Turkmenistan', 'Uzbekistan'],
+        'UTC+04:30' => ['Afghanistan'],
+        'UTC+04:00' => ['Armenia', 'Azerbaijan', 'Georgia', 'Mauritius', 'Oman', 'Reunion', 'Seychelles', 'United Arab Emirates'],
+        'UTC+03:30' => ['Iran, Islamic Republic of'],
+        'UTC+03:00' => ['Bahrain', 'Belarus', 'Comoros', 'Djibouti', 'Eritrea', 'Ethiopia', 'Iraq', 'Jordan', 'Kenya', 'Kuwait', 'Madagascar', 'Mayotte', 'Qatar', 'Russian Federation', 'Saudi Arabia', 'Somalia', 'South Africa', 'Sudan', 'Syrian Arab Republic', 'Tanzania, United Republic of', 'Turkey', 'Uganda', 'Yemen'],
+        'UTC+02:00' => ['Åland Islands', 'Botswana', 'Bulgaria', 'Burundi', 'Cyprus', 'Egypt', 'Estonia', 'Finland', 'Greece', 'Israel', 'Latvia', 'Lebanon', 'Lesotho', 'Libyan Arab Jamahiriya', 'Lithuania', 'Malawi', 'Moldova, Republic of', 'Mozambique', 'Namibia', 'Palestinian Territory, Occupied', 'Romania', 'Rwanda', 'Swaziland', 'Ukraine', 'Zambia', 'Zimbabwe'],
+        'UTC+01:00' => ['Albania', 'Algeria', 'Andorra', 'Angola', 'Austria', 'Belgium', 'Benin', 'Bosnia and Herzegovina', 'Cameroon', 'Central African Republic', 'Chad', 'Congo', 'Congo, The Democratic Republic of The', 'Croatia', 'Czech Republic', 'Denmark', 'Equatorial Guinea', 'France', 'Gabon', 'Germany', 'Gibraltar', 'Holy See (Vatican City State)', 'Hungary', 'Italy', 'Liechtenstein', 'Luxembourg', 'Macedonia, The Former Yugoslav Republic of', 'Malta', 'Monaco', 'Montenegro', 'Morocco', 'Netherlands', 'Niger', 'Nigeria', 'Norway', 'Poland', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'Tunisia', 'United Kingdom', 'Western Sahara'],
+        'UTC+00:00' => ['Bouvet Island', 'Burkina Faso', 'Cote D\'ivoire', 'Faroe Islands', 'Gambia', 'Ghana', 'Greenland', 'Guernsey', 'Guinea', 'Guinea-bissau', 'Iceland', 'Ireland', 'Isle of Man', 'Jersey', 'Liberia', 'Mali', 'Mauritania', 'Portugal', 'Saint Helena', 'Sao Tome and Principe', 'Senegal', 'Sierra Leone', 'Svalbard and Jan Mayen', 'Togo', 'Tokelau'],
+        'UTC-01:00' => ['Cape Verde'],
+        'UTC-02:00' => ['South Georgia and The South Sandwich Islands'],
+        'UTC-03:00' => ['Antarctica', 'Argentina', 'Brazil', 'Falkland Islands (Malvinas)', 'French Guiana', 'Paraguay', 'Saint Pierre and Miquelon', 'Suriname', 'Uruguay'],
+        'UTC-04:00' => ['Anguilla', 'Antigua and Barbuda', 'Aruba', 'Barbados', 'Bermuda', 'Bolivia', 'Chile', 'Dominica', 'Dominican Republic', 'Grenada', 'Guadeloupe', 'Guyana', 'Martinique', 'Montserrat', 'Netherlands Antilles', 'Puerto Rico', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and The Grenadines', 'Trinidad and Tobago', 'Venezuela', 'Virgin Islands, British', 'Virgin Islands, U.S.'],
+        'UTC-05:00' => ['Bahamas', 'Canada', 'Cayman Islands', 'Colombia', 'Cuba', 'Ecuador', 'Haiti', 'Jamaica', 'Panama', 'Peru', 'Turks and Caicos Islands', 'United States'],
+        'UTC-06:00' => ['Belize', 'Costa Rica', 'El Salvador', 'Guatemala', 'Honduras', 'Mexico', 'Nicaragua'],
+        'UTC-08:00' => ['Pitcairn'],
+        'UTC-10:00' => ['Cook Islands', 'French Polynesia'],
+        'UTC-11:00' => ['American Samoa', 'Niue', 'United States Minor Outlying Islands'],
     ];
+
+    // Create a flattened array for quick lookup
+    $countryTimezones = [];
+    foreach ($timezoneGroups as $timezone => $countries) {
+        foreach ($countries as $countryName) {
+            $countryTimezones[$countryName] = $timezone;
+        }
+    }
+
     return $countryTimezones[$country] ?? 'UTC+08:00';
 }
 
@@ -255,7 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReLeaf - Host An Event</title>
+    <title>Host An Event - ReLeaf</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
 
     <link rel="stylesheet" href="../../style/style.css">
@@ -633,7 +674,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </a>
                                 <span class="c-notification-badge" id="chatBadgeMobile"></span>
                             </div>
-                            <a href="../../pages/MemberPages/mSetting.html">
+                            <a href="../../pages/MemberPages/mSetting.php">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a>
                         <?php endif; ?>
@@ -653,7 +694,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                        <a href="../../pages/CommonPages/aboutUs.php">About</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -675,7 +716,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                <a href="../../pages/CommonPages/aboutUs.php">About</a>
             <?php endif; ?>
         </nav>
 
@@ -696,7 +737,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                     <span class="c-notification-badge" id="chatBadgeDesktop"></span>
                 </a>
-                <a href="../../pages/MemberPages/mSetting.html">
+                <a href="../../pages/MemberPages/mSetting.php">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a>
             <?php endif; ?>
@@ -705,231 +746,222 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <hr>
 
     <!-- Main Content -->
-    <main>
-        <section class="content" id="content">
-            <div class="create-event-wrapper">
-                <?php if ($hasError): ?>
-                    <div class="error-message">
-                        <strong>Failed to create event</strong>
-                    </div>
-                <?php endif; ?>
+    <main class="content" id="content">
+        <section class="create-event-wrapper">
+            <?php if ($hasError): ?>
+                <div class="error-message">
+                    <strong>Failed to create event</strong>
+                </div>
+            <?php endif; ?>
 
-                <?php if (isset($_SESSION['success_message'])): ?>
-                    <div class="success-message">
-                        <?php echo htmlspecialchars($_SESSION['success_message']); ?>
-                    </div>
-                    <?php unset($_SESSION['success_message']); ?>
-                <?php endif; ?>
+            <?php if (isset($_SESSION['success_message'])): ?>
+                <div class="success-message">
+                    <?php echo htmlspecialchars($_SESSION['success_message']); ?>
+                </div>
+                <?php unset($_SESSION['success_message']); ?>
+            <?php endif; ?>
 
-                <a href="mainEvent.php" class="back-button">← Back to Events</a>
+            <a href="mainEvent.php" class="back-button">← Back to Events</a>
+            
+            <form class="form-container" method="POST" enctype="multipart/form-data" id="createEventForm">
+                <div class="form-header">
+                    <img src="../../assets/images/Logo.png" alt="Logo">
+                    <h2>Create Your Event</h2>
+                    <p>Start by filling up the form below.</p>
+                </div>
                 
-                <form class="form-container" method="POST" enctype="multipart/form-data" id="createEventForm">
-                    <div class="form-header">
-                        <img src="../../assets/images/Logo.png" alt="Logo">
-                        <h2>Create Your Event</h2>
-                        <p>Start by filling up the form below.</p>
-                    </div>
-                    
-                    <!-- Title Field -->
-                    <div class="form-group full-width <?php echo isset($errors['title']) ? 'has-error' : ''; ?>">
-                        <label>Event Title <span class="required">*</span></label>
-                        <input class="c-input" type="text" name="title" placeholder="Enter event title" 
-                            value="<?php echo htmlspecialchars($formData['title'] ?? ''); ?>" required />
-                        <?php if (isset($errors['title'])): ?>
-                            <span class="field-error"><?php echo htmlspecialchars($errors['title']); ?></span>
+                <!-- Title Field -->
+                <div class="form-group full-width <?php echo isset($errors['title']) ? 'has-error' : ''; ?>">
+                    <label>Event Title <span class="required">*</span></label>
+                    <input class="c-input" type="text" name="title" placeholder="Enter event title" 
+                        value="<?php echo htmlspecialchars($formData['title'] ?? ''); ?>" required />
+                    <?php if (isset($errors['title'])): ?>
+                        <span class="field-error"><?php echo htmlspecialchars($errors['title']); ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Description Field -->
+                <div class="form-group full-width <?php echo isset($errors['description']) ? 'has-error' : ''; ?>">
+                    <label>Description <span class="required">*</span></label>
+                    <textarea class="c-input" name="description" placeholder="Describe your event" required><?php echo htmlspecialchars($formData['description'] ?? ''); ?></textarea>
+                    <?php if (isset($errors['description'])): ?>
+                        <span class="field-error"><?php echo htmlspecialchars($errors['description']); ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Date Fields Row -->
+                <div class="form-row">
+                    <div class="form-group <?php echo isset($errors['startDate']) ? 'has-error' : ''; ?>">
+                        <label>Start Date <span class="required">*</span> <small>(When your event begins)</small></label>
+                        <input class="c-input" type="date" name="startDate" id="startDate" 
+                            value="<?php echo htmlspecialchars($formData['startDate'] ?? ''); ?>" required />
+                        <?php if (isset($errors['startDate'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['startDate']); ?></span>
                         <?php endif; ?>
                     </div>
-
-                    <!-- Description Field -->
-                    <div class="form-group full-width <?php echo isset($errors['description']) ? 'has-error' : ''; ?>">
-                        <label>Description <span class="required">*</span></label>
-                        <textarea class="c-input" name="description" placeholder="Describe your event" required><?php echo htmlspecialchars($formData['description'] ?? ''); ?></textarea>
-                        <?php if (isset($errors['description'])): ?>
-                            <span class="field-error"><?php echo htmlspecialchars($errors['description']); ?></span>
+                    <div class="form-group <?php echo isset($errors['endDate']) ? 'has-error' : ''; ?>">
+                        <label>End Date <span class="required">*</span> <small>(When your event ends)</small></label>
+                        <input class="c-input" type="date" name="endDate" id="endDate" 
+                            value="<?php echo htmlspecialchars($formData['endDate'] ?? ''); ?>" required />
+                        <?php if (isset($errors['endDate'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['endDate']); ?></span>
                         <?php endif; ?>
                     </div>
+                </div>
 
-                    <!-- Date Fields Row -->
-                    <div class="form-row">
-                        <div class="form-group <?php echo isset($errors['startDate']) ? 'has-error' : ''; ?>">
-                            <label>Start Date <span class="required">*</span> <small>(When your event begins)</small></label>
-                            <input class="c-input" type="date" name="startDate" id="startDate" 
-                                value="<?php echo htmlspecialchars($formData['startDate'] ?? ''); ?>" required />
-                            <?php if (isset($errors['startDate'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['startDate']); ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="form-group <?php echo isset($errors['endDate']) ? 'has-error' : ''; ?>">
-                            <label>End Date <span class="required">*</span> <small>(When your event ends)</small></label>
-                            <input class="c-input" type="date" name="endDate" id="endDate" 
-                                value="<?php echo htmlspecialchars($formData['endDate'] ?? ''); ?>" required />
-                            <?php if (isset($errors['endDate'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['endDate']); ?></span>
-                            <?php endif; ?>
-                        </div>
+                <!-- Time & Duration Row -->
+                <div class="form-row">
+                    <div class="form-group <?php echo isset($errors['time']) ? 'has-error' : ''; ?>">
+                        <label>Time <span class="required">*</span> <small>(Event start time)</small></label>
+                        <input class="c-input" type="time" name="time" id="time" 
+                            value="<?php echo htmlspecialchars($formData['time'] ?? ''); ?>" required />
+                        <?php if (isset($errors['time'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['time']); ?></span>
+                        <?php endif; ?>
                     </div>
-
-                    <!-- Time & Duration Row -->
-                    <div class="form-row">
-                        <div class="form-group <?php echo isset($errors['time']) ? 'has-error' : ''; ?>">
-                            <label>Time <span class="required">*</span> <small>(Event start time)</small></label>
-                            <input class="c-input" type="time" name="time" id="time" 
-                                value="<?php echo htmlspecialchars($formData['time'] ?? ''); ?>" required />
-                            <?php if (isset($errors['time'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['time']); ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="form-group <?php echo isset($errors['duration']) ? 'has-error' : ''; ?>">
-                            <label>Duration <span class="required">*</span> <small>(Total number of hours per day)</small></label>
-                            <input class="c-input" type="number" name="duration" min="1" max="24" 
-                                placeholder="Must be between 1 and 24 hours" 
-                                value="<?php echo htmlspecialchars($formData['duration'] ?? ''); ?>" required />
-                            <?php if (isset($errors['duration'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['duration']); ?></span>
-                            <?php endif; ?>
-                        </div>
+                    <div class="form-group <?php echo isset($errors['duration']) ? 'has-error' : ''; ?>">
+                        <label>Duration <span class="required">*</span> <small>(Total number of hours per day)</small></label>
+                        <input class="c-input" type="number" name="duration" min="1" max="24" 
+                            placeholder="Must be between 1 and 24 hours" 
+                            value="<?php echo htmlspecialchars($formData['duration'] ?? ''); ?>" required />
+                        <?php if (isset($errors['duration'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['duration']); ?></span>
+                        <?php endif; ?>
                     </div>
+                </div>
 
-                    <!-- Days & Max Participants Row -->
-                    <div class="form-row">
-                        <div class="form-group <?php echo isset($errors['day']) ? 'has-error' : ''; ?>">
-                            <label>Number of Days <span class="required">*</span> <small>(Total event duration)</small></label>
-                            <input class="c-input" type="number" name="day" min="1" max="60" 
-                                value="<?php echo htmlspecialchars($formData['day'] ?? '1'); ?>" required />
-                            <?php if (isset($errors['day'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['day']); ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="form-group <?php echo isset($errors['maxPax']) ? 'has-error' : ''; ?>">
-                            <label>Maximum Participants <span class="required">*</span></label>
-                            <input class="c-input" type="number" name="maxPax" min="1" 
-                                placeholder="Must be at least 20" 
-                                value="<?php echo htmlspecialchars($formData['maxPax'] ?? ''); ?>" required />
-                            <?php if (isset($errors['maxPax'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['maxPax']); ?></span>
-                            <?php endif; ?>
-                        </div>
+                <!-- Days & Max Participants Row -->
+                <div class="form-row">
+                    <div class="form-group <?php echo isset($errors['day']) ? 'has-error' : ''; ?>">
+                        <label>Number of Days <span class="required">*</span> <small>(Total event duration)</small></label>
+                        <input class="c-input" type="number" name="day" min="1" max="60" 
+                            value="<?php echo htmlspecialchars($formData['day'] ?? '1'); ?>" required />
+                        <?php if (isset($errors['day'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['day']); ?></span>
+                        <?php endif; ?>
                     </div>
+                    <div class="form-group <?php echo isset($errors['maxPax']) ? 'has-error' : ''; ?>">
+                        <label>Maximum Participants <span class="required">*</span></label>
+                        <input class="c-input" type="number" name="maxPax" min="1" 
+                            placeholder="Must be at least 20" 
+                            value="<?php echo htmlspecialchars($formData['maxPax'] ?? ''); ?>" required />
+                        <?php if (isset($errors['maxPax'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['maxPax']); ?></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
-                    <!-- Location & Country Row -->
-                    <div class="form-row">
-                        <div class="form-group <?php echo isset($errors['location']) ? 'has-error' : ''; ?>">
-                            <label>Location <span class="required">*</span></label>
-                            <input class="c-input" type="text" name="location" placeholder="Event location or 'Online'" 
-                                value="<?php echo htmlspecialchars($formData['location'] ?? ''); ?>" required />
-                            <?php if (isset($errors['location'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['location']); ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="form-group <?php echo isset($errors['country']) ? 'has-error' : ''; ?>">
-                            <label>Country <span class="required">*</span></label>
-                            <select class="c-input c-input-select" id="registerCountry" name="country" required>
-                                <option value="" disabled <?php echo empty($formData['country']) ? 'selected' : ''; ?>>Select your Country</option>
-                                <?php 
-                                $query = "SELECT country FROM tblusers WHERE userID = ?";
-                                $stmt = $connection->prepare($query);
-                                $stmt->bind_param("i", $userID);
-                                $stmt->execute();
-                                $stmt->bind_result($userCountry);
-                                $stmt->fetch();
-                                $stmt->close();
+                <!-- Location & Country Row -->
+                <div class="form-row">
+                    <div class="form-group <?php echo isset($errors['location']) ? 'has-error' : ''; ?>">
+                        <label>Location <span class="required">*</span></label>
+                        <input class="c-input" type="text" name="location" placeholder="Event location or 'Online'" 
+                            value="<?php echo htmlspecialchars($formData['location'] ?? ''); ?>" required />
+                        <?php if (isset($errors['location'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['location']); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="form-group <?php echo isset($errors['country']) ? 'has-error' : ''; ?>">
+                        <label>Country <span class="required">*</span></label>
+                        <select class="c-input c-input-select" id="registerCountry" name="country" required>
+                            <option value="" disabled <?php echo empty($formData['country']) ? 'selected' : ''; ?>>Select your Country</option>
+                            <?php 
+                            $query = "SELECT country FROM tblusers WHERE userID = ?";
+                            $stmt = $connection->prepare($query);
+                            $stmt->bind_param("i", $userID);
+                            $stmt->execute();
+                            $stmt->bind_result($userCountry);
+                            $stmt->fetch();
+                            $stmt->close();
 
-                                foreach ($countries as $country) {
-                                    $selected = '';
-                                    if (!empty($formData['country'])) {
-                                        $selected = ($formData['country'] == $country) ? 'selected' : '';
-                                    } elseif ($userCountry == $country) {
-                                        $selected = 'selected';
-                                    }
-                                    echo "<option value=\"$country\" $selected>$country</option>";
+                            foreach ($countries as $country) {
+                                $selected = '';
+                                if (!empty($formData['country'])) {
+                                    $selected = ($formData['country'] == $country) ? 'selected' : '';
+                                } elseif ($userCountry == $country) {
+                                    $selected = 'selected';
                                 }
-                                ?>
-                            </select>
-                            <?php if (isset($errors['country'])): ?>
-                                <span class="field-error"><?php echo htmlspecialchars($errors['country']); ?></span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
-                    <!-- Event Mode -->
-                    <div class="form-group <?php echo isset($errors['mode']) ? 'has-error' : ''; ?>">
-                        <label>Event Mode <span class="required">*</span></label>
-                        <div class="radio-group">
-                            <label><input type="radio" name="mode" value="online" 
-                                <?php echo ($formData['mode'] ?? '') === 'online' ? 'checked' : ''; ?> required /> Online</label>
-                            <label><input type="radio" name="mode" value="physical" 
-                                <?php echo ($formData['mode'] ?? '') === 'physical' ? 'checked' : ''; ?> /> Physical</label>
-                            <label><input type="radio" name="mode" value="hybrid" 
-                                <?php echo ($formData['mode'] ?? '') === 'hybrid' ? 'checked' : ''; ?> /> Hybrid</label>
-                        </div>
-                        <?php if (isset($errors['mode'])): ?>
-                            <span class="field-error"><?php echo htmlspecialchars($errors['mode']); ?></span>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- Event Type -->
-                    <div class="form-group <?php echo isset($errors['type']) ? 'has-error' : ''; ?>">
-                        <label>Event Type <span class="required">*</span></label>
-                        <select class="c-input c-input-select" name="type" required>
-                            <option value="" disabled <?php echo empty($formData['type']) ? 'selected' : ''; ?>>Select category</option>
-                            <option value="talk" <?php echo ($formData['type'] ?? '') === 'talk' ? 'selected' : ''; ?>>Talk</option>
-                            <option value="workshop" <?php echo ($formData['type'] ?? '') === 'workshop' ? 'selected' : ''; ?>>Workshop</option>
-                            <option value="seminar" <?php echo ($formData['type'] ?? '') === 'seminar' ? 'selected' : ''; ?>>Seminar</option>
-                            <option value="clean-up" <?php echo ($formData['type'] ?? '') === 'clean-up' ? 'selected' : ''; ?>>Clean-up</option>
-                            <option value="campaign" <?php echo ($formData['type'] ?? '') === 'campaign' ? 'selected' : ''; ?>>Campaign</option>
-                            <option value="competition" <?php echo ($formData['type'] ?? '') === 'competition' ? 'selected' : ''; ?>>Competition</option>
-                            <option value="tree-planting" <?php echo ($formData['type'] ?? '') === 'tree-planting' ? 'selected' : ''; ?>>Tree Planting</option>
-                            <option value="other" <?php echo ($formData['type'] ?? '') === 'other' ? 'selected' : ''; ?>>Other</option>
+                                echo "<option value=\"$country\" $selected>$country</option>";
+                            }
+                            ?>
                         </select>
-                        <?php if (isset($errors['type'])): ?>
-                            <span class="field-error"><?php echo htmlspecialchars($errors['type']); ?></span>
+                        <?php if (isset($errors['country'])): ?>
+                            <span class="field-error"><?php echo htmlspecialchars($errors['country']); ?></span>
                         <?php endif; ?>
                     </div>
+                </div>
 
-                    <!-- Event Banner -->
-                    <div class="form-group <?php echo isset($errors['banner']) ? 'has-error' : ''; ?>">
-                        <label>Event Banner <small>(Optional - PNG, JPG, JPEG)</small></label>
-                        <div id="fileStatus"></div>
-                        <div class="file-upload-area" id="fileUploadArea">
-                            <input type="file" name="banner" id="fileInput" accept="image/*" />
-                            <div class="file-upload-text" id="uploadText">Click to upload or drag and drop</div>
-                            <div class="file-upload-hint">Best viewed at 1200×400px | PNG, JPG, JPEG (Max 5MB)</div>
-                        </div>
-                        <div class="preview-container" id="previewContainer">
-                            <img id="imagePreview" class="preview-image" />
-                            <button type="button" class="replace-btn" id="replaceBtn">Replace Image</button>
-                        </div>
-                        <?php if (isset($errors['banner'])): ?>
-                            <span class="field-error"><?php echo htmlspecialchars($errors['banner']); ?></span>
-                        <?php endif; ?>
+                <!-- Event Mode -->
+                <div class="form-group <?php echo isset($errors['mode']) ? 'has-error' : ''; ?>">
+                    <label>Event Mode <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="mode" value="online" 
+                            <?php echo ($formData['mode'] ?? '') === 'online' ? 'checked' : ''; ?> required /> Online</label>
+                        <label><input type="radio" name="mode" value="physical" 
+                            <?php echo ($formData['mode'] ?? '') === 'physical' ? 'checked' : ''; ?> /> Physical</label>
+                        <label><input type="radio" name="mode" value="hybrid" 
+                            <?php echo ($formData['mode'] ?? '') === 'hybrid' ? 'checked' : ''; ?> /> Hybrid</label>
                     </div>
+                    <?php if (isset($errors['mode'])): ?>
+                        <span class="field-error"><?php echo htmlspecialchars($errors['mode']); ?></span>
+                    <?php endif; ?>
+                </div>
 
-                    <button type="submit" class="save-btn">Create Event</button>
-                </form>
-            </div>
-        </section>
+                <!-- Event Type -->
+                <div class="form-group <?php echo isset($errors['type']) ? 'has-error' : ''; ?>">
+                    <label>Event Type <span class="required">*</span></label>
+                    <select class="c-input c-input-select" name="type" required>
+                        <option value="" disabled <?php echo empty($formData['type']) ? 'selected' : ''; ?>>Select category</option>
+                        <option value="talk" <?php echo ($formData['type'] ?? '') === 'talk' ? 'selected' : ''; ?>>Talk</option>
+                        <option value="workshop" <?php echo ($formData['type'] ?? '') === 'workshop' ? 'selected' : ''; ?>>Workshop</option>
+                        <option value="seminar" <?php echo ($formData['type'] ?? '') === 'seminar' ? 'selected' : ''; ?>>Seminar</option>
+                        <option value="clean-up" <?php echo ($formData['type'] ?? '') === 'clean-up' ? 'selected' : ''; ?>>Clean-up</option>
+                        <option value="campaign" <?php echo ($formData['type'] ?? '') === 'campaign' ? 'selected' : ''; ?>>Campaign</option>
+                        <option value="competition" <?php echo ($formData['type'] ?? '') === 'competition' ? 'selected' : ''; ?>>Competition</option>
+                        <option value="tree-planting" <?php echo ($formData['type'] ?? '') === 'tree-planting' ? 'selected' : ''; ?>>Tree Planting</option>
+                        <option value="other" <?php echo ($formData['type'] ?? '') === 'other' ? 'selected' : ''; ?>>Other</option>
+                    </select>
+                    <?php if (isset($errors['type'])): ?>
+                        <span class="field-error"><?php echo htmlspecialchars($errors['type']); ?></span>
+                    <?php endif; ?>
+                </div>
 
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="tickets">Tickets</div>
-                <?php endif; ?>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="faqs">FAQ</div>
-                <?php endif; ?>
-            </div>
+                <!-- Event Banner -->
+                <div class="form-group <?php echo isset($errors['banner']) ? 'has-error' : ''; ?>">
+                    <label>Event Banner <small>(Optional - PNG, JPG, JPEG)</small></label>
+                    <div id="fileStatus"></div>
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <input type="file" name="banner" id="fileInput" accept="image/*" />
+                        <div class="file-upload-text" id="uploadText">Click to upload or drag and drop</div>
+                        <div class="file-upload-hint">Best viewed at 1200×400px | PNG, JPG, JPEG (Max 5MB)</div>
+                    </div>
+                    <div class="preview-container" id="previewContainer">
+                        <img id="imagePreview" class="preview-image" />
+                        <button type="button" class="replace-btn" id="replaceBtn">Replace Image</button>
+                    </div>
+                    <?php if (isset($errors['banner'])): ?>
+                        <span class="field-error"><?php echo htmlspecialchars($errors['banner']); ?></span>
+                    <?php endif; ?>
+                </div>
 
-            <!-- Results -->
-            <div class="results" id="results"></div>
+                <button type="submit" class="save-btn">Create Event</button>
+            </form>
         </section>
     </main>
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <!-- Tabs -->
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results"></div>
+    </section>
 
     <?php if (!$isAdmin): ?>
     <!-- Footer (Member Only) -->
@@ -956,13 +988,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
-                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
+                <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>

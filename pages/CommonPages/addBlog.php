@@ -5,7 +5,7 @@ include("../../php/sessionCheck.php");
 
 // Check if user is logged in
 if (!isset($_SESSION['userID'])) {
-    header("Location: ../../pages/MemberPages/login.php");
+    header("Location: ../../pages/MemberPages/signUpPage.php");
     exit;
 }
 
@@ -538,7 +538,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
                             </a>
                             <span class="c-notification-badge" id="chatBadgeMobile"></span>
                         </div>
-                        <a href="../../pages/MemberPages/mSetting.html">
+                        <a href="../../pages/MemberPages/mSetting.php">
                             <img src="../../assets/images/setting-light.svg" alt="Settings">
                         </a>
                     </section>
@@ -546,7 +546,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
                     <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                    <a href="../../pages/CommonPages/aboutUs.php">About</a>
                 </div>
             </div>
         </nav>
@@ -557,7 +557,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
             <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-            <a href="../../pages/CommonPages/aboutUs.html">About</a>
+            <a href="../../pages/CommonPages/aboutUs.php">About</a>
         </nav>
 
         <section class="c-navbar-more">
@@ -569,7 +569,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
                 <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                 <span class="c-notification-badge" id="chatBadgeDesktop"></span>
             </a>
-            <a href="../../pages/MemberPages/mSetting.html">
+            <a href="../../pages/MemberPages/mSetting.php">
                 <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
             </a>
         </section>
@@ -578,7 +578,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
     <hr>
 
     <!-- Main Content -->
-    <main>
+    <<main class="content" id="content">
         <section class="page-header">
             <div class="header-top">
                 <a href="mainBlog.php" class="back-to-blogs" title="Back to Blogs">
@@ -664,6 +664,17 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
             </div>
         </form>
     </main>
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
 
     <!-- Footer -->
     <footer>
@@ -683,12 +694,12 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
-                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
             </div>
             <div>

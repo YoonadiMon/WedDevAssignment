@@ -137,7 +137,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit();
     }
 
-    // Delete the event (this will cascade delete registrations if foreign key is set)
+    // Delete the event banner file if it exists
+    $fileDeleted = false;
+    if (!empty($event['bannerFilePath']) && file_exists($event['bannerFilePath'])) {
+        if (unlink($event['bannerFilePath'])) {
+            $fileDeleted = true;
+        } else {
+            error_log("Failed to delete event banner: " . $event['bannerFilePath']);
+            // Continue with deletion
+        }
+    }
+
+    // Delete the event
     $deleteSql = "DELETE FROM tblevents WHERE eventID = ?";
     $stmt2 = $connection->prepare($deleteSql);
     $stmt2->bind_param("i", $eventID);
@@ -210,7 +221,7 @@ $hostedEvents = $stmt_hosted->get_result();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReLeaf - My Events</title>
+    <title>My Events - ReLeaf</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
     <link rel="stylesheet" href="../../style/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -817,7 +828,7 @@ $hostedEvents = $stmt_hosted->get_result();
                         <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                        <a href="../../pages/CommonPages/aboutUs.php">About</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -839,7 +850,7 @@ $hostedEvents = $stmt_hosted->get_result();
                 <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                <a href="../../pages/CommonPages/aboutUs.php">About</a>
             <?php endif; ?>
         </nav>
 
@@ -867,8 +878,8 @@ $hostedEvents = $stmt_hosted->get_result();
         </section>
     </header>
     <hr>
-    <main>
-        <section class="content my-events-container">
+    <main class="content" id="content">
+        <section class="my-events-container">
             <a href="mainEvent.php" class="back-button">← Back to Events</a>
             <?php
             if (isset($_SESSION['success'])) {
@@ -1069,27 +1080,18 @@ $hostedEvents = $stmt_hosted->get_result();
                 </div>
             </div>
         </section>
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="tickets">Tickets</div>
-                <?php endif; ?>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="faqs">FAQ</div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Results -->
-            <div class="results" id="results"></div>
-        </section>
     </main>
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
 
     <?php if (!$isAdmin): ?>
     <!-- Footer (Member Only) -->
@@ -1120,7 +1122,7 @@ $hostedEvents = $stmt_hosted->get_result();
             </div>
             <div>
                 <b>Helps</b><br>
-                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
+                <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>

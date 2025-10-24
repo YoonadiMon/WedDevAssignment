@@ -347,16 +347,16 @@ $stmt->close();
                                 <span class="c-notification-badge" id="chatBadgeMobile"></span>
                             </div>
 
-                            <a href="../../pages/MemberPages/mSetting.html">
+                            <a href="../../pages/MemberPages/mSetting.php">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a>
                         </section>
 
                         <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                        <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php" class="active">Trade</a>
-                        <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                        <a href="../../pages/CommonPages/aboutUs.php">About</a>
                     </div>
                 </div>
 
@@ -365,10 +365,10 @@ $stmt->close();
             <!-- Menu Links Desktop + Tablet -->
             <nav class="c-navbar-desktop">
                 <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php" class="active">Trade</a>
-                <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                <a href="../../pages/CommonPages/aboutUs.php">About</a>
             </nav>
             <section class="c-navbar-more">
                 <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
@@ -381,7 +381,7 @@ $stmt->close();
                     <span class="c-notification-badge" id="chatBadgeDesktop"></span>
                 </a>
 
-                <a href="../../pages/MemberPages/mSetting.html">
+                <a href="../../pages/MemberPages/mSetting.php">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a>
             </section>
@@ -390,7 +390,7 @@ $stmt->close();
         <hr>
 
         <!-- Main Content -->
-        <main>
+        <main class="content" id="content">
             <div class="quiz-dashboard">
                 <!-- User Info Card -->
                 <div class="user-info-card">
@@ -445,6 +445,17 @@ $stmt->close();
                 </div>
             </div>
         </main>
+        <!-- Search & Results -->
+        <section class="search-container" id="searchContainer" style="display: none;">
+            <div class="tabs" id="tabs">
+                <div class="tab active" data-type="all">All</div>
+                <div class="tab" data-type="profiles">Profiles</div>
+                <div class="tab" data-type="blogs">Blogs</div>
+                <div class="tab" data-type="events">Events</div>
+                <div class="tab" data-type="trades">Trades</div>
+            </div>
+            <div class="results" id="results"></div>
+        </section>
 
         <hr>
         
@@ -471,13 +482,13 @@ $stmt->close();
                     <b>My Account</b><br>
                     <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                     <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
-                    <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
                 </div>
                 <div>
                     <b>Helps</b><br>
                     <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                     <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                    <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
                 </div>
                 <div>
                     <b>Community</b><br>

@@ -15,6 +15,15 @@
         rel="stylesheet">
 
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
+
+    <style>
+        body {
+            overflow-y: hidden;
+        }
+        .settings h1 {
+            margin-bottom: 4rem;
+        }
+    </style>
 </head>
 
 <body>
@@ -24,8 +33,10 @@
     <header>
         <!-- Logo + Name -->
         <section class="c-logo-section">
-            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
-            <div class="c-text">ReLeaf</div>
+            <a href="../../pages/MemberPages/memberIndex.php" class="c-logo-link">
+                <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                <div class="c-text">ReLeaf</div>
+            </a>
         </section>
 
         <!-- Menu Links -->
@@ -52,16 +63,16 @@
                             <span class="c-notification-badge" id="chatBadgeMobile"></span>
                         </div>
 
-                        <!-- <a href="../../pages/MemberPages/mSetting.html">
+                        <!-- <a href="../../pages/MemberPages/mSetting.php">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a> -->
                     </section>
 
                     <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                    <a href="../../pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
+                    <a href="../../pages/CommonPages/mainBlog.php" class=".c-navbar-side-item">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                    <a href="../../pages/CommonPages/aboutUs.php">About</a>
                 </div>
             </div>
 
@@ -70,10 +81,10 @@
         <!-- Menu Links Desktop + Tablet -->
         <nav class="c-navbar-desktop">
             <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-            <a href="../../pages/CommonPages/mainBlog.html" class=".c-navbar-side-item">Blog</a>
+            <a href="../../pages/CommonPages/mainBlog.php" class=".c-navbar-side-item">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-            <a href="../../pages/CommonPages/aboutUs.html">About</a>
+            <a href="../../pages/CommonPages/aboutUs.php">About</a>
         </nav>
         <section class="c-navbar-more">
             <!-- <input type="text" placeholder="Search..." id="searchBar" class="search-bar"> -->
@@ -87,20 +98,65 @@
             </a>
 
 
-            <!-- <a href="../../pages/MemberPages/mSetting.html">
+            <!-- <a href="../../pages/MemberPages/mSetting.php">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a> -->
         </section>
 
     </header>
 
-    <!-- Main Content -->
-    <main>
+    <main class="content" id="content">
+        <section class="settings">
+        <h1>Settings</h1>
+            <ul class="settings-list">
+                <li data-href="../MemberPages/mProfile.php">
+                    <div class="icon-box">
+                        <img src="../../assets/images/edit-profile-light.svg" alt="Edit Profile Picture"
+                            class="edit-profile-pic">
+                    </div>
+                    <span>Edit Profile</span>
+                </li>
 
-        <!-- Results -->
-        <div class="results" id="results"></div>
+                <li id="themeToggleLi">
+                    <div class="icon-box">
+                        <img src="../../assets/images/dark-mode-icon.svg" alt="dark-mode-icon">
+                    </div>
+                    <span>Dark Mode</span>
+                </li>
+
+                <li data-href="../MemberPages/privacy.html">
+                    <div class="icon-box">
+                        <img src="../../assets/images/lock-icon-light.svg" alt="Privacy & Security"
+                            class="privacy-security-icon">
+                    </div>
+                    <span>Privacy & Security</span>
+                </li>
+
+                <li data-href="../MemberPages/mContactSupport.php">
+                    <div class="icon-box">
+                        <img src="../../assets/images/help-support-icon-light.svg" alt="Help & Support"
+                            class="help-support-icon">
+                    </div>
+                    <span>Help & Support</span>
+                </li>
+
+                <!-- <li data-href="../../CommonPages/loginPage.html">
+                    <div class="icon-box">
+                        <img src="../../assets/images/logout-icon-light.svg" alt="Log out" class="logout-icon">
+                    </div>
+                    <span>Log out</span>
+                </li> -->
+
+                <li data-href="../../php/logOut.php" id="logoutBtn">
+                    <div class="icon-box">
+                        <img src="../../assets/images/logout-icon-light.svg" alt="Log out" class="logout-icon">
+                    </div>
+                    <span>Log out</span>
+                </li>
+            </ul>
         </section>
     </main>
+<<<<<<< HEAD:pages/MemberPages/mSetting.html
 
 
 
@@ -158,6 +214,19 @@
         </ul>
     </main>
 
+=======
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
+>>>>>>> 77941f6c9ef03e2be0bb387b1736399a5ba75220:pages/MemberPages/mSetting.php
     <script>const isAdmin = false;</script>
     <script src="../../javascript/mainScript.js"></script>
     <script src="../../javascript/setting.js"></script>

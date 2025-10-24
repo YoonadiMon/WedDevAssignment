@@ -75,7 +75,7 @@ include("../../php/sessionCheck.php");
                         <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                        <a href="../../pages/CommonPages/aboutUs.php">About</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -97,7 +97,7 @@ include("../../php/sessionCheck.php");
                 <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                <a href="../../pages/CommonPages/aboutUs.php">About</a>
             <?php endif; ?>
         </nav>
 
@@ -127,33 +127,26 @@ include("../../php/sessionCheck.php");
     <hr>
 
     <!-- Main Content -->
-    <main>
+    <main class="content" id="content">
         <!-- Content Placeholder -->
-        <section class="content" id="content">
+        <section>
             <p>Welcome to ReLeaf, <?php echo htmlspecialchars($fullName); ?>!</p>
         </section>
-
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="tickets">Tickets</div>
-                <?php endif; ?>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="faqs">FAQ</div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Results -->
-            <div class="results" id="results"></div>
-        </section>
     </main>
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <!-- Tabs -->
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results"></div>
+    </section>
 
     <?php if (!$isAdmin): ?>
     <!-- Footer (Member Only) -->
@@ -184,7 +177,7 @@ include("../../php/sessionCheck.php");
             </div>
             <div>
                 <b>Helps</b><br>
-                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
+                <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>

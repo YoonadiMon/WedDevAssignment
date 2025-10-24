@@ -10,6 +10,7 @@ if ($_SESSION['userType'] !== 'admin') {
 }
 
 // Handle user deletion
+// Handle user deletion
 if (isset($_POST['delete_user'])) {
     $userIDToDelete = $_POST['user_id'];
     
@@ -24,7 +25,25 @@ if (isset($_POST['delete_user'])) {
         $errorMessage = "";
         
         try {
-            // Define deletion operations in correct order
+            // Delete event banner files
+            $eventsQuery = "SELECT eventID, bannerFilePath FROM tblevents WHERE userID = ? AND bannerFilePath IS NOT NULL";
+            $eventsStmt = $connection->prepare($eventsQuery);
+            $eventsStmt->bind_param("i", $userIDToDelete);
+            $eventsStmt->execute();
+            $eventsResult = $eventsStmt->get_result();
+            
+            $deletedFiles = [];
+            while ($event = $eventsResult->fetch_assoc()) {
+                if (!empty($event['bannerFilePath']) && file_exists($event['bannerFilePath'])) {
+                    if (unlink($event['bannerFilePath'])) {
+                        $deletedFiles[] = $event['bannerFilePath'];
+                    } else {
+                        error_log("Failed to delete event banner: " . $event['bannerFilePath']);
+                    }
+                }
+            }
+            $eventsStmt->close();
+            
             $deletionOperations = [
                 // ticket responses
                 "DELETE FROM tblticket_responses WHERE responderId = ?",
@@ -41,7 +60,7 @@ if (isset($_POST['delete_user'])) {
                 // event registrations
                 "DELETE FROM tblregistration WHERE userID = ?",
                 
-                // events created by user
+                // events created by user 
                 "DELETE FROM tblevents WHERE userID = ?",
                 
                 // blog tags associations
@@ -90,6 +109,9 @@ if (isset($_POST['delete_user'])) {
             // Commit transaction if all operations succeeded
             $connection->commit();
             $success = "User and all associated data deleted successfully!";
+            if (!empty($deletedFiles)) {
+                $success .= " Deleted " . count($deletedFiles) . " event banner files.";
+            }
             
         } catch (Exception $e) {
             // Rollback transaction on any error
@@ -206,7 +228,7 @@ if (!$connection->ping()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReLeaf - Manage Users</title>
+    <title>Manage Users - ReLeaf</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
     <link rel="stylesheet" href="../../style/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -215,7 +237,7 @@ if (!$connection->ping()) {
     
     <style>
         .manage-users-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
@@ -602,7 +624,7 @@ if (!$connection->ping()) {
                         </a>
                     </section>
                     <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                     <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -613,7 +635,7 @@ if (!$connection->ping()) {
 
         <nav class="c-navbar-desktop">
             <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-            <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+            <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -633,8 +655,8 @@ if (!$connection->ping()) {
     <hr>
 
     <!-- Main Content -->
-    <main>
-        <div class="content manage-users-container">
+    <main class="content" id="content">
+        <div class="manage-users-container">
             <a href="../../pages/adminPages/adminIndex.php" class="back-button">
                 ← Back to Dashboard
             </a>
@@ -731,6 +753,17 @@ if (!$connection->ping()) {
             </div>
         </div>
     </main>
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
 
     <!-- Delete Confirmation Modal -->
     <div class="modal-overlay" id="deleteModal">
@@ -762,7 +795,7 @@ if (!$connection->ping()) {
         </div>
     </div>
 
-    <script>const isAdmin = true;</script>
+    <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
     <script src="../../javascript/mainScript.js"></script>
     <script>
         function showDeleteModal(userId, fullName, username) {

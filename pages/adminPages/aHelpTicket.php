@@ -585,7 +585,7 @@ foreach ($tickets as $ticket) {
                     </section>
 
                     <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                     <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -598,7 +598,7 @@ foreach ($tickets as $ticket) {
         <!-- Menu Links Desktop + Tablet -->
         <nav class="c-navbar-desktop">
             <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-            <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+            <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
@@ -618,8 +618,8 @@ foreach ($tickets as $ticket) {
     <hr>
 
     <!-- Main Content -->
-    <main>
-        <div class="admin-tickets-container">
+    <main class="content" id="content">
+        <div class="admin-tickets-container" >
             <!-- Admin Header -->
             <div class="admin-header">
                 <div class="admin-welcome">
@@ -770,22 +770,21 @@ foreach ($tickets as $ticket) {
                 </div>
             </div>
         </div>
-
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-            </div>
-
-            <!-- Results -->
-            <div class="results" id="results"></div>
-        </section>
     </main>
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <!-- Tabs -->
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results"></div>
+    </section>
 
     <hr>
 

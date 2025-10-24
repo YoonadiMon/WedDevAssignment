@@ -310,7 +310,7 @@ $stmt->close();
                                 </a>
                                 <span class="c-notification-badge" id="chatBadgeMobile"></span>
                             </div>
-                            <a href="../../pages/MemberPages/mSetting.html">
+                            <a href="../../pages/MemberPages/mSetting.php">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a>
                         </section>
@@ -341,7 +341,7 @@ $stmt->close();
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                     <span class="c-notification-badge" id="chatBadgeDesktop"></span>
                 </a>
-                <a href="../../pages/MemberPages/mSetting.html">
+                <a href="../../pages/MemberPages/mSetting.php">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a>
             </section>
@@ -350,7 +350,7 @@ $stmt->close();
         <hr>
 
         <!-- Main Content -->
-        <main>
+        <main class="content" id="content">
             <div class="quiz-container">
                 <!-- Start Screen -->
                 <div id="startScreen" class="quiz-start">
@@ -415,7 +415,17 @@ $stmt->close();
                 </div>
             </div>
         </main>
-
+        <!-- Search & Results -->
+        <section class="search-container" id="searchContainer" style="display: none;">
+            <div class="tabs" id="tabs">
+                <div class="tab active" data-type="all">All</div>
+                <div class="tab" data-type="profiles">Profiles</div>
+                <div class="tab" data-type="blogs">Blogs</div>
+                <div class="tab" data-type="events">Events</div>
+                <div class="tab" data-type="trades">Trades</div>
+            </div>
+            <div class="results" id="results"></div>
+        </section>
         <hr>
         
         <!-- Footer -->
@@ -441,13 +451,13 @@ $stmt->close();
                     <b>My Account</b><br>
                     <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                     <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
-                    <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
                 </div>
                 <div>
                     <b>Helps</b><br>
                     <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                     <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                    <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
                 </div>
                 <div>
                     <b>Community</b><br>

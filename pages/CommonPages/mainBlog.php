@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog</title>
+    <title>ReLeaf - Blog</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
     <link rel="stylesheet" href="../../style/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -393,7 +393,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
           <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
           <a href="../../pages/CommonPages/mainEvent.php">Event</a>
           <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-          <a href="../../pages/CommonPages/aboutUs.html">About</a>
+          <a href="../../pages/CommonPages/aboutUs.php">About</a>
         </div>
       </div>
     </nav>
@@ -404,7 +404,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
       <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
       <a href="../../pages/CommonPages/mainEvent.php">Event</a>
       <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-      <a href="../../pages/CommonPages/aboutUs.html">About</a>
+      <a href="../../pages/CommonPages/aboutUs.php">About</a>
     </nav>
     <section class="c-navbar-more">
       <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
@@ -425,70 +425,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
   <hr>
 
-  <!-- Main Content -->
-  <main>
+    <!-- Main Content -->
+    <main class="content" id="content">
+        <section class="hero">
+            <h5>OUR BLOGS</h5>
+            <h1>Find all our blogs from here</h1>
+            <p>Explore insightful articles and stories from the ReLeaf community. Share your knowledge and join the conversation about sustainability and environmental conservation.</p>
+            <a href="../../pages/CommonPages/addBlog.php" class="btn">Write A Blog</a>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search by Blog title or keyword">
+                <button onclick="searchBlogs()">🔍 Search</button>
+            </div>
+        </section>
+
+        <section class="blogs">
+            <div class="blog-header">
+                <p>Showing <span id="blogCount"><?php echo count($blogs); ?></span> Blogs</p>
+                <div class="sort">
+                    <button class="active" onclick="filterBlogs('all')">All</button>
+                    <button onclick="filterBlogs('recent')">Recent (3 days)</button>
+                    <select id="tagFilter" onchange="filterByTag()">
+                        <option value="all">All Tags</option>
+                        <?php foreach ($tags as $tag): ?>
+                            <option value="<?php echo htmlspecialchars($tag['tagName']); ?>">
+                                <?php echo htmlspecialchars($tag['tagName']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="blog-grid" id="blogGrid">
+                <?php foreach ($blogs as $blog): ?>
+                    <div class="blog-card" onclick="location.href='readBlog.php?id=<?php echo $blog['blogID']; ?>'">
+                        <div class="blog-image">📰</div>
+                        <div class="blog-content">
+                            <div class="blog-meta">
+                                <span class="blog-category"><?php echo htmlspecialchars($blog['category']); ?></span>
+                                <span class="blog-date"><?php echo date('M d, Y', strtotime($blog['date'])); ?></span>
+                            </div>
+                            <h3 class="blog-title"><?php echo htmlspecialchars($blog['title']); ?></h3>
+                            <p class="blog-excerpt"><?php echo htmlspecialchars(substr($blog['excerpt'], 0, 100)) . '...'; ?></p>
+                            <a href="readBlog.php?id=<?php echo $blog['blogID']; ?>" class="read-more">Read More →</a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    </main>
     <!-- Search & Results -->
     <section class="search-container" id="searchContainer" style="display: none;">
-      <!-- Tabs -->
-      <div class="tabs" id="tabs">
-        <div class="tab active" data-type="all">All</div>
-        <div class="tab" data-type="profiles">Profiles</div>
-        <div class="tab" data-type="blogs">Blogs</div>
-        <div class="tab" data-type="events">Events</div>
-        <div class="tab" data-type="trades">Trades</div>
-      </div>
-
-      <!-- Results -->
-      <div class="results" id="results"></div>
-    </section>
-  </main>
-
-    <section class="hero">
-        <h5>OUR BLOGS</h5>
-        <h1>Find all our blogs from here</h1>
-        <p>Explore insightful articles and stories from the ReLeaf community. Share your knowledge and join the conversation about sustainability and environmental conservation.</p>
-        <a href="../../pages/CommonPages/addBlog.php" class="btn">Write A Blog</a>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search by Blog title or keyword">
-            <button onclick="searchBlogs()">🔍 Search</button>
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
         </div>
+        <div class="results" id="results"></div>
     </section>
-
-    <section class="blogs">
-        <div class="blog-header">
-            <p>Showing <span id="blogCount"><?php echo count($blogs); ?></span> Blogs</p>
-            <div class="sort">
-                <button class="active" onclick="filterBlogs('all')">All</button>
-                <button onclick="filterBlogs('recent')">Recent (3 days)</button>
-                <select id="tagFilter" onchange="filterByTag()">
-                    <option value="all">All Tags</option>
-                    <?php foreach ($tags as $tag): ?>
-                        <option value="<?php echo htmlspecialchars($tag['tagName']); ?>">
-                            <?php echo htmlspecialchars($tag['tagName']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-        </div>
-
-        <div class="blog-grid" id="blogGrid">
-            <?php foreach ($blogs as $blog): ?>
-                <div class="blog-card" onclick="location.href='readBlog.php?id=<?php echo $blog['blogID']; ?>'">
-                    <div class="blog-image">📰</div>
-                    <div class="blog-content">
-                        <div class="blog-meta">
-                            <span class="blog-category"><?php echo htmlspecialchars($blog['category']); ?></span>
-                            <span class="blog-date"><?php echo date('M d, Y', strtotime($blog['date'])); ?></span>
-                        </div>
-                        <h3 class="blog-title"><?php echo htmlspecialchars($blog['title']); ?></h3>
-                        <p class="blog-excerpt"><?php echo htmlspecialchars(substr($blog['excerpt'], 0, 100)) . '...'; ?></p>
-                        <a href="readBlog.php?id=<?php echo $blog['blogID']; ?>" class="read-more">Read More →</a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </section>
-
+  
     <footer>
         <section class="c-footer-info-section">
             <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
@@ -510,8 +506,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             </div>
             <div>
                 <b>Helps</b><br>
-                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.html">FAQs</a><br>
+                <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                 <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
             </div>
             <div>
@@ -523,7 +519,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         </section>
     </footer>
 
-    <script>const isAdmin = false;</script>
+    <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false';?>;</script>
     <script src="../../javascript/mainScript.js"></script>
     <script>
         function filterBlogs(type) {

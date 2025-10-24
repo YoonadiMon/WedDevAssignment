@@ -77,7 +77,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReLeaf - Frequently Asked Questions</title>
+    <title>Frequently Asked Questions - ReLeaf</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
     <link rel="stylesheet" href="../../style/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -608,7 +608,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
                         <?php if ($isAdmin): ?>
                             <!-- Admin Navigation Icons -->
-                            <a href="../../pages/adminPages/aProfile.html">
+                            <a href="../../pages/adminPages/aProfile.php">
                                 <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
                         <?php else: ?>
@@ -619,7 +619,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                 </a>
                                 <span class="c-notification-badge" id="chatBadgeMobile"></span>
                             </div>
-                            <a href="../../pages/MemberPages/mSetting.html">
+                            <a href="../../pages/MemberPages/mSetting.php">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a>
                         <?php endif; ?>
@@ -639,7 +639,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                         <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                        <a href="../../pages/CommonPages/aboutUs.php">About</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -661,7 +661,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                <a href="../../pages/CommonPages/aboutUs.php">About</a>
             <?php endif; ?>
         </nav>
 
@@ -673,7 +673,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
             <?php if ($isAdmin): ?>
                 <!-- Admin Navbar More -->
-                <a href="../../pages/adminPages/aProfile.html">
+                <a href="../../pages/adminPages/aProfile.php">
                     <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
                 </a>
             <?php else: ?>
@@ -682,7 +682,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                     <span class="c-notification-badge" id="chatBadgeDesktop"></span>
                 </a>
-                <a href="../../pages/MemberPages/mSetting.html">
+                <a href="../../pages/MemberPages/mSetting.php">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a>
             <?php endif; ?>
@@ -691,8 +691,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     <hr>
 
     <!-- Main Content -->
-    <main>
-        <div class="content faq-container" id="faqContainer">
+    <main class="content" id="content">
+        <section class="faq-container" id="faqContainer">
             <div class="faq-content" id="faqContent">
                 <!-- Header -->
                 <div class="faq-header" id="faqHeader">
@@ -790,29 +790,20 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <img src="../../assets/images/edit-icon-light.svg" alt="edit-icon">
             </button>
             <?php endif; ?>
-        </div>
-
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="tickets">Tickets</div>
-                <?php endif; ?>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="faqs">FAQ</div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Results -->
-            <div class="results" id="results"></div>
         </section>
     </main>
+
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
 
     <?php if (!$isAdmin): ?>
     <!-- Footer (Member Only) -->
@@ -837,15 +828,15 @@ while ($row = mysqli_fetch_assoc($result)) {
         <section class="c-footer-links-section">
             <div>
                 <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.html">My Account</a><br>
+                <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
-                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
+                <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>

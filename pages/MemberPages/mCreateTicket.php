@@ -1,10 +1,13 @@
 <?php
+session_start();
 include("../../php/dbConn.php");
+include("../../php/sessionCheck.php");
 
 // Initialize variables
+$currentUserID = $_SESSION['userID']; 
+
 $success_message = "";
 $error_message = "";
-$currentUserID = 4; // Assuming current user ID is 6
 
 // Process form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -419,16 +422,16 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
                             <span class="c-notification-badge" id="chatBadgeMobile"></span>
                         </div>
 
-                        <a href="../../pages/MemberPages/mSetting.html">
+                        <a href="../../pages/MemberPages/mSetting.php">
                             <img src="../../assets/images/setting-light.svg" alt="Settings">
                         </a>
                     </section>
 
                     <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                    <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                    <a href="../../pages/CommonPages/aboutUs.php">About</a>
                 </div>
             </div>
 
@@ -437,10 +440,10 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
         <!-- Menu Links Desktop + Tablet -->
         <nav class="c-navbar-desktop">
             <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-            <a href="../../pages/CommonPages/mainBlog.html">Blog</a>
+            <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-            <a href="../../pages/CommonPages/aboutUs.html">About</a>
+            <a href="../../pages/CommonPages/aboutUs.php">About</a>
         </nav>
         <section class="c-navbar-more">
             <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
@@ -453,7 +456,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
                 <span class="c-notification-badge" id="chatBadgeDesktop"></span>
             </a>
 
-            <a href="../../pages/MemberPages/mSetting.html">
+            <a href="../../pages/MemberPages/mSetting.php">
                 <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
             </a>
         </section>
@@ -463,7 +466,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
     <hr>
 
     <!-- Main Content -->
-    <main>
+    <main class="content" id="content">
         <div class="support-ticket-container">
             <!-- Back Button -->
             <a href="mContactSupport.php" class="back-button">
@@ -574,23 +577,18 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
                 </ul>
             </div>
         </div>
-
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-            </div>
-
-            <!-- Results -->
-            <div class="results" id="results"></div>
-        </section>
     </main>
-
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
     <hr>
 
     <!-- Footer -->
@@ -618,18 +616,18 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
-                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
+                <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>
                 <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
-                <a href="../../pages/CommonPages/mainBlog.html">Blogs</a><br>
+                <a href="../../pages/CommonPages/mainBlog.php">Blogs</a><br>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             </div>
         </section>

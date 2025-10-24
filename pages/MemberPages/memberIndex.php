@@ -101,7 +101,7 @@ if ($userRank == 0 && isset($userData['point'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReLeaf - Home</title>
+    <title>Home - ReLeaf</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
     <link rel="stylesheet" href="../../style/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -596,7 +596,7 @@ if ($userRank == 0 && isset($userData['point'])) {
                             </a>
                             <span class="c-notification-badge" id="chatBadgeMobile"></span>
                         </div>
-                        <a href="../../pages/MemberPages/mSetting.html">
+                        <a href="../../pages/MemberPages/mSetting.php">
                             <img src="../../assets/images/setting-light.svg" alt="Settings">
                         </a>
                     </section>
@@ -604,7 +604,7 @@ if ($userRank == 0 && isset($userData['point'])) {
                     <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                    <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                    <a href="../../pages/CommonPages/aboutUs.php">About</a>
                 </div>
             </div>
         </nav>
@@ -615,7 +615,7 @@ if ($userRank == 0 && isset($userData['point'])) {
             <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-            <a href="../../pages/CommonPages/aboutUs.html">About</a>
+            <a href="../../pages/CommonPages/aboutUs.php">About</a>
         </nav>
 
         <section class="c-navbar-more">
@@ -627,7 +627,7 @@ if ($userRank == 0 && isset($userData['point'])) {
                 <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                 <span class="c-notification-badge" id="chatBadgeDesktop"></span>
             </a>
-            <a href="../../pages/MemberPages/mSetting.html">
+            <a href="../../pages/MemberPages/mSetting.php">
                 <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
             </a>
         </section>
@@ -635,8 +635,8 @@ if ($userRank == 0 && isset($userData['point'])) {
     <hr>
 
     <!-- Main Content -->
-    <main>
-        <section class="content profile-container">
+    <main class="content" id="content">
+        <section class="profile-container">
             <!-- Profile Header -->
             <div class="profile-top">
                 <div class="profile-info">
@@ -737,28 +737,18 @@ if ($userRank == 0 && isset($userData['point'])) {
                 <img src="../../assets/images/quiz-icon-dark.svg" alt="Quiz">
             </a>
         </section>
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="tickets">Tickets</div>
-                <?php endif; ?>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="faqs">FAQ</div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Results -->
-            <div class="results" id="results"></div>
-        </section>
     </main>
-
+    <!-- Search & Results -->
+    <section class="search-container" id="searchContainer" style="display: none;">
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-type="all">All</div>
+            <div class="tab" data-type="profiles">Profiles</div>
+            <div class="tab" data-type="blogs">Blogs</div>
+            <div class="tab" data-type="events">Events</div>
+            <div class="tab" data-type="trades">Trades</div>
+        </div>
+        <div class="results" id="results"></div>
+    </section>
     <hr>
     
     <!-- Footer -->
@@ -784,13 +774,13 @@ if ($userRank == 0 && isset($userData['point'])) {
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
-                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
+                <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>
