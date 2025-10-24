@@ -354,7 +354,7 @@ document.getElementById('blogForm').addEventListener('submit', function(e) {
         
         // Redirect to main blog page after 1.5 seconds
         setTimeout(() => {
-            window.location.href = 'mainBlog.html';
+            window.location.href = 'mainBlog.php';
         }, 1500);
 
     } catch (error) {
