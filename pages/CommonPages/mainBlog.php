@@ -355,49 +355,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             font-size: 1.1rem;
         }
 
-        /* Header Search Bar Responsive */
-        .search-bar {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        .search-bar:focus {
-            outline: none;
-            border-color: var(--MainGreen);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-
-        .search-bar::placeholder {
-            color: var(--text-color-2);
-        }
-
-        .c-navbar-side .search-bar,
-        .c-navbar-more .search-bar {
-            margin-bottom: 0.5rem;
-        }
-
         /* Dark mode support */
         .dark-mode .hero .search-bar-container input {
             background-color: var(--bg-color-dark);
             color: var(--text-color);
-        }
-
-        .dark-mode .search-bar {
-            background-color: var(--bg-color-dark);
-            border-color: var(--border-color);
-            color: var(--text-color);
-        }
-
-        .dark-mode .search-bar:focus {
-            border-color: var(--MainGreen);
         }
 
         .dark-mode .sort select {
@@ -510,21 +471,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;
             }
-
-            .c-navbar-side .search-bar {
-                width: calc(100% - 2rem);
-                margin: 1rem 1rem 0 1rem;
-                padding: 0.75rem 1rem;
-                font-size: 1rem;
-                box-sizing: border-box;
-            }
-
-            .c-navbar-more .search-bar {
-                width: 100%;
-                padding: 0.75rem 1rem;
-                margin-bottom: 0.5rem;
-                box-sizing: border-box;
-            }
         }
 
         /* Extra small devices (max 480px) */
@@ -618,19 +564,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             .blog-excerpt {
                 font-size: 0.8rem;
-            }
-
-            .search-bar {
-                font-size: 0.9rem;
-                padding: 0.625rem 0.75rem;
-                box-sizing: border-box;
-            }
-
-            .c-navbar-side .search-bar {
-                width: calc(100% - 1.5rem);
-                margin: 0.75rem 0.75rem 0 0.75rem;
-                font-size: 0.9rem;
-                padding: 0.625rem 0.75rem;
             }
         }
     </style>
