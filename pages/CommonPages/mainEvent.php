@@ -129,6 +129,36 @@ if ($stmt = $connection->prepare($query)) {
             margin-top: 1rem;
         }
 
+        /* Event Header */
+        .event-header {
+            background: linear-gradient(135deg, var(--LowGreen), var(--MainGreen), var(--LowGreen));
+            padding: 3rem 2rem;
+            margin: 2rem 0;
+            text-align: center;
+            border-radius: 20px;
+        }
+
+        .event-header-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .event-header-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--White);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-header-subtitle {
+            font-size: 1.25rem;
+            color: var(--White);
+            font-weight: 400;
+            margin: 0;
+            opacity: 0.95;
+        }
+
         .btn-wrapper {
             display: flex;
             justify-content: space-between;
@@ -471,6 +501,18 @@ if ($stmt = $connection->prepare($query)) {
         }
 
         @media (max-width: 760px) {
+            .event-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .event-header-title {
+                font-size: 2rem;
+            }
+
+            .event-header-subtitle {
+                font-size: 1.1rem;
+            }
+            
             .event-grid {
                 grid-template-columns: 1fr;
             }
@@ -495,16 +537,28 @@ if ($stmt = $connection->prepare($query)) {
         }
 
         @media (max-width: 480px) {
+            .event-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .event-header-title {
+                font-size: 1.75rem;
+            }
+
+            .event-header-subtitle {
+                font-size: 1rem;
+            }
+
             .btn-left-group {
                 display: flex;
                 justify-content: space-between;
                 gap: 1rem;
-                margin-bottom: 0.5rem;
             }
 
             .top-btn {
                 font-size: 0.85rem;
                 padding: 0.6rem 1.2rem;
+                margin-bottom: 0.5rem;
             }
 
             .filter-toggle {
@@ -568,7 +622,7 @@ if ($stmt = $connection->prepare($query)) {
                                 </a>
                                 <span class="c-notification-badge" id="chatBadgeMobile"></span>
                             </div>
-                            <a href="../../pages/MemberPages/mSetting.html">
+                            <a href="../../pages/MemberPages/mSetting.php">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a>
                         <?php endif; ?>
@@ -631,7 +685,7 @@ if ($stmt = $connection->prepare($query)) {
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                     <span class="c-notification-badge" id="chatBadgeDesktop"></span>
                 </a>
-                <a href="../../pages/MemberPages/mSetting.html">
+                <a href="../../pages/MemberPages/mSetting.php">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a>
             <?php endif; ?>
@@ -641,14 +695,25 @@ if ($stmt = $connection->prepare($query)) {
 
     <!-- Main Content -->
     <main class="content" id="content">
-        <section class="btn-wrapper">
-            <div class="btn-left-group">
-                <a href="../../pages/CommonPages/createEvent.php" class="c-btn c-btn-primary top-btn">Host an Event</a>
-                <a href="../../pages/CommonPages/myEvents.php" class="c-btn c-btn-primary top-btn">My Events</a>
+        <!-- Event Header -->
+        <section class="event-header">
+            <div class="event-header-content">
+                <h1 class="event-header-title">🗓️<br>Events</h1>
+                <p class="event-header-subtitle">Join us and be part of something bigger — learn, connect, volunteer, and make an impact together.</p>
             </div>
+        </section>
+        
+        <section class="btn-wrapper">
+            <?php if ($isAdmin): ?>
+                <a href="../../pages/adminPages/aManageEvent.php" class="c-btn c-btn-primary top-btn">Manage Events</a>
+            <?php else: ?>
+                <div class="btn-left-group">
+                    <a href="../../pages/CommonPages/createEvent.php" class="c-btn c-btn-primary top-btn">Host an Event</a>
+                    <a href="../../pages/CommonPages/myEvents.php" class="c-btn c-btn-primary top-btn">My Events</a>
+                </div>                
+            <?php endif; ?>
             <button class="c-btn c-btn-primary top-btn filter-toggle" onclick="toggleFilters()">Show Filters</button>
         </section>
-
         <section class="event-browse-container">
             <!-- Filter Sidebar -->
             <aside class="filter-sidebar" id="filterSidebar">
@@ -862,13 +927,13 @@ if ($stmt = $connection->prepare($query)) {
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>
