@@ -5,6 +5,12 @@ include("sessionCheck.php");
 
 header('Content-Type: application/json');
 
+// Check if user is logged in
+if (!isset($_SESSION['userID'])) {
+    echo json_encode(['success' => false, 'message' => 'User not logged in']);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $listingID = mysqli_real_escape_string($connection, $_POST['listingID']);
     $reason = mysqli_real_escape_string($connection, $_POST['reason']);
