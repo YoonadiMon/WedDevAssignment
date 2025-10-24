@@ -137,7 +137,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit();
     }
 
-    // Delete the event (this will cascade delete registrations if foreign key is set)
+    // Delete the event banner file if it exists
+    $fileDeleted = false;
+    if (!empty($event['bannerFilePath']) && file_exists($event['bannerFilePath'])) {
+        if (unlink($event['bannerFilePath'])) {
+            $fileDeleted = true;
+        } else {
+            error_log("Failed to delete event banner: " . $event['bannerFilePath']);
+            // Continue with deletion
+        }
+    }
+
+    // Delete the event
     $deleteSql = "DELETE FROM tblevents WHERE eventID = ?";
     $stmt2 = $connection->prepare($deleteSql);
     $stmt2->bind_param("i", $eventID);
@@ -797,7 +808,7 @@ $hostedEvents = $stmt_hosted->get_result();
                                 </a>
                                 <span class="c-notification-badge" id="chatBadgeMobile"></span>
                             </div>
-                            <a href="../../pages/MemberPages/mSetting.php">
+                            <a href="../../pages/MemberPages/mSetting.html">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a>
                         <?php endif; ?>
@@ -860,7 +871,7 @@ $hostedEvents = $stmt_hosted->get_result();
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                     <span class="c-notification-badge" id="chatBadgeDesktop"></span>
                 </a>
-                <a href="../../pages/MemberPages/mSetting.php">
+                <a href="../../pages/MemberPages/mSetting.html">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a>
             <?php endif; ?>
@@ -1107,13 +1118,13 @@ $hostedEvents = $stmt_hosted->get_result();
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>

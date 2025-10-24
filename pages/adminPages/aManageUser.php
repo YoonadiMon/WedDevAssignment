@@ -10,6 +10,7 @@ if ($_SESSION['userType'] !== 'admin') {
 }
 
 // Handle user deletion
+// Handle user deletion
 if (isset($_POST['delete_user'])) {
     $userIDToDelete = $_POST['user_id'];
     
@@ -24,7 +25,25 @@ if (isset($_POST['delete_user'])) {
         $errorMessage = "";
         
         try {
-            // Define deletion operations in correct order
+            // Delete event banner files
+            $eventsQuery = "SELECT eventID, bannerFilePath FROM tblevents WHERE userID = ? AND bannerFilePath IS NOT NULL";
+            $eventsStmt = $connection->prepare($eventsQuery);
+            $eventsStmt->bind_param("i", $userIDToDelete);
+            $eventsStmt->execute();
+            $eventsResult = $eventsStmt->get_result();
+            
+            $deletedFiles = [];
+            while ($event = $eventsResult->fetch_assoc()) {
+                if (!empty($event['bannerFilePath']) && file_exists($event['bannerFilePath'])) {
+                    if (unlink($event['bannerFilePath'])) {
+                        $deletedFiles[] = $event['bannerFilePath'];
+                    } else {
+                        error_log("Failed to delete event banner: " . $event['bannerFilePath']);
+                    }
+                }
+            }
+            $eventsStmt->close();
+            
             $deletionOperations = [
                 // ticket responses
                 "DELETE FROM tblticket_responses WHERE responderId = ?",
@@ -41,7 +60,7 @@ if (isset($_POST['delete_user'])) {
                 // event registrations
                 "DELETE FROM tblregistration WHERE userID = ?",
                 
-                // events created by user
+                // events created by user 
                 "DELETE FROM tblevents WHERE userID = ?",
                 
                 // blog tags associations
@@ -90,6 +109,9 @@ if (isset($_POST['delete_user'])) {
             // Commit transaction if all operations succeeded
             $connection->commit();
             $success = "User and all associated data deleted successfully!";
+            if (!empty($deletedFiles)) {
+                $success .= " Deleted " . count($deletedFiles) . " event banner files.";
+            }
             
         } catch (Exception $e) {
             // Rollback transaction on any error

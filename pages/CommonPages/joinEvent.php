@@ -183,11 +183,13 @@ if ($userStmt = $connection->prepare($userQuery)) {
             width: 100%;
             height: 400px;
             object-fit: cover;
-            background: var(--LowGreen);
+            background: var(--bg-color);
             flex-shrink: 0;
+            border-bottom: 1px solid var(--Black);
         }
 
         .event-banner-placeholder {
+            background: var(--White);
             object-fit: contain;
         }
 
@@ -714,7 +716,7 @@ if ($userStmt = $connection->prepare($userQuery)) {
                                 </a>
                                 <span class="c-notification-badge" id="chatBadgeMobile"></span>
                             </div>
-                            <a href="../../pages/MemberPages/mSetting.php">
+                            <a href="../../pages/MemberPages/mSetting.html">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a>
                         <?php endif; ?>
@@ -777,7 +779,7 @@ if ($userStmt = $connection->prepare($userQuery)) {
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                     <span class="c-notification-badge" id="chatBadgeDesktop"></span>
                 </a>
-                <a href="../../pages/MemberPages/mSetting.php">
+                <a href="../../pages/MemberPages/mSetting.html">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a>
             <?php endif; ?>
@@ -807,9 +809,9 @@ if ($userStmt = $connection->prepare($userQuery)) {
                     <img src="<?php echo htmlspecialchars($event['bannerFilePath']); ?>" 
                         alt="<?php echo htmlspecialchars($event['title']); ?>" 
                         class="event-banner" 
-                        onerror="this.src='../../assets/images/Logo.png'; this.classList.add('event-banner-placeholder')">
+                        onerror="this.src='../../assets/images/banner-placeholder.png'; this.classList.add('event-banner-placeholder')">
                 <?php else: ?>
-                    <img src="../../assets/images/Logo.png" 
+                    <img src="../../assets/images/banner-placeholder.png" 
                         alt="<?php echo htmlspecialchars($event['title']); ?>" 
                         class="event-banner event-banner-placeholder">
                 <?php endif; ?>
@@ -1027,13 +1029,13 @@ if ($userStmt = $connection->prepare($userQuery)) {
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>

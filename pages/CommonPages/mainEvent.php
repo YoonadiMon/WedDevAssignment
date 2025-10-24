@@ -364,12 +364,9 @@ if ($stmt = $connection->prepare($query)) {
             width: 100%;
             height: 180px;
             object-fit: cover;
-            background: var(--LowGreen);
+            background: var(--bg-color);
             flex-shrink: 0;
-        }
-
-        .event-card-placeholder {
-            object-fit: contain;
+            border-bottom: 1px solid var(--Black);
         }
 
         .event-card-content {
@@ -571,7 +568,7 @@ if ($stmt = $connection->prepare($query)) {
                                 </a>
                                 <span class="c-notification-badge" id="chatBadgeMobile"></span>
                             </div>
-                            <a href="../../pages/MemberPages/mSetting.php">
+                            <a href="../../pages/MemberPages/mSetting.html">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
                             </a>
                         <?php endif; ?>
@@ -634,7 +631,7 @@ if ($stmt = $connection->prepare($query)) {
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
                     <span class="c-notification-badge" id="chatBadgeDesktop"></span>
                 </a>
-                <a href="../../pages/MemberPages/mSetting.php">
+                <a href="../../pages/MemberPages/mSetting.html">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
                 </a>
             <?php endif; ?>
@@ -778,11 +775,11 @@ if ($stmt = $connection->prepare($query)) {
                                     <img src="<?php echo htmlspecialchars($event['bannerFilePath']); ?>" 
                                         alt="<?php echo htmlspecialchars($event['title']); ?>" 
                                         class="event-card-banner" 
-                                        onerror="this.src='../../assets/images/Logo.png'; this.classList.add('event-card-placeholder')">
+                                        onerror="this.src='../../assets/images/banner-placeholder.png';">
                                 <?php else: ?>
-                                    <img src="../../assets/images/Logo.png" 
+                                    <img src="../../assets/images/banner-placeholder.png" 
                                         alt="<?php echo htmlspecialchars($event['title']); ?>" 
-                                        class="event-card-banner event-card-placeholder">
+                                        class="event-card-banner">
                                 <?php endif; ?>
                                 <?php
                                     $maxDescriptionLength = 250; // characters
@@ -865,13 +862,13 @@ if ($stmt = $connection->prepare($query)) {
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
                 <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>
