@@ -305,7 +305,7 @@ if ($userRank == 0 && isset($userData['point'])) {
             color: var(--Gray);
         }
 
-        .leaderboard {
+        .leaderboard, .tradelisting {
             background: var(--bg-color);
             border: 1px solid var(--Gray);
             border-radius: 16px;
@@ -313,7 +313,7 @@ if ($userRank == 0 && isset($userData['point'])) {
             margin-top: 2rem;
         }
 
-        .leaderboard-title {
+        .leaderboard-title, .tradelisting-title {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--text-color);
@@ -445,6 +445,130 @@ if ($userRank == 0 && isset($userData['point'])) {
             transform: scale(1.1);
             box-shadow: 0 6px 12px var(--MainGreen);
         }
+        
+        /* Trade items styls */
+        .tradelisting {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        .listings-grid {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-content: space-between;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .listing-card {
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 400px;
+            background: var(--bg-color);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .listing-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: var(--sec-bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--Gray);
+            font-size: 14px;
+        }
+
+        .listing-content {
+            padding: 20px;
+        }
+
+        .listing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .listing-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .listing-category {
+            background: var(--LowGreen);
+            color: var(--Black);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            width: fit-content;
+        }
+
+        .listing-description {
+            color: var(--text-color);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .listing-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .detail-badge {
+            background: var(--LightGreen);
+            color: var(--Black);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .listing-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .listing-date {
+            font-size: 0.8rem;
+        }
+
+        .plant-special {
+            background: linear-gradient(135deg, #10b981, #a7f3d0);
+            color: var(--White);
+        }
+
+        .item-special {
+            background: linear-gradient(135deg, #6366f1, #a5b4fc);
+            color: var(--White);
+        }
+
+        .listing-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
 
         @media (max-width: 768px) {
             .profile-top {
@@ -517,6 +641,14 @@ if ($userRank == 0 && isset($userData['point'])) {
 
             .username-country-wrapper {
                 justify-content: center;
+            }
+
+            .listings-grid {
+                flex-direction: column;
+            }
+
+            .listing-card {
+                margin-bottom: 2rem;
             }
         }
     </style>
@@ -732,6 +864,147 @@ if ($userRank == 0 && isset($userData['point'])) {
                     <?php endif; ?>
                 </ul>
             </section>
+
+            <section class="tradelisting">
+    <h2 class="tradelisting-title">Your Trade Listings</h2>
+    
+    <div class="listings-grid">
+        <?php
+        $userID = $_SESSION['userID'];
+        
+        $query = "SELECT * FROM tbltrade_listings WHERE userID = ? AND status = 'active' ORDER BY dateListed DESC";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("i", $userID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                // Determine card type based on category
+                $cardClass = 'item-special';
+                if ($row["category"] == 'Plants') {
+                    $cardClass = 'plant-special';
+                } elseif ($row["category"] == 'Seeds & Saplings') {
+                    $cardClass = 'plant-special';
+                } elseif ($row["category"] == 'Garden Decor') {
+                    $cardClass = 'item-special';
+                }
+                
+                // Format date
+                $formattedDate = formatRelativeDate($row["dateListed"]);
+                
+                // Get user initials for avatar
+                $userInitials = getUserInitials($row["userID"]);
+                $userFullname = getUserFullname($row["userID"]);
+        ?>
+        <div class="listing-card">
+            <div class="listing-image">
+                <img src="<?php echo !empty($row['imageUrl']) ? htmlspecialchars($row['imageUrl']) : '../../assets/images/placeholder-image.jpg'; ?>" 
+                     alt="<?php echo htmlspecialchars($row['title']); ?>" 
+                     style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div class="listing-content">
+                <div class="listing-header">
+                    <div>
+                        <div class="listing-title"><?php echo htmlspecialchars($row['title']); ?></div>
+                        <div class="listing-category c-text"><?php echo htmlspecialchars($row['category']); ?></div>
+                    </div>
+                </div>
+                <div class="listing-description"><?php echo htmlspecialchars($row['description']); ?></div>
+                
+                <div class="listing-details">
+                    <span class="detail-badge"><?php echo htmlspecialchars($row['itemCondition']); ?></span>
+                    <span class="detail-badge"><?php echo htmlspecialchars($row['category']); ?></span>
+                    <?php if (!empty($row['species'])): ?>
+                        <span class="detail-badge"><?php echo htmlspecialchars($row['species']); ?></span>
+                    <?php endif; ?>
+                    <?php if (!empty($row['growthStage'])): ?>
+                        <span class="detail-badge"><?php echo htmlspecialchars($row['growthStage']); ?></span>
+                    <?php endif; ?>
+                    <?php if (!empty($row['brand'])): ?>
+                        <span class="detail-badge"><?php echo htmlspecialchars($row['brand']); ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <div class="listing-meta">
+                    <div>
+                        Created on
+                    </div>
+                    <div class="listing-date c-text">
+                    <?php if (!empty($row['dateListed'])): ?>
+                        <?php echo htmlspecialchars($row['dateListed']); ?>
+                    <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+            }
+        } else {
+        ?>
+        <div class="no-listings">
+            <p>You have no trade listings yet.</p>
+            <a href="create_listing.php" class="btn-create">Create Your First Listing</a>
+        </div>
+        <?php } ?>
+    </div>
+</section>
+
+<?php
+// Helper function to format relative dates
+function formatRelativeDate($dateString) {
+    $date = new DateTime($dateString);
+    $now = new DateTime();
+    $interval = $date->diff($now);
+    
+    if ($interval->days == 0) {
+        return 'Today';
+    } elseif ($interval->days == 1) {
+        return 'Yesterday';
+    } elseif ($interval->days < 7) {
+        return $interval->days . ' days ago';
+    } else {
+        return $date->format('n/j/Y');
+    }
+}
+
+// Helper function to get user initials
+function getUserInitials($userID) {
+    global $connection;
+    $query = "SELECT fullname FROM tblusers WHERE userID = ?";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("i", $userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        $names = explode(' ', $user['fullname']);
+        $initials = '';
+        foreach ($names as $name) {
+            $initials .= strtoupper(substr($name, 0, 1));
+        }
+        return substr($initials, 0, 2);
+    }
+    return 'UU'; // Unknown User
+}
+
+// Helper function to get user fullname
+function getUserFullname($userID) {
+    global $connection;
+    $query = "SELECT fullname FROM tblusers WHERE userID = ?";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("i", $userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        return $user['fullname'];
+    }
+    return 'Unknown User';
+}
+?>
 
             <a href="../../pages/MemberPages/mQuiz.php" class="floating-btn" title="Take a Quiz">
                 <img src="../../assets/images/quiz-icon-dark.svg" alt="Quiz">
