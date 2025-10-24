@@ -500,7 +500,7 @@ mysqli_close($connection);
         <header>
             <!-- Logo + Name -->
             <section class="c-logo-section">
-                <a href="../../index.html" class="c-logo-link">
+                <a href="../../index.php" class="c-logo-link">
                     <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                     <div class="c-text">ReLeaf</div>
                 </a>
