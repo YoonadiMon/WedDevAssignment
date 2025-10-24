@@ -658,7 +658,7 @@ $connection->close();
             toast: document.getElementById('toast')
         };
 
-        const AVATAR_COLOR = '#4ECDC4';
+        const AVATAR_COLOR =' #2fd26b'; 
         function generateAvatar(name) {
             const initials = name.split(/\s+/).map(s => s[0]).slice(0, 2).join('').toUpperCase();
             const canvas = document.createElement('canvas');

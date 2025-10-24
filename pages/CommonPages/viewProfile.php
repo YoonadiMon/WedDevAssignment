@@ -312,201 +312,26 @@ if ($profileUserID <= 0) {
             color: var(--MainGreen);
             text-decoration: underline;
         }
-
-        @media (max-width: 768px) {
-            .profile-top {
-                flex-direction: column;
-                gap: 1.5rem;
-                align-items: center;
-            }
-
-            .profile-info {
-                flex-direction: column;
-                text-align: center;
-                align-items: center;
-                gap: 1rem;
-            }
-
-            .username-country-wrapper {
-                justify-content: center;
-            }
-
-            .profile-bio-wrapper {
-                width: 100%;
-                max-width: 100%;
-                text-align: center;
-                padding: 0 1rem;
-            }
-
-            .stats-bar {
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-
-            .avatar-circle {
-                width: 80px;
-                height: 80px;
-                font-size: 2rem;
-                margin-top: 0;
-            }
-
-            .profile-name {
-                font-size: 1.5rem;
-            }
-
-            .profile-details {
-                text-align: center;
-            }
-
-            .action-buttons {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .profile-header {
-                padding: 1.5rem 1rem;
-            }
-            
-            .profile-top {
-                gap: 1rem;
-            }
-            
-            .avatar-circle {
-                width: 70px;
-                height: 70px;
-                font-size: 1.75rem;
-            }
-            
-            .profile-name {
-                font-size: 1.25rem;
-            }
-
-            .username-country-wrapper {
-                justify-content: center;
-            }
-        }
     </style>
 </head>
 <body>
     <div id="cover" class="" onclick="hideMenu()"></div>
     
-    <!-- Logo + Name & Navbar -->
     <header>
-        <!-- Logo + Name -->
+        <!-- Logo + Navbar -->
         <section class="c-logo-section">
             <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.php'; ?>" class="c-logo-link">
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
             </a>
         </section>
-
-        <!-- Menu Links Mobile -->
-        <nav class="c-navbar-side">
-            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
-            <div id="sidebarNav" class="c-navbar-side-menu">
-                
-                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
-                <div class="c-navbar-side-items">
-                    <section class="c-navbar-side-more">
-                        <button id="themeToggle1">
-                            <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
-                        </button>
-
-                        <?php if ($isAdmin): ?>
-                            <!-- Admin Navigation Icons -->
-                            <a href="../../pages/adminPages/aProfile.php">
-                                <img src="../../assets/images/profile-light.svg" alt="Profile">
-                            </a>
-                        <?php else: ?>
-                            <!-- Member Navigation Icons -->
-                            <div class="c-chatbox" id="chatboxMobile">
-                                <a href="../../pages/MemberPages/mChat.html">
-                                    <img src="../../assets/images/chat-light.svg" alt="Chatbox">
-                                </a>
-                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
-                            </div>
-                            <a href="../../pages/MemberPages/mSetting.html">
-                                <img src="../../assets/images/setting-light.svg" alt="Settings">
-                            </a>
-                        <?php endif; ?>
-                    </section>
-
-                    <?php if ($isAdmin): ?>
-                        <!-- Admin Menu Items -->
-                        <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
-                        <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
-                    <?php else: ?>
-                        <!-- Member Menu Items -->
-                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/aboutUs.html">About</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Menu Links Desktop + Tablet -->
-        <nav class="c-navbar-desktop">
-            <?php if ($isAdmin): ?>
-                <!-- Admin Desktop Menu -->
-                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
-                <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
-            <?php else: ?>
-                <!-- Member Desktop Menu -->
-                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/aboutUs.html">About</a>
-            <?php endif; ?>
-        </nav>
-
-        <section class="c-navbar-more">
-            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-            <button id="themeToggle2">
-                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
-            </button>
-
-            <?php if ($isAdmin): ?>
-                <!-- Admin Navbar More -->
-                <a href="../../pages/adminPages/aProfile.php">
-                    <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
-                </a>
-            <?php else: ?>
-                <!-- Member Navbar More -->
-                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
-                    <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
-                </a>
-                <a href="../../pages/MemberPages/mSetting.html">
-                    <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
-                </a>
-            <?php endif; ?>
-        </section>
     </header>
     <hr>
     
-    <!-- Main Content -->
     <main>
         <section class="profile-container content">
-            <!-- Back Button -->
-            <a href="javascript:history.back()" class="back-button">
-                ← Back
-            </a>
+            <a href="javascript:history.back()" class="back-button">← Back</a>
 
-            <!-- Profile Header -->
             <div class="profile-top">
                 <div class="profile-info">
                     <div class="avatar-circle"><?php echo htmlspecialchars($initials); ?></div>
@@ -514,9 +339,7 @@ if ($profileUserID <= 0) {
                         <h1 class="profile-name"><?php echo htmlspecialchars($userData['fullName']); ?></h1>
                         <div class="username-country-wrapper">
                             <div class="profile-username-wrapper">
-                                <p class="profile-username">
-                                    @<?php echo htmlspecialchars($userData['username']); ?>
-                                </p>
+                                <p class="profile-username">@<?php echo htmlspecialchars($userData['username']); ?></p>
                             </div>
                             <div class="profile-country-wrapper">
                                 <img src="../../assets/images/location-icon-light.svg" alt="Location">
@@ -534,20 +357,23 @@ if ($profileUserID <= 0) {
                         </div>
                     </div>
                 </div>
-                <!-- only show action buttons if that user is not admin or own profile -->
+
+                <!-- ✅ Fixed Chat Button -->
                 <?php if ($profileUserID !== $currentUserID && !$profileUserIsAdmin): ?>
                 <div class="action-buttons">
                     <a href="../../pages/MemberPages/mCreateTicket.php" class="action-btn" title="Report User">
                         <img src="../../assets/images/report-icon-light.svg" alt="Report" class="report-icon">
                     </a>
-                    <a href="../../pages/MemberPages/mChat.html" class="action-btn" title="Chat">
+                    <a href="../../pages/MemberPages/mChat.php?userID=<?php echo urlencode($profileUserID); ?>" 
+                       class="action-btn" 
+                       title="Chat with <?php echo htmlspecialchars($userData['fullName']); ?>">
                         <img src="../../assets/images/chat-light.svg" alt="Chat" class="chat-icon">
                     </a>
                 </div>
                 <?php endif; ?>
             </div>
+
             <?php if (!$profileUserIsAdmin): ?>
-            <!-- Stats Bar -->
             <div class="stats-bar">
                 <div class="stat-item">
                     <span class="stat-value"><?php echo $blogsPosted; ?></span>
@@ -568,71 +394,7 @@ if ($profileUserID <= 0) {
             </div>
             <?php endif; ?>
         </section>
-
-        <!-- Search & Results -->
-        <section class="search-container" id="searchContainer" style="display: none;">
-            <!-- Tabs -->
-            <div class="tabs" id="tabs">
-                <div class="tab active" data-type="all">All</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="tickets">Tickets</div>
-                <?php endif; ?>
-                <div class="tab" data-type="profiles">Profiles</div>
-                <div class="tab" data-type="blogs">Blogs</div>
-                <div class="tab" data-type="events">Events</div>
-                <div class="tab" data-type="trades">Trades</div>
-                <?php if ($isAdmin): ?>
-                    <div class="tab" data-type="faqs">FAQ</div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Results -->
-            <div class="results" id="results"></div>
-        </section>
     </main>
-    
-    <?php if (!$isAdmin): ?>
-    <!-- Footer (Member Only) -->
-    <hr>
-    <footer>
-        <section class="c-footer-info-section">
-            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
-            <div class="c-text">ReLeaf</div>
-            <div class="c-text c-text-center">
-                "Relief for the Planet, One Leaf at a Time."
-                <br>
-                "Together, We Can ReLeaf the Earth."
-            </div>
-            <div class="c-text c-text-label">
-                +60 12 345 6789
-            </div>
-            <div class="c-text">
-                abc@gmail.com
-            </div>
-        </section>
-        
-        <section class="c-footer-links-section">
-            <div>
-                <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
-                <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
-            </div>
-            <div>
-                <b>Helps</b><br>
-                <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.html">Settings</a>
-            </div>
-            <div>
-                <b>Community</b><br>
-                <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
-                <a href="../../pages/CommonPages/mainBlog.php">Blogs</a><br>
-                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-            </div>
-        </section>
-    </footer>
-    <?php endif; ?>
 
     <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
     <script src="../../javascript/mainScript.js"></script>
