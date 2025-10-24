@@ -1,6 +1,7 @@
 <?php
 session_start();
 include("dbConn.php");
+include("sessionCheck.php");
 
 header('Content-Type: application/json');
 

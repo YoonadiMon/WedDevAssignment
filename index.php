@@ -79,7 +79,7 @@
             display: flex;
             flex-direction: row;
             align-items: center;
-            min-height: 80vh;
+            min-height: 100vh;
         }
         
         .hero-section::before {
@@ -496,7 +496,7 @@
                     <div class="stat-label">Products Swapped</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number" data-count="<?php echo $quizzes; ?>">0</div>
+                    <div class="stat-number" data-count="<?php echo $quizzes * 5; ?>">0</div>
                     <div class="stat-label">Quizzes</div>
                 </div>
             </div>

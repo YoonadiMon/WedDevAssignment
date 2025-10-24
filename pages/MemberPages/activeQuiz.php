@@ -1,15 +1,9 @@
 <?php
 session_start();
 include("../../php/dbConn.php");
+include("../../php/sessionCheck.php");
 
-// Check if user is logged in and is a member
-// if (!isset($_SESSION['userID']) || $_SESSION['userType'] !== 'member') {
-//     header("Location: ../../pages/CommonPages/login.php");
-//     exit();
-// }
-// $userID = $_SESSION['userID'];
-
-$userID = 6; // Temporary hardcoded userID for testing
+$userID = $_SESSION['userID'];
 $stageID = isset($_GET['stage']) ? intval($_GET['stage']) : 1;
 
 // Fetch quiz questions for stage 1
@@ -139,6 +133,13 @@ $stmt->close();
 
             .quiz-controls {
                 display: flex;
+                justify-content: center;
+                margin-top: 2rem;
+                gap: 1rem;
+            }
+
+            .quiz-controls-next {
+                display: flex;
                 justify-content: space-between;
                 margin-top: 2rem;
                 gap: 1rem;
@@ -177,13 +178,15 @@ $stmt->close();
 
             .quiz-popup-content {
                 background: var(--bg-color);
-                padding: 3rem;
+                padding: 2rem;
                 border-radius: 16px;
-                max-width: 500px;
+                max-width: 600px;
                 width: 90%;
                 text-align: center;
                 box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
                 animation: popupSlide 0.3s ease-out;
+                max-height: 90vh;
+                overflow-y: scroll;
             }
 
             @keyframes popupSlide {
@@ -379,7 +382,7 @@ $stmt->close();
                         <div id="feedback" class="quiz-feedback hidden"></div>
                     </div>
 
-                    <div class="quiz-controls">
+                    <div class="quiz-controls-next">
                         <button class="c-btn c-btn-secondary" onclick="previousQuestion()" id="prevBtn" disabled>Previous</button>
                         <button class="c-btn c-btn-primary" onclick="nextQuestion()" id="nextBtn" disabled>Next</button>
                     </div>
