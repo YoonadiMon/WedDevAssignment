@@ -991,7 +991,7 @@ try {
 
     <!-- Footer -->
     <?php
-    if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'member') {
+    if (isset($_SESSION['userType']) && $_SESSION['userType'] === 'member') {
         ?>
             <!-- Footer -->
             <footer>
