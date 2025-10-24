@@ -98,9 +98,9 @@
             </a>
 
 
-            <!-- <a href="../../pages/MemberPages/mSetting.php">
-                    <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
-                </a> -->
+            <a href="../../pages/MemberPages/mSetting.php">
+                <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
+            </a>
         </section>
 
     </header>
