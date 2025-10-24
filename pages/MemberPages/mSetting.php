@@ -4,7 +4,6 @@
     include("../../php/sessionCheck.php");
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -25,10 +24,90 @@
 
     <style>
         body {
-            overflow-y: hidden;
+            overflow-y: auto;
         }
+
         .settings h1 {
             margin-bottom: 4rem;
+        }
+
+        /* Scroll to Top Button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--MainGreen);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+            width: 50px;
+            height: 50px;
+        }
+
+        .scroll-to-top:hover {
+            background-color: var(--btn-color-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .scroll-to-top:active {
+            transform: translateY(-1px);
+        }
+
+        .scroll-to-top.show {
+            display: flex;
+        }
+
+        /* Dark mode support */
+        .dark-mode .scroll-to-top {
+            background-color: var(--MainGreen);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .dark-mode .scroll-to-top:hover {
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Main content spacing */
+        main.settings {
+            margin-bottom: 80px;
+        }
+
+        /* Responsive scroll button */
+        @media (max-width: 768px) {
+            .scroll-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+                padding: 10px 14px;
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .scroll-to-top {
+                bottom: 15px;
+                right: 15px;
+                width: 40px;
+                height: 40px;
+                padding: 8px 12px;
+                font-size: 18px;
+            }
         }
     </style>
 </head>
@@ -46,11 +125,8 @@
             </a>
         </section>
 
-        <!-- Menu Links -->
-
         <!-- Menu Links Mobile -->
         <nav class="c-navbar-side">
-            <!-- <input type="text" placeholder="Search..." id="searchBar" class="search-bar"> -->
             <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
                 id="menuBtn">
             <div id="sidebarNav" class="c-navbar-side-menu">
@@ -69,33 +145,27 @@
                             </a>
                             <span class="c-notification-badge" id="chatBadgeMobile"></span>
                         </div>
-
-                        <!-- <a href="../../pages/MemberPages/mSetting.php">
-                                <img src="../../assets/images/setting-light.svg" alt="Settings">
-                            </a> -->
                     </section>
 
                     <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                    <a href="../../pages/CommonPages/mainBlog.php" class=".c-navbar-side-item">Blog</a>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                     <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                     <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
                     <a href="../../pages/CommonPages/aboutUs.php">About</a>
                 </div>
             </div>
-
         </nav>
 
         <!-- Menu Links Desktop + Tablet -->
         <nav class="c-navbar-desktop">
             <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-            <a href="../../pages/CommonPages/mainBlog.php" class=".c-navbar-side-item">Blog</a>
+            <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
             <a href="../../pages/CommonPages/mainEvent.php">Event</a>
             <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
             <a href="../../pages/CommonPages/aboutUs.php">About</a>
         </nav>
-        <section class="c-navbar-more">
-            <!-- <input type="text" placeholder="Search..." id="searchBar" class="search-bar"> -->
 
+        <section class="c-navbar-more">
             <button id="themeToggle2">
                 <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
             </button>
@@ -104,19 +174,17 @@
                 <span class="c-notification-badge" id="chatBadgeDesktop"></span>
             </a>
 
-
             <a href="../../pages/MemberPages/mSetting.php">
                 <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
             </a>
         </section>
-
     </header>
 
     <main class="content" id="content">
         <section class="settings">
-        <h1>Settings</h1>
+            <h1>Settings</h1>
             <ul class="settings-list">
-                <li data-href="../MemberPages/mProfile.php">
+                <li data-href="../../pages/MemberPages/mProfile.php">
                     <div class="icon-box">
                         <img src="../../assets/images/edit-profile-light.svg" alt="Edit Profile Picture"
                             class="edit-profile-pic">
@@ -131,28 +199,21 @@
                     <span>Dark Mode</span>
                 </li>
 
-                <li data-href="../MemberPages/privacy.html">
+                <li data-href="../../pages/CommonPages/mainFAQ.php">
                     <div class="icon-box">
-                        <img src="../../assets/images/lock-icon-light.svg" alt="Privacy & Security"
+                        <img src="../../assets/images/FAQ.png" alt="FAQ"
                             class="privacy-security-icon">
                     </div>
-                    <span>Privacy & Security</span>
+                    <span>FAQ</span>
                 </li>
 
-                <li data-href="../MemberPages/mContactSupport.php">
+                <li data-href="../../pages/MemberPages/mContactSupport.php">
                     <div class="icon-box">
                         <img src="../../assets/images/help-support-icon-light.svg" alt="Help & Support"
                             class="help-support-icon">
                     </div>
                     <span>Help & Support</span>
                 </li>
-
-                <!-- <li data-href="../../CommonPages/loginPage.html">
-                    <div class="icon-box">
-                        <img src="../../assets/images/logout-icon-light.svg" alt="Log out" class="logout-icon">
-                    </div>
-                    <span>Log out</span>
-                </li> -->
 
                 <li data-href="../../php/logOut.php" id="logoutBtn">
                     <div class="icon-box">
@@ -163,81 +224,56 @@
             </ul>
         </section>
     </main>
-<<<<<<< HEAD:pages/MemberPages/mSetting.html
 
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTopBtn" title="Go to top" aria-label="Scroll to top">
+        ↑
+    </button>
 
-
-
-
-
-    <main class="settings">
-        <h1>Settings</h1>
-        <ul class="settings-list">
-            <li data-href="../MemberPages/mProfile.php">
-                <div class="icon-box">
-                    <img src="../../assets/images/edit-profile-light.svg" alt="Edit Profile Picture"
-                        class="edit-profile-pic">
-                </div>
-                <span>Edit Profile</span>
-            </li>
-
-            <li id="themeToggleLi">
-                <div class="icon-box">
-                    <img src="../../assets/images/dark-mode-icon.svg" alt="dark-mode-icon">
-                </div>
-                <span>Dark Mode</span>
-            </li>
-
-            <li data-href="../../pages/CommonPages/mainFAQ.php">
-                <div class="icon-box">
-                    <img src="../../assets/images/FAQ.png" alt="FAQ"
-                        class="privacy-security-icon">
-                </div>
-                <span>FAQ</span>
-            </li>
-
-            <li data-href="../MemberPages/mContactSupport.php">
-                <div class="icon-box">
-                    <img src="../../assets/images/help-support-icon-light.svg" alt="Help & Support"
-                        class="help-support-icon">
-                </div>
-                <span>Help & Support</span>
-            </li>
-
-            <!-- <li data-href="../../CommonPages/loginPage.html">
-                <div class="icon-box">
-                    <img src="../../assets/images/logout-icon-light.svg" alt="Log out" class="logout-icon">
-                </div>
-                <span>Log out</span>
-            </li> -->
-
-            <li data-href="../../php/logOut.php" id="logoutBtn">
-                <div class="icon-box">
-                    <img src="../../assets/images/logout-icon-light.svg" alt="Log out" class="logout-icon">
-                </div>
-                <span>Log out</span>
-            </li>
-
-        </ul>
-    </main>
-
-=======
-    <!-- Search & Results -->
-    <section class="search-container" id="searchContainer" style="display: none;">
-        <div class="tabs" id="tabs">
-            <div class="tab active" data-type="all">All</div>
-            <div class="tab" data-type="profiles">Profiles</div>
-            <div class="tab" data-type="blogs">Blogs</div>
-            <div class="tab" data-type="events">Events</div>
-            <div class="tab" data-type="trades">Trades</div>
-        </div>
-        <div class="results" id="results"></div>
-    </section>
->>>>>>> 77941f6c9ef03e2be0bb387b1736399a5ba75220:pages/MemberPages/mSetting.php
     <script>const isAdmin = false;</script>
     <script src="../../javascript/mainScript.js"></script>
     <script src="../../javascript/setting.js"></script>
 
+    <script>
+        // Scroll to Top Button Functionality
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+
+        // Show button when scrolled down
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                scrollToTopBtn.classList.add('show');
+            } else {
+                scrollToTopBtn.classList.remove('show');
+            }
+        });
+
+        // Scroll to top when button clicked
+        scrollToTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Alternative scroll wheel functionality (scroll down with smooth animation)
+        let isScrolling = false;
+
+        document.addEventListener('wheel', function(e) {
+            // Optional: Add custom scroll handling if needed
+            // This allows native scrolling while adding custom behavior
+        }, { passive: true });
+
+        // Keyboard navigation for accessibility
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'ArrowUp' && scrollToTopBtn.classList.contains('show')) {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
