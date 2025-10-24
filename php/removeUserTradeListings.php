@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         
-        // Update listing status to inactive instead of deleting
+        // Update listing status to inactive  == DELETED Trade listing
         $updateQuery = "UPDATE tbltrade_listings SET status = 'inactive' WHERE listingID = ? AND userID = ?";
         $updateStmt = mysqli_prepare($connection, $updateQuery);
         mysqli_stmt_bind_param($updateStmt, "ii", $listingID, $userID);
