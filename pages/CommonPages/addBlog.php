@@ -3,6 +3,16 @@ session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
+$user_type = $_SESSION['userType'];
+
+// Fetch all blogs with author info
+$query = "
+    SELECT b.blogID, b.userID, b.title, b.excerpt, b.category, b.date, u.fullName
+    FROM tblblog b
+    JOIN tblusers u ON b.userID = u.userID
+    ORDER BY b.date DESC
+";
+
 // Check if user is logged in
 if (!isset($_SESSION['userID'])) {
     header("Location: ../../pages/MemberPages/signUpPage.php");
@@ -121,7 +131,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
             font-weight: 700;
             color: var(--text-heading);
             margin-bottom: 0.5rem;
-            margin-left: 10rem;
+            margin-left: 7.5rem;
         }
 
         .page-header p {
@@ -514,71 +524,137 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
 <body>
     <div id="cover" class="" onclick="hideMenu()"></div>
 
-    <!-- Header -->
-    <header>
-        <section class="c-logo-section">
-            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
-            <div class="c-text">ReLeaf</div>
-        </section>
+    <!-- Dynamic Header based on user type -->
+    <header id="main-header">
+        <?php if ($user_type === 'admin'): ?>
+            <!-- Admin Header -->
+            <section class="c-logo-section">
+                <a href="../../pages/adminPages/adminIndex.php" class="c-logo-link">
+                    <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                    <div class="c-text">ReLeaf</div>
+                </a>
+            </section>
 
-        <!-- Mobile Navigation -->
-        <nav class="c-navbar-side">
-            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
-            <div id="sidebarNav" class="c-navbar-side-menu">
-                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
-                <div class="c-navbar-side-items">
-                    <section class="c-navbar-side-more">
-                        <button id="themeToggle1">
-                            <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
-                        </button>
-                        <div class="c-chatbox" id="chatboxMobile">
-                            <a href="../../pages/MemberPages/mChat.html">
-                                <img src="../../assets/images/chat-light.svg" alt="Chatbox">
+            <!-- Menu Links Mobile -->
+            <nav class="c-navbar-side">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
+                <div id="sidebarNav" class="c-navbar-side-menu">
+
+                    <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
+                    <div class="c-navbar-side-items">
+                        <section class="c-navbar-side-more">
+                            <button id="themeToggle1">
+                                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                            </button>
+                            <a href="../../pages/adminPages/aProfile.php">
+                                <img src="../../assets/images/profile-light.svg" alt="Profile">
                             </a>
-                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
-                        </div>
-                        <a href="../../pages/MemberPages/mSetting.php">
-                            <img src="../../assets/images/setting-light.svg" alt="Settings">
-                        </a>
-                    </section>
-                    <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                    <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-                    <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                    <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                    <a href="../../pages/CommonPages/aboutUs.php">About</a>
+                        </section>
+
+                        <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
+                        <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
+                    </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
 
-        <!-- Desktop Navigation -->
-        <nav class="c-navbar-desktop">
-            <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-            <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-            <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-            <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-            <a href="../../pages/CommonPages/aboutUs.php">About</a>
-        </nav>
+            <!-- Menu Links Desktop + Tablet -->
+            <nav class="c-navbar-desktop">
+                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
+                <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
+            </nav>
+            <section class="c-navbar-more">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                <button id="themeToggle2">
+                    <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                </button>
+                <a href="../../pages/adminPages/aProfile.php">
+                    <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
+                </a>
+            </section>
+        <?php else: ?>
+            <!-- Member Header -->
+            <section class="c-logo-section">
+                <a href="../../pages/MemberPages/memberIndex.php" class="c-logo-link">
+                    <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                    <div class="c-text">ReLeaf</div>
+                </a>
+            </section>
 
-        <section class="c-navbar-more">
-            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-            <button id="themeToggle2">
-                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
-            </button>
-            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
-                <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
-            </a>
-            <a href="../../pages/MemberPages/mSetting.php">
-                <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
-            </a>
-        </section>
+            <!-- Menu Links Mobile -->
+            <nav class="c-navbar-side">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
+                    id="menuBtn">
+                <div id="sidebarNav" class="c-navbar-side-menu">
+
+                    <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
+                        class="close-btn">
+                    <div class="c-navbar-side-items">
+                        <section class="c-navbar-side-more">
+                            <button id="themeToggle1">
+                                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                            </button>
+
+                            <div class="c-chatbox" id="chatboxMobile">
+                                <a href="../../pages/MemberPages/mChat.html">
+                                    <img src="../../assets/images/chat-light.svg" alt="Chatbox">
+                                </a>
+                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            </div>
+
+                            <a href="../../pages/MemberPages/mSetting.php">
+                                <img src="../../assets/images/setting-light.svg" alt="Settings">
+                            </a>
+                        </section>
+
+                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                        <a href="../../pages/CommonPages/aboutUs.php">About</a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Menu Links Desktop + Tablet -->
+            <nav class="c-navbar-desktop">
+                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                <a href="../../pages/CommonPages/aboutUs.php">About</a>
+            </nav>
+            <section class="c-navbar-more">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+
+                <button id="themeToggle2">
+                    <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                </button>
+                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                    <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                </a>
+
+                <a href="../../pages/MemberPages/mSetting.php">
+                    <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
+                </a>
+            </section>
+        <?php endif; ?>
     </header>
 
     <hr>
 
     <!-- Main Content -->
-    <<main class="content" id="content">
+    <main class="content" id="content">
         <section class="page-header">
             <div class="header-top">
                 <a href="mainBlog.php" class="back-to-blogs" title="Back to Blogs">
