@@ -1,0 +1,403 @@
+<?php
+    // Start the session
+    session_start();
+    include("../../php/sessionCheck.php");
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>About Us - ReLeaf</title>
+        <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
+
+        <link rel="stylesheet" href="../../style/style.css">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+            rel="stylesheet">
+        <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
+        
+        <style>
+            /* Additional styles for About page */
+            a {
+                text-decoration: none;
+                color: inherit;
+            }
+            .about-hero {
+                text-align: center;
+                padding: 3rem 0;
+                background: linear-gradient(135deg, var(--MainGreen) 0%, var(--LightGreen) 100%);
+                color: var(--White);
+                margin-bottom: 2rem;
+            }
+            
+            .about-content {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 20px;
+            }
+            
+            .mission-section, .values-section, .team-section {
+                margin-bottom: 3rem;
+            }
+            
+            .mission-cards {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 2rem;
+                margin-top: 2rem;
+            }
+            
+            .mission-card {
+                background: var(--bg-color);
+                padding: 2rem;
+                border-radius: 8px;
+                border-left: 4px solid var(--MainGreen);
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            
+            .values-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                margin-top: 2rem;
+            }
+            
+            .value-item {
+                text-align: center;
+                padding: 1.5rem;
+                background: var(--sec-bg-color);
+                border-radius: 8px;
+            }
+            
+            .value-icon {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+            }
+            
+            .team-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 2rem;
+                margin-top: 2rem;
+            }
+            
+            .team-member {
+                text-align: center;
+                padding: 1.5rem;
+                background: var(--bg-color);
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                
+            }
+            
+            .team-member:hover {
+                transform: translateY(-5px);
+                transition: transform 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                cursor: pointer;
+            }
+
+            .member-avatar {
+                width: 90px;
+                height: 90px;
+                border-radius: 50%;
+                background: var(--LightGreen);
+                margin: 0 auto 1rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+            }
+
+            .c-text-body {
+                line-height: 1.8;
+            }
+            
+            @media (max-width: 768px) {
+                .mission-cards, .values-grid, .team-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="cover" class="" onclick="hideMenu()"></div>
+
+        <!-- Logo + Name & Navbar -->
+        <header>
+            <!-- Logo + Name -->
+            <section class="c-logo-section">
+                <a href="../../pages/MemberPages/memberIndex.php" class="c-logo-link">
+                    <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                    <div class="c-text">ReLeaf</div>
+                </a>
+            </section>
+
+            <!-- Menu Links Mobile -->
+            <nav class="c-navbar-side">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
+                    id="menuBtn">
+                <div id="sidebarNav" class="c-navbar-side-menu">
+
+                    <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
+                        class="close-btn">
+                    <div class="c-navbar-side-items">
+                        <section class="c-navbar-side-more">
+                            <button id="themeToggle1">
+                                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                            </button>
+
+                            <div class="c-chatbox" id="chatboxMobile">
+                                <a href="../../pages/MemberPages/mChat.html">
+                                    <img src="../../assets/images/chat-light.svg" alt="Chatbox">
+                                </a>
+                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            </div>
+
+                            <a href="../../pages/MemberPages/mSetting.php">
+                                <img src="../../assets/images/setting-light.svg" alt="Settings">
+                            </a>
+                        </section>
+
+                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                        <a href="../../pages/CommonPages/aboutUs.php" class="active">About</a>
+                    </div>
+                </div>
+
+            </nav>
+
+            <!-- Menu Links Desktop + Tablet -->
+            <nav class="c-navbar-desktop">
+                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                <a href="../../pages/CommonPages/aboutUs.php" class="active">About</a>
+            </nav>
+            <section class="c-navbar-more">
+                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+                
+                <button id="themeToggle2">
+                    <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                </button>
+                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                    <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                </a>
+
+                <a href="../../pages/MemberPages/mSetting.php">
+                    <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
+                </a>
+            </section>
+        </header>
+
+        <hr>
+
+        <!-- Main Content -->
+        <main>
+            <!-- About Us Content -->
+            <section class="content" id="content">
+                <div class="about-hero">
+                    <div class="about-content">
+                        <h1 class="c-heading-1">About ReLeaf</h1>
+                        <p class="c-text-subtitle">Creating sustainable communities through knowledge sharing and collaboration</p>
+                    </div>
+                </div>
+                
+                <div class="about-content">
+                    <!-- Our Story -->
+                    <section class="mission-section">
+                        <h2 class="c-heading-2">Our Story</h2>
+                        <p class="c-text-body">
+                            ReLeaf was founded in 2025 by a group of APU students to target the growing need 
+                            for accessible sustainability resources and community support. What started as a group assignment for a university project has the potential to make a real difference. 
+                        </p>
+                        <p class="c-text-body">
+                            Our brand name combines "Relief" and "Leaf", symbolizing both the comfort we provide to communities 
+                            and our deep connection to nature and growth.
+                        </p>
+                    </section>
+
+                    <!-- Mission & Vision -->
+                    <section class="mission-section">
+                        <h2 class="c-heading-2">Our Mission & Vision</h2>
+                        <div class="mission-cards">
+                            <div class="mission-card">
+                                <h3 class="c-heading-4">Our Mission</h3>
+                                <p class="c-text-body">
+                                    To empower communities with knowledge, tools, and connections needed to adopt sustainable 
+                                    living practices and reduce environmental impact.
+                                </p>
+                            </div>
+                            <div class="mission-card">
+                                <h3 class="c-heading-4">Our Vision</h3>
+                                <p class="c-text-body">
+                                    A world where every community thrives through sustainable practices and environmental 
+                                    stewardship becomes second nature for everyone.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- What We Do -->
+                    <section class="mission-section">
+                        <h2 class="c-heading-2">What We Do</h2>
+                        <div class="mission-cards">
+                            <div class="mission-card">
+                                <h3 class="c-heading-4">🌱 Sustainable Education</h3>
+                                <p class="c-text-body">
+                                    Provide comprehensive resources on recycling, energy conservation, and sustainable practices 
+                                    that anyone can implement in their daily lives.
+                                </p>
+                            </div>
+                            <div class="mission-card">
+                                <h3 class="c-heading-4">🤝 Community Building</h3>
+                                <p class="c-text-body">
+                                    Connect like-minded individuals through events, workshops, and online platforms to foster 
+                                    collaboration and shared learning.
+                                </p>
+                            </div>
+                            <div class="mission-card">
+                                <h3 class="c-heading-4">🔄 Resource Sharing</h3>
+                                <p class="c-text-body">
+                                    Facilitate product swaps and resource sharing to reduce waste and promote circular economy 
+                                    principles within communities.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Our Values -->
+                    <section class="values-section">
+                        <h2 class="c-heading-2">Our Values</h2>
+                        <div class="values-grid">
+                            <div class="value-item">
+                                <div class="value-icon">🌍</div>
+                                <h3 class="c-heading-5">Sustainability</h3>
+                                <p class="c-text-body">Prioritizing long-term environmental health</p>
+                            </div>
+                            <div class="value-item">
+                                <div class="value-icon">🤲</div>
+                                <h3 class="c-heading-5">Community</h3>
+                                <p class="c-text-body">Strength through collective action</p>
+                            </div>
+                            <div class="value-item">
+                                <div class="value-icon">💡</div>
+                                <h3 class="c-heading-5">Innovation</h3>
+                                <p class="c-text-body">Creative solutions for modern challenges</p>
+                            </div>
+                            <div class="value-item">
+                                <div class="value-icon">🔍</div>
+                                <h3 class="c-heading-5">Transparency</h3>
+                                <p class="c-text-body">Open and honest in all we do</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Team Section -->
+                    <section class="team-section">
+                        <h2 class="c-heading-2">Meet Our Team</h2>
+                        <div class="team-grid">
+                            <a href="../../pages/adminPages/LeeXinCi.html">
+                                <div class="team-member">
+                                    <div class="member-avatar">👩‍💻</div>
+                                    <h3 class="c-heading-5">Lee Xin Ci</h3>
+                                    <p class="c-text-body">TP081446</p>
+                                    <p class="c-text-caption">Email: TP081446@mail.apu.edu.my</p>
+                                </div>
+                            </a>
+                            <a href="../../pages/adminPages/MiYoonadiMon.html">
+                                <div class="team-member">
+                                    <div class="member-avatar">👩‍💻</div>
+                                    <h3 class="c-heading-5">Mi Yoonadi Mon</h3>
+                                    <p class="c-text-body">TP081506</p>
+                                    <p class="c-text-caption">Email: TP081506@mail.apu.edu.my</p>
+                                </div>
+                            </a>
+                            <a href="../../pages/adminPages/NgXiaoWei.html">
+                                <div class="team-member">
+                                    <div class="member-avatar">👩‍💻</div>
+                                    <h3 class="c-heading-5">Ng Xiao Wei</h3>
+                                    <p class="c-text-body">TP081848</p>
+                                    <p class="c-text-caption">Email: TP081848@mail.apu.edu.my</p>
+                                </div>
+                            </a>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <!-- Search & Results -->
+            <section class="search-container" id="searchContainer" style="display: none;">
+                <!-- Tabs -->
+                <div class="tabs" id="tabs">
+                    <div class="tab active" data-type="all">All</div>
+                    <div class="tab" data-type="profiles">Profiles</div>
+                    <div class="tab" data-type="blogs">Blogs</div>
+                    <div class="tab" data-type="events">Events</div>
+                    <div class="tab" data-type="trades">Trades</div>
+                </div>
+
+                <!-- Results -->
+                <div class="results" id="results"></div>
+            </section>
+        </main>
+
+        <hr>
+
+        <!-- Footer -->
+        <footer>
+            <!-- Column 1 -->
+            <section class="c-footer-info-section">
+                <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                <div class="c-text">ReLeaf</div>
+                <div class="c-text c-text-center">
+                    "Relief for the Planet, One Leaf at a Time."
+                    <br>
+                    "Together, We Can ReLeaf the Earth."
+                </div>
+                <div class="c-text c-text-label">
+                    +60 12 345 6789
+                </div>
+                <div class="c-text">
+                    abc@gmail.com
+                </div>
+            </section>
+            
+            <!-- Column 2 -->
+            <section class="c-footer-links-section">
+                <div>
+                    <b>My Account</b><br>
+                    <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
+                    <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
+                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                </div>
+                <div>
+                    <b>Helps</b><br>
+                    <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
+                    <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
+                    <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
+                </div>
+                <div>
+                    <b>Community</b><br>
+                    <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blogs</a><br>
+                    <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                </div>
+            </section>
+        </footer>
+
+        <script>const isAdmin = false;</script>
+        <script src="../../javascript/mainScript.js"></script>
+    </body>
+</html>

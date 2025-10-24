@@ -610,7 +610,7 @@ if (isset($_POST['reopen_ticket'])) {
                         <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                         <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                         <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                        <a href="../../pages/CommonPages/aboutUs.php">About</a>
                     </div>
                 </div>
 
@@ -622,7 +622,7 @@ if (isset($_POST['reopen_ticket'])) {
                 <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
                 <a href="../../pages/CommonPages/mainEvent.php">Event</a>
                 <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/aboutUs.html">About</a>
+                <a href="../../pages/CommonPages/aboutUs.php">About</a>
             </nav>
             <section class="c-navbar-more">
                 <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
@@ -890,7 +890,7 @@ if (isset($_POST['reopen_ticket'])) {
                 </div>
                 <div>
                     <b>Helps</b><br>
-                    <a href="../../pages/CommonPages/aboutUs.html">Contact</a><br>
+                    <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                     <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
                     <a href="../../pages/MemberPages/mSetting.php">Settings</a>
                 </div>
