@@ -1086,5 +1086,9 @@
         });
     </script>
     <script src="../../javascript/mainScript.js"></script>
+    <?php
+        // last step - close the connection
+        mysqli_close($connection);
+    ?>
 </body>
 </html>

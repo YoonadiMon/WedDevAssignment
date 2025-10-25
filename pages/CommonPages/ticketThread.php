@@ -1007,5 +1007,6 @@ function formatFileSize($bytes) {
     return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
 }
 
+// last step - close the connection
 mysqli_close($connection);
 ?>

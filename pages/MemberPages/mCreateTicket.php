@@ -759,8 +759,6 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
 </body>
 </html>
 <?php
-// Close database connection
-if (isset($connection)) {
+    // last step - close the connection
     mysqli_close($connection);
-}
 ?>

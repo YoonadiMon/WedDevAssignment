@@ -853,6 +853,6 @@ function formatTime($timestamp) {
     return 'Just now';
 }
 
-// Close database connection
+// last step - close the connection
 mysqli_close($connection);
 ?>

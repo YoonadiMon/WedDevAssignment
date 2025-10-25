@@ -632,9 +632,9 @@ $ticketCount = mysqli_num_rows($result);
             const unreadCount = <?php echo $unread_count; ?>;
         </script>
         <script src="../../javascript/mainScript.js"></script>
+        <?php
+            // last step - close the connection
+            mysqli_close($connection);
+        ?>
     </body>
 </html>
-<?php
-// Close the database connection
-mysqli_close($connection);
-?>
