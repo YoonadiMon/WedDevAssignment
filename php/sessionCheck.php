@@ -1,4 +1,5 @@
 <?php
+include("dbConn.php");
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -198,4 +199,5 @@ if (!$isAdmin) {
         $unread_count = $unread_data['unread_count'];
     }
 }
+$_SESSION['unread_count'] = $unread_count;
 ?>
