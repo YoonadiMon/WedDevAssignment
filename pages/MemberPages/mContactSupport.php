@@ -1,9 +1,9 @@
 <?php
 // Database connection and query for current user's tickets
 include("../../php/dbConn.php");
+include("../../php/sessionCheck.php");
 
 // Start session and get actual logged-in user ID
-session_start();
 $currentUserID = $_SESSION['userID']; 
 $username = $_SESSION['username'] ?? '';
 
