@@ -829,3 +829,5 @@ if ($row = $result->fetch_assoc()) {
     <script src="../../javascript/aDashboard.js"></script>
 </body>
 </html>
+
+<?php mysqli_close($connection); ?>

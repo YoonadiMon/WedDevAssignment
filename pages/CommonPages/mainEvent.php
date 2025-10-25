@@ -1031,6 +1031,4 @@ if ($stmt = $connection->prepare($query)) {
 </body>
 </html>
 
-<?php
-mysqli_close($connection);
-?>
+<?php mysqli_close($connection); ?>

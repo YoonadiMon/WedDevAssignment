@@ -1204,3 +1204,5 @@ $hostedEvents = $stmt_hosted->get_result();
     </script>
 </body>
 </html>
+
+<?php mysqli_close($connection); ?>

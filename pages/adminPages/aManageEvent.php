@@ -751,6 +751,4 @@ $allEvents = $stmt_all->get_result();
 </body>
 </html>
 
-<?php
-mysqli_close($connection);
-?>
+<?php mysqli_close($connection); ?>

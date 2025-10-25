@@ -827,3 +827,5 @@ if (!$connection->ping()) {
     </script>
 </body>
 </html>
+
+<?php mysqli_close($connection); ?>
