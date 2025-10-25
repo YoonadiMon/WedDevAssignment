@@ -2,6 +2,18 @@
     // Start the session
     session_start();
     include("../../php/sessionCheck.php");
+    $user_type = $_SESSION["userType"];
+    
+    // Redirect if user type is not member
+    if ($user_type !== "member") {
+        echo "Access denied. About Us is page is for member view only. Redirecting to admin page...";
+        echo "<script>
+                setTimeout(function() {
+                    window.location.href = '../../pages/adminPages/adminIndex.php';
+                }, 2000); // Redirect after 3 seconds
+              </script>";
+        exit();
+    }
 ?>
 
 <!DOCTYPE html>
