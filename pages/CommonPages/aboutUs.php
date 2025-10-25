@@ -29,10 +29,11 @@
             }
             .about-hero {
                 text-align: center;
-                padding: 3rem 0;
                 background: linear-gradient(135deg, var(--MainGreen) 0%, var(--LightGreen) 100%);
                 color: var(--White);
-                margin-bottom: 2rem;
+                margin-bottom: 40px;
+                padding: 30px 20px;
+                border-radius: 12px;
             }
             
             .about-content {
