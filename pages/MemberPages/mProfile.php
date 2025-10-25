@@ -242,10 +242,12 @@ $connection->close();
                             <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                         </button>
                         <div class="c-chatbox" id="chatboxMobile">
-                            <a href="../../pages/MemberPages/mChat.html">
+                            <a href="../../pages/MemberPages/mChat.php">
                                 <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                             </a>
-                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            <?php if ($unread_count > 0): ?>
+                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            <?php endif; ?>
                         </div>
                         <a href="../../pages/MemberPages/mSetting.php">
                             <img src="../../assets/images/setting-light.svg" alt="Settings">
@@ -274,9 +276,11 @@ $connection->close();
             <button id="themeToggle2">
                 <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
             </button>
-            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+            <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
                 <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                <?php if ($unread_count > 0): ?>
+                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                <?php endif; ?>
             </a>
             <a href="../../pages/MemberPages/mSetting.php">
                 <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
@@ -650,7 +654,10 @@ $connection->close();
         <div class="results" id="results"></div>
     </section>
     <!-- Scripts -->
-    <script>const isAdmin = false;</script>
+    <script>
+        const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+        const unreadCount = <?php echo $unread_count; ?>;
+    </script>
     <script src="../../javascript/mainScript.js"></script>
     <script>
         // Profile data from PHP

@@ -367,31 +367,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             color: var(--text-color);
         }
 
-        .c-notification-badge {
-            position: absolute;
-            top: 0;
-            right: 0;
-            transform: translate(50%, -50%);
-            background-color: var(--Red);
-            color: white;
-            font-size: 0.7rem;
-            font-weight: bold;
-            border-radius: 999px;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            white-space: nowrap;
-            z-index: 2;
-        }
-
-        .c-navbar-side .c-notification-badge {
-            top: 6px;
-            right: 5px;
-        }
-
         /* Tablet Responsive (768px - 1024px) */
         @media (max-width: 1024px) and (min-width: 769px) {
             .c-navbar-more .search-bar {
@@ -653,10 +628,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             </button>
 
                             <div class="c-chatbox" id="chatboxMobile">
-                                <a href="../../pages/MemberPages/mChat.html">
+                                <a href="../../pages/MemberPages/mChat.php">
                                     <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                                 </a>
-                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                                <?php if ($unread_count > 0): ?>
+                                    <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                                <?php endif; ?>
+
                             </div>
 
                             <a href="../../pages/MemberPages/mSetting.php">
@@ -687,9 +665,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <button id="themeToggle2">
                     <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                 </button>
-                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                    <?php if ($unread_count > 0): ?>
+                        <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                    <?php endif; ?>
                 </a>
 
                 <a href="../../pages/MemberPages/mSetting.php">
@@ -777,7 +757,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <div>
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
-                <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
+                <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
@@ -796,7 +776,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     </footer>
 
     <script>
-        const isAdmin = <?php echo $user_type === 'admin' ? 'true' : 'false'; ?>;
+        const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+        const unreadCount = <?php echo $unread_count; ?>;
     </script>
     <script src="../../javascript/mainScript.js"></script>
     <script>

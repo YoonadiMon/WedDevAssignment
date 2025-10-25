@@ -416,10 +416,12 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
                         </button>
 
                         <div class="c-chatbox" id="chatboxMobile">
-                            <a href="../../pages/MemberPages/mChat.html">
+                            <a href="../../pages/MemberPages/mChat.php">
                                 <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                             </a>
-                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            <?php if ($unread_count > 0): ?>
+                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            <?php endif; ?>
                         </div>
 
                         <a href="../../pages/MemberPages/mSetting.php">
@@ -451,9 +453,11 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
             <button id="themeToggle2">
                 <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
             </button>
-            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+            <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
                 <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                <?php if ($unread_count > 0): ?>
+                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                <?php endif; ?>
             </a>
 
             <a href="../../pages/MemberPages/mSetting.php">
@@ -615,7 +619,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
             <div>
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
-                <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
+                <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
@@ -634,7 +638,8 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
     </footer>
 
     <script>
-        const isAdmin = false;
+        const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+        const unreadCount = <?php echo $unread_count; ?>;
         
         // Priority indicator functionality
         document.getElementById('ticketPriority').addEventListener('change', function() {

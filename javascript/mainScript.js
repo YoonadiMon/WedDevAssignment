@@ -18,44 +18,53 @@ if (themeToggleLi) {
   themeToggleLi.addEventListener('click', toggleTheme);
 }
 
-// if (!isAdmin) {
-//     // Chatbox notification badge
-//     let unread = 3; // assume unread messages count
+// Unread message notification functionality
+if (!isAdmin) {
+    // Get the unread count from PHP
+    let unread = unreadCount || 0;
 
-//     const badges = [
-//         document.getElementById("chatBadgeDesktop"),
-//         document.getElementById("chatBadgeMobile")
-//     ];
-//     const chatboxes = [
-//         document.getElementById("chatboxDesktop"),
-//         document.getElementById("chatboxMobile")
-//     ];
+    const badges = [
+        document.getElementById("chatBadgeDesktop"),
+        document.getElementById("chatBadgeMobile")
+    ];
 
+    function updateBadge() {
+        badges.forEach(badge => {
+            if (badge) {
+                if (unread > 0) {
+                    badge.style.display = "flex";
+                } else {
+                    badge.style.display = "none"; 
+                }
+            }
+        });
+    }
 
-//     function updateBadge() {
-//         badges.forEach(badge => {
-//             if (unread > 0) {
-//                 badge.textContent = unread > 99 ? "99+" : unread;
-//                 badge.style.display = "flex";
-//             } else {
-//                 badge.style.display = "none";
-//             }
-//         });
-//     }
+    // Initial render
+    updateBadge();
 
-//     // initial render
-//     updateBadge();
+    // Periodically check for new messages (every 30 seconds)
+    setInterval(() => {
+        checkNewMessages();
+    }, 30000);
+}
 
-//     // reset on click (works for both desktop + mobile)
-//     chatboxes.forEach(chatbox => {
-//         chatbox.addEventListener("click", (e) => {
-//             // e.preventDefault();   // stop page reload, just too test when on click the badge resets
-//             unread = 0;
-//             updateBadge();
-//         });
-//     });
-// }
-
+// Function to check for new messages
+async function checkNewMessages() {
+    if (isAdmin) return;
+    
+    try {
+        const response = await fetch('../../php/getUnread.php');
+        const data = await response.json();
+        
+        if (data.success && data.unread_count !== unread) {
+            unread = data.unread_count;
+            updateBadge();
+        }
+    } catch (error) {
+        console.error('Failed to check new messages:', error);
+    }
+}
 
 function showMenu() {
     sidebarNav.style.transform = "translateX(0)";

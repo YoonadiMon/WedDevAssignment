@@ -595,10 +595,12 @@ if (isset($_POST['reopen_ticket'])) {
                             </button>
 
                             <div class="c-chatbox" id="chatboxMobile">
-                                <a href="../../pages/MemberPages/mChat.html">
+                                <a href="../../pages/MemberPages/mChat.php">
                                     <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                                 </a>
-                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                                <?php if ($unread_count > 0): ?>
+                                    <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                                <?php endif; ?>
                             </div>
 
                             <a href="../../pages/MemberPages/mSetting.php">
@@ -630,9 +632,11 @@ if (isset($_POST['reopen_ticket'])) {
                 <button id="themeToggle2">
                     <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                 </button>
-                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                    <?php if ($unread_count > 0): ?>
+                        <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                    <?php endif; ?>
                 </a>
 
                 <a href="../../pages/MemberPages/mSetting.php">
@@ -885,7 +889,7 @@ if (isset($_POST['reopen_ticket'])) {
                 <div>
                     <b>My Account</b><br>
                     <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
-                    <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
+                    <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
                     <a href="../../pages/MemberPages/mSetting.php">Settings</a>
                 </div>
                 <div>
@@ -903,7 +907,11 @@ if (isset($_POST['reopen_ticket'])) {
             </section>
         <?php endif; ?>
     </footer>
-
+    
+    <script>
+        const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+        const unreadCount = <?php echo $unread_count; ?>;
+    </script>
     <script>
         // Attachments Slider Functionality
         document.addEventListener('DOMContentLoaded', function() {

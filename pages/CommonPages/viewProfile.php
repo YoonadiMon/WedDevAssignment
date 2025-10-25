@@ -325,13 +325,6 @@ if ($profileUserID <= 0) {
                 <div class="c-text">ReLeaf</div>
             </a>
         </section>
-<<<<<<< HEAD
-    </header>
-    <hr>
-    
-    <main>
-=======
-
         <!-- Menu Links Mobile -->
         <nav class="c-navbar-side">
             <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
@@ -353,10 +346,12 @@ if ($profileUserID <= 0) {
                         <?php else: ?>
                             <!-- Member Navigation Icons -->
                             <div class="c-chatbox" id="chatboxMobile">
-                                <a href="../../pages/MemberPages/mChat.html">
+                                <a href="../../pages/MemberPages/mChat.php">
                                     <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                                 </a>
-                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                                <?php if ($unread_count > 0): ?>
+                                    <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                                <?php endif; ?>
                             </div>
                             <a href="../../pages/MemberPages/mSetting.php">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
@@ -417,9 +412,11 @@ if ($profileUserID <= 0) {
                 </a>
             <?php else: ?>
                 <!-- Member Navbar More -->
-                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                    <?php if ($unread_count > 0): ?>
+                        <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                    <?php endif; ?>
                 </a>
                 <a href="../../pages/MemberPages/mSetting.php">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
@@ -431,7 +428,6 @@ if ($profileUserID <= 0) {
     
     <!-- Main Content -->
     <main class="content" id="content">
->>>>>>> 77941f6c9ef03e2be0bb387b1736399a5ba75220
         <section class="profile-container content">
             <a href="javascript:history.back()" class="back-button">← Back</a>
 
@@ -460,19 +456,17 @@ if ($profileUserID <= 0) {
                         </div>
                     </div>
                 </div>
-
-                <!-- ✅ Fixed Chat Button -->
                 <?php if ($profileUserID !== $currentUserID && !$profileUserIsAdmin): ?>
-                <div class="action-buttons">
-                    <a href="../../pages/MemberPages/mCreateTicket.php" class="action-btn" title="Report User">
-                        <img src="../../assets/images/report-icon-light.svg" alt="Report" class="report-icon">
-                    </a>
-                    <a href="../../pages/MemberPages/mChat.php?userID=<?php echo urlencode($profileUserID); ?>" 
-                       class="action-btn" 
-                       title="Chat with <?php echo htmlspecialchars($userData['fullName']); ?>">
-                        <img src="../../assets/images/chat-light.svg" alt="Chat" class="chat-icon">
-                    </a>
-                </div>
+                    <div class="action-buttons">
+                        <a href="../../pages/MemberPages/mCreateTicket.php" class="action-btn" title="Report User">
+                            <img src="../../assets/images/report-icon-light.svg" alt="Report" class="report-icon">
+                        </a>
+                        <a href="../../pages/MemberPages/mChat.php?start_chat_with=<?php echo urlencode($profileUserID); ?>" 
+                        class="action-btn" 
+                        title="Chat with <?php echo htmlspecialchars($userData['fullName']); ?>">
+                            <img src="../../assets/images/chat-light.svg" alt="Chat" class="chat-icon">
+                        </a>
+                    </div>
                 <?php endif; ?>
             </div>
 
@@ -498,8 +492,6 @@ if ($profileUserID <= 0) {
             <?php endif; ?>
         </section>
     </main>
-<<<<<<< HEAD
-=======
     <!-- Search & Results -->
     <section class="search-container" id="searchContainer" style="display: none;">
         <div class="tabs" id="tabs">
@@ -536,7 +528,7 @@ if ($profileUserID <= 0) {
             <div>
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
-                <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
+                <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
@@ -554,9 +546,11 @@ if ($profileUserID <= 0) {
         </section>
     </footer>
     <?php endif; ?>
->>>>>>> 77941f6c9ef03e2be0bb387b1736399a5ba75220
 
-    <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
+    <script>
+        const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+        const unreadCount = <?php echo $unread_count; ?>;
+    </script>
     <script src="../../javascript/mainScript.js"></script>
 </body>
 </html>

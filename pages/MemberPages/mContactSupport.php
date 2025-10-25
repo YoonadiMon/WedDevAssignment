@@ -390,10 +390,12 @@ $ticketCount = mysqli_num_rows($result);
                             </button>
 
                             <div class="c-chatbox" id="chatboxMobile">
-                                <a href="../../pages/MemberPages/mChat.html">
+                                <a href="../../pages/MemberPages/mChat.php">
                                     <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                                 </a>
-                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                                <?php if ($unread_count > 0): ?>
+                                    <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                                <?php endif; ?>
                             </div>
 
                             <a href="../../pages/MemberPages/mSetting.php">
@@ -425,9 +427,11 @@ $ticketCount = mysqli_num_rows($result);
                 <button id="themeToggle2">
                     <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                 </button>
-                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                    <?php if ($unread_count > 0): ?>
+                        <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                    <?php endif; ?>
                 </a>
 
 
@@ -605,14 +609,14 @@ $ticketCount = mysqli_num_rows($result);
                 <div>
                     <b>My Account</b><br>
                     <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
-                    <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
+                    <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
                     <a href="../../pages/MemberPages/mSetting.php">Settings</a>
                 </div>
                 <div>
                     <b>Helps</b><br>
                     <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                     <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                    <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
+                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
                 </div>
                 <div>
                     <b>Community</b><br>
@@ -623,7 +627,10 @@ $ticketCount = mysqli_num_rows($result);
             </section>
         </footer>
 
-        <script>const isAdmin = false;</script>
+        <script>
+            const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+            const unreadCount = <?php echo $unread_count; ?>;
+        </script>
         <script src="../../javascript/mainScript.js"></script>
     </body>
 </html>

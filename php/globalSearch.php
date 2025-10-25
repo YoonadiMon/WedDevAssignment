@@ -92,8 +92,7 @@ try {
                 
                 while ($row = mysqli_fetch_assoc($result)) {
                     $initials = getInitials($row['fullName']);
-                    $bio = !empty($row['bio']) ? truncateText($row['bio'], 120) 
-                        : '<span style="color: var(--Gray);">This user has yet to set their bio</span>';
+                    $bio = truncateText($row['bio'], 120);
                     
                         $results['profiles'][] = [
                         'id' => $row['userID'],

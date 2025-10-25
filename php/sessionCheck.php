@@ -185,4 +185,17 @@ $username = $_SESSION['username'] ?? '';
 $fullName = $_SESSION['fullName'] ?? '';
 $email = $_SESSION['email'] ?? '';
 $point = $_SESSION['point'] ?? 0;
+
+// Get unread message count for the current user (if not admin)
+$unread_count = 0;
+if (!$isAdmin) {
+    $unread_query = "SELECT COUNT(*) as unread_count 
+                    FROM tblmessages 
+                    WHERE receiverID = '$userID' AND isRead = FALSE";
+    $unread_result = mysqli_query($connection, $unread_query);
+    if ($unread_result) {
+        $unread_data = mysqli_fetch_assoc($unread_result);
+        $unread_count = $unread_data['unread_count'];
+    }
+}
 ?>

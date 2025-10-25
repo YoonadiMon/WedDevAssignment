@@ -3,6 +3,19 @@ session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
+// Get unread message count for the current user (if not admin)
+$unread_count = 0;
+if (!$isAdmin) {
+    $unread_query = "SELECT COUNT(*) as unread_count 
+                    FROM tblmessages 
+                    WHERE receiverID = '$userID' AND isRead = FALSE";
+    $unread_result = mysqli_query($connection, $unread_query);
+    if ($unread_result) {
+        $unread_data = mysqli_fetch_assoc($unread_result);
+        $unread_count = $unread_data['unread_count'];
+    }
+}
+
 // Initialize variables
 $showWelcomePopup = false;
 $userName = '';
@@ -570,27 +583,6 @@ if ($userRank == 0 && isset($userData['point'])) {
             border-top: 1px solid var(--border-color);
         }
 
-        .no-listings {
-            grid-column: 1 / -1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 3rem 2rem;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border: 2px dashed #dee2e6;
-            margin: 2rem 0;
-        }
-
-        .no-listings p {
-            font-size: 1.2rem;
-            color: #6c757d;
-            margin-bottom: 1.5rem;
-            font-weight: 500;
-        }
-
         @media (max-width: 768px) {
             .profile-top {
                 flex-direction: column;
@@ -744,10 +736,12 @@ if ($userRank == 0 && isset($userData['point'])) {
                             <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                         </button>
                         <div class="c-chatbox" id="chatboxMobile">
-                            <a href="../../pages/MemberPages/mChat.html">
+                            <a href="../../pages/MemberPages/mChat.php">
                                 <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                             </a>
-                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            <?php if ($unread_count > 0): ?>
+                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            <?php endif; ?>
                         </div>
                         <a href="../../pages/MemberPages/mSetting.php">
                             <img src="../../assets/images/setting-light.svg" alt="Settings">
@@ -776,9 +770,11 @@ if ($userRank == 0 && isset($userData['point'])) {
             <button id="themeToggle2">
                 <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
             </button>
-            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+            <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
                 <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                <?php if ($unread_count > 0): ?>
+                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                <?php endif; ?>
             </a>
             <a href="../../pages/MemberPages/mSetting.php">
                 <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
@@ -965,7 +961,7 @@ if ($userRank == 0 && isset($userData['point'])) {
         ?>
         <div class="no-listings">
             <p>You have no trade listings yet.</p>
-            <a href="../../pages/CommonPages/mainTrade.php" class="c-btn c-btn-primary">Create Your First Listing</a>
+            <a href="create_listing.php" class="btn-create">Create Your First Listing</a>
         </div>
         <?php } ?>
     </div>
@@ -1067,14 +1063,14 @@ function getUserFullname($userID) {
             <div>
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
-                <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
+                <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
+                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
                 <b>Community</b><br>
@@ -1085,7 +1081,10 @@ function getUserFullname($userID) {
         </section>
     </footer>
 
-    <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
+    <script>
+        const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+        const unreadCount = <?php echo $unread_count; ?>;
+    </script>
     <script src="../../javascript/mainScript.js"></script>
 </body>
 </html>

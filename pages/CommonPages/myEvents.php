@@ -803,10 +803,12 @@ $hostedEvents = $stmt_hosted->get_result();
                         <?php else: ?>
                             <!-- Member Navigation Icons -->
                             <div class="c-chatbox" id="chatboxMobile">
-                                <a href="../../pages/MemberPages/mChat.html">
+                                <a href="../../pages/MemberPages/mChat.php">
                                     <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                                 </a>
-                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                                <?php if ($unread_count > 0): ?>
+                                    <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                                <?php endif; ?>
                             </div>
                             <a href="../../pages/MemberPages/mSetting.html">
                                 <img src="../../assets/images/setting-light.svg" alt="Settings">
@@ -867,9 +869,11 @@ $hostedEvents = $stmt_hosted->get_result();
                 </a>
             <?php else: ?>
                 <!-- Member Navbar More -->
-                <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
+                <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
                     <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                    <?php if ($unread_count > 0): ?>
+                        <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                    <?php endif; ?>
                 </a>
                 <a href="../../pages/MemberPages/mSetting.html">
                     <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
@@ -1117,7 +1121,7 @@ $hostedEvents = $stmt_hosted->get_result();
             <div>
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
-                <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
+                <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.html">Settings</a>
             </div>
             <div>
@@ -1136,7 +1140,10 @@ $hostedEvents = $stmt_hosted->get_result();
     </footer>
     <?php endif; ?>
 
-    <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
+    <script>
+        const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+        const unreadCount = <?php echo $unread_count; ?>;
+    </script>
     <script src="../../javascript/mainScript.js"></script>
     <script>
         // Tab switching
