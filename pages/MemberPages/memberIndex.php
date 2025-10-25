@@ -889,35 +889,35 @@ if ($userRank == 0 && isset($userData['point'])) {
             <section class="tradelisting">
     <h2 class="tradelisting-title">Your Trade Listings</h2>
 
-    <div class="listings-grid">
-        <?php
-        $userID = $_SESSION['userID'];
+    <?php
+    $userID = $_SESSION['userID'];
 
-        $query = "SELECT * FROM tbltrade_listings WHERE userID = ? AND status = 'active' ORDER BY dateListed DESC";
-        $stmt = $connection->prepare($query);
-        $stmt->bind_param("i", $userID);
-        $stmt->execute();
-        $result = $stmt->get_result();
+    $query = "SELECT * FROM tbltrade_listings WHERE userID = ? AND status = 'active' ORDER BY dateListed DESC";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("i", $userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                // Determine card type based on category
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            // Determine card type based on category
+            $cardClass = 'item-special';
+            if ($row["category"] == 'Plants') {
+                $cardClass = 'plant-special';
+            } elseif ($row["category"] == 'Seeds & Saplings') {
+                $cardClass = 'plant-special';
+            } elseif ($row["category"] == 'Garden Decor') {
                 $cardClass = 'item-special';
-                if ($row["category"] == 'Plants') {
-                    $cardClass = 'plant-special';
-                } elseif ($row["category"] == 'Seeds & Saplings') {
-                    $cardClass = 'plant-special';
-                } elseif ($row["category"] == 'Garden Decor') {
-                    $cardClass = 'item-special';
-                }
+            }
 
-                // Format date
-                $formattedDate = formatRelativeDate($row["dateListed"]);
+            // Format date
+            $formattedDate = formatRelativeDate($row["dateListed"]);
 
-                // Get user initials for avatar
-                $userInitials = getUserInitials($row["userID"]);
-                $userFullname = getUserFullname($row["userID"]);
-        ?>
+            // Get user initials for avatar
+            $userInitials = getUserInitials($row["userID"]);
+            $userFullname = getUserFullname($row["userID"]);
+    ?>
+    <div class="listings-grid">
         <div class="listing-card">
             <div class="listing-image">
                 <img src="<?php echo !empty($row['imageUrl']) ? htmlspecialchars($row['imageUrl']) : '../../assets/images/placeholder-image.jpg'; ?>" 
@@ -959,16 +959,17 @@ if ($userRank == 0 && isset($userData['point'])) {
                 </div>
             </div>
         </div>
-        <?php
-            }
-        } else {
-        ?>
-        <div class="no-listings">
-            <p>You have no trade listings yet.</p>
-            <a href="../../pages/CommonPages/mainTrade.php" class="c-btn c-btn-primary">Create Your First Listing</a>
-        </div>
-        <?php } ?>
     </div>
+    <?php
+        }
+    } else {
+    ?>
+    <div class="no-listings">
+        <p>You have no trade listings yet.</p>
+        <a href="../../pages/CommonPages/mainTrade.php" class="c-btn c-btn-primary">Create Your First Listing</a>
+    </div>
+    <?php } ?>
+    
 </section>
 
 <?php
@@ -1085,7 +1086,10 @@ function getUserFullname($userID) {
         </section>
     </footer>
 
-    <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
+    <script>
+        const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+        const unreadCount = <?php echo $unread_count; ?>;
+    </script>
     <script src="../../javascript/mainScript.js"></script>
 </body>
 </html>
