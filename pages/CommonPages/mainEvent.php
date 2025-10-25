@@ -952,7 +952,7 @@ if ($stmt = $connection->prepare($query)) {
     <script>
         const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
         const unreadCount = <?php echo $unread_count; ?>;
-    </script>
+    
         // Toggle filters on mobile
         function toggleFilters() {
             const sidebar = document.getElementById('filterSidebar');
