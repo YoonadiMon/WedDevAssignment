@@ -1,79 +1,382 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>My Personal Website</title>
-    </head>
-    <body>
-    <a href="../../pages/CommonPages/aboutUs.php">←</a>
-    <h1>Welcome to Mi Yoonadi Mon's Personal Website</h1>
-
-    <hr>
-
-    <h2>About Me</h2>
-
-    <p><b>Name:</b> Mi Yoonadi Mon</p>
-    <p><b>Age:</b> 21</p>
-
-    <p>Hi there! My name is Yoon and I am a University student studying Diploma in ICT. I like playing video games, watching movies, and hanging out with friends. This is a website that I made using HTML.</p>
-
-    <p>I hope you like my website.</p>
-
-    <hr>
-
-    <h2>My Education</h2>
-
-    <h3>APU</h3>
-    <p>Diploma in ICT</p>
-    <p>2024 - 2025 (Current)</p>
-
-    <img src="campus.jpg" width="200">
-
-    <h3>High School</h3>
-    <p>IGCSE</p>
-    <p>2022 - 2024</p>
-
-    <hr>
-
-    <h2>My Hobbies and Interests</h2>
-
-    <h3>Playing Video Games</h3>
-    <p>I really love playing video games on my computer. My favorite games are Stardew, Don't Starve, and Hollow Knight.</p>
-
-    <h3>Watching Movies</h3>
-    <p>I watch a lot of movies and TV shows. I like horror, action movies, fantasy. My favorite movie is Home Alone.</p>
-
-    <h3>Listening to Music</h3>
-    <p>I listen to music all the time. I like pop music, rap music, and rock music. My favorite artist is Alec.</p>
-
-    <hr>
-
-    <h2>Contact Me</h2>
-
-    <p>If you want to send me a message, you can use this form:</p>
-
-    <form>
-        <p>Your Name:</p>
-        <input type="text" name="name">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Yoonadi Mon - Personal Website</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        <p>Your Email:</p>
-        <input type="email" name="email">
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
         
-        <p>Your Message:</p>
-        <textarea name="message" rows="6" cols="50"></textarea>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
         
-        <br><br>
-        <input type="submit" value="Send Message">
-    </form>
+        header {
+            background: linear-gradient(135deg, #4a6fa5, #6b8cbc);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        h2 {
+            color: #4a6fa5;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        h3 {
+            color: #4a6fa5;
+            margin-bottom: 0.5rem;
+        }
+        
+        section {
+            padding: 2.5rem;
+            background: white;
+            margin: 2rem 0;
+            border-radius: 8px;
+        }
+        
+        section p {
+            margin-top: 1rem;
+        }
+        
+        strong {
+            color: #4a6fa5;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        
+        .card {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .card img {
+            width: 100%;
+            max-width: 300px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .center {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .center img {
+            max-width: 100%;
+        }
+        
+        .timeline {
+            margin-bottom: 2rem;
+            padding-left: 2rem;
+            border-left: 3px solid #6b8cbc;
+        }
+        
+        .period {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .project {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .project-header {
+            background: #4a6fa5;
+            color: white;
+            padding: 1rem;
+        }
+        
+        .project-body {
+            padding: 1.5rem;
+        }
+        
+        .project-body ul {
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        footer {
+            background: #343a40;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        ul {
+            list-style-type: none;
+        }
+        
+        ul li {
+            margin-bottom: 0.5rem;
+        }
+        
+        a {
+            color: #4a6fa5;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
 
-    <h3>Other Ways to Contact Me</h3>
-    <ul>
-        <li>Email: miyoonadimon@email.com</li>
-    </ul>
+        .img-sec {
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            gap: 1rem; 
+            margin-top: 1rem;
+        }
+        .img-sec img {
+            width: 40vw; 
+            max-width: 600px; 
+            height: auto; 
+            border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            section { padding: 1.5rem; }
+            .img-sec {
+                flex-direction: column; 
+            }
+            .img-sec img {
+                width: 80vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="../../pages/CommonPages/aboutUs.php" class="back-link" style="color: #ddd;">← Back to About Us</a>
+        <h1>Mi Yoonadi Mon</h1>
+        <p>ICT Student & Aspiring Developer</p>
+    </header>
 
-    <hr>
+    <div class="container">
+        <!-- About Section -->
+        <section>
+            <h2>About Me</h2>
+            <div class="grid center">
+                <div><strong>Name:</strong> Mi Yoonadi Mon</div>
+                <div><strong>Age:</strong> 21</div>
+                <div><strong>Status:</strong> University Student</div>
+            </div>
+            <p>Hi there! My name is Yoon and I am a University student studying Diploma in ICT. I started my journey in web development in 2019 during an online course and continued through IGCSE where I took ICT and Computer Science. Since then, I've been learning on my own, exploring HTML, CSS, JavaScript, Sass, React with Expo, React Native, and more.</p>
+            <p>Now I'm pursuing my diploma while continuing to expand my skills. I enjoy playing video games, watching movies, and hanging out with friends. This website showcases my journey and skills in web development.</p>
+        </section>
 
-    <p><i>Thank you for visiting my website!</i></p>
-    <p>Created by Mi Yoonadi Mon - 2025</p>
+        <!-- Education Section -->
+        <section>
+            <h2>My Education</h2>
+            <div class="timeline">
+                <h3>APU</h3>
+                <p class="period">2024 May - 2025 (Current)</p>
+                <p>Diploma in ICT</p>
+            </div>
+            <div class="timeline">
+                <h3>Frontendmentor</h3>
+                <p class="period">x</p>
+                <p>www.frontendmentor.io/profile/YoonadiMon</p>
+            </div>
+            <div class="timeline">
+                <h3>FreeCodeCamp</h3>
+                <p class="period">x</p>
+                <p>https://www.freecodecamp.org/miyoonadimonhttps://www.frontendmentor.io/profile/YoonadiMon</p>
+            </div>
+            <div class="timeline">
+                <h3>High School</h3>
+                <p class="period">2022 - 2024</p>
+                <p>IGCSE</p>
+            </div>
+        </section>
 
-    </body>
+        <!-- Skills Section -->
+        <section>
+            <h2>My Skills</h2>
+            <h3 class="center">🛠 Tech Stack</h3>
+            <div class="badges">
+                <img src="https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white" alt="C++">
+                <img src="https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
+                <img src="https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">
+                <img src="https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E" alt="JavaScript">
+                <img src="https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java">
+                <img src="https://img.shields.io/badge/markdown-%23000000.svg?style=for-the-badge&logo=markdown&logoColor=white" alt="Markdown">
+                <img src="https://img.shields.io/badge/php-%23777BB4.svg?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
+                <img src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" alt="Python">
+                <img src="https://img.shields.io/badge/apache-%23D42029.svg?style=for-the-badge&logo=apache&logoColor=white" alt="Apache">
+                <img src="https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white" alt="Git">
+                <img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+                <img src="https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white" alt="Figma">
+                <img src="https://img.shields.io/badge/Canva-%2300C4CC.svg?style=for-the-badge&logo=Canva&logoColor=white" alt="Canva">
+                <img src="https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
+                <img src="https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB" alt="React">
+                <img src="https://img.shields.io/badge/react_native-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB" alt="React Native">
+                <img src="https://img.shields.io/badge/expo-1C1E24?style=for-the-badge&logo=expo&logoColor=#D04A37" alt="Expo">
+                <img src="https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+            </div>
+
+            <div class="center">
+                <h3 class="center">🛠 Check out my coding activity</h3>
+                <div class="img-sec">
+                    <img src="https://wakatime.com/share/@MYNM/08bae8aa-515e-4dd1-acb8-18d0d3bac440.svg" alt="coding activity">
+                    <img src="https://wakatime.com/share/@018e0ede-5109-4231-a915-219f103a6ca7/ab2c154d-398d-4427-b513-2ae445a0d8e4.svg" alt="coding lang">
+                </div>
+            </div>
+        </section>
+
+        <!-- Hobbies Section -->
+        <section>
+            <h2>My Hobbies & Interests</h2>
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">📙</div>
+                    <h3>Reading novels</h3>
+                    <p>I spend most of time reading horror, fantasy, and progession novels, a hobby I share with my father. My favorite is <i>Lord of the Mysteries</i>, if I must pick one.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🎵</div>
+                    <h3>Listening to Music</h3>
+                    <p>I listen to music all the time. I like pop music, rap music, and rock music. My favorite artist is <i>Paris Paloma</i>, if I could only pick one.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🎬</div>
+                    <h3>Watching Movies</h3>
+                    <p>I watch a lot of movies and TV shows. I like horror, action movies, fantasy. The first movie on my watch list is <i>Good Boy</i>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Games Section -->
+        <section>
+            <h2>My Favorite Games</h2>
+            <div class="grid">
+                <div class="card">
+                    <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg" alt="Stardew Valley">
+                    <h3>Stardew Valley</h3>
+                </div>
+                <div class="card">
+                    <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2947440/7e5d923ac622bd1775ebc9b5d4b5b0a24bf5ed40/header.jpg?t=1758772827" alt="Silent Hill F">
+                    <h3>Silent Hill F</h3>
+                </div>
+                <div class="card">
+                    <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/219740/header.jpg" alt="Don't Starve">
+                    <h3>Don't Starve</h3>
+                </div>
+                <div class="card">
+                    <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/367520/header.jpg" alt="Hollow Knight">
+                    <h3>Hollow Knight</h3>
+                </div>
+                <div class="card">
+                    <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/7983574d464e6559ac7e24275727f73a8bcca1f3/header.jpg?t=1756994410" alt="Hollow Knight">
+                    <h3>Silk Song</h3>
+                </div>
+                <div class="card">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/1/18/Ghost_of_Y%C5%8Dtei_cover_art.png" alt="Ghost of Yōtei">
+                    <h3>Ghost of Yōtei</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section>
+            <h2>Recent Projects</h2>
+            <div class="grid">
+                <div class="project">
+                    <div class="project-header" style="max-height: 80px;">
+                        <h2 style="color: #f8f9fa;">Assignment Web App</h3>
+                    </div>
+                    <div class="project-body">
+                        <p>A group project with three members where I contributed to:</p>
+                        <ul>
+                            <li><strong>Trade Page:</strong> addTrade.php, mainTrade.php</li>
+                            <li><strong>Quiz Page:</strong> mQuiz.php, activeQuiz.php</li>
+                            <li><strong>Ticket Page:</strong> mContactSupport.php, mCreateTicket.php, ticketThread.php</li>
+                            <li><strong>Landing Page:</strong> index.php</li>
+                            <li><strong>About Us:</strong> aboutUs.php</li>
+                            <li><strong>Personal Page:</strong> MiYoonadiMon.html</li>
+                        </ul>
+                        <p><strong>Technologies:</strong> HTML, CSS, JavaScript, PHP</p>
+                        <p><strong>Languages:</strong> PHP 78.8% | JavaScript 11.9% | HTML 5.2% | CSS 4.1%</p>
+                        <p><strong>GitHub:</strong> <a href="https://github.com/YoonadiMon/WedDevAssignment" target="_blank">View Project</a></p>
+                    </div>
+                </div>
+                <div class="project">
+                    <div class="project-header" style="max-height: 80px;">
+                        <h2 style="color: #f8f9fa;">Personal Website</h3>
+                    </div>
+                    <div class="project-body">
+                        <p>This responsive personal website showcasing my skills, education, and interests.</p>
+                        <p><strong>Technologies:</strong> HTML, CSS</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section>
+            <h2>Contact Me</h2>
+            <div class="center">
+                <p>Feel free to reach out to me through any of the following channels:</p>
+                <br>
+                <ul>
+                    <li><strong>Email:</strong> miyoonadimon@email.com</li>
+                    <li><strong>GitHub:</strong> <a href="https://github.com/YoonadiMon" target="_blank">https://github.com/YoonadiMon</a></li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p><i>Thank you for visiting my page!</i></p>
+            <p>Created by Mi Yoonadi Mon - 2025</p>
+        </div>
+    </footer>
+</body>
 </html>
