@@ -570,6 +570,27 @@ if ($userRank == 0 && isset($userData['point'])) {
             border-top: 1px solid var(--border-color);
         }
 
+        .no-listings {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 3rem 2rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px dashed #dee2e6;
+            margin: 2rem 0;
+        }
+
+        .no-listings p {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
         @media (max-width: 768px) {
             .profile-top {
                 flex-direction: column;
@@ -944,7 +965,7 @@ if ($userRank == 0 && isset($userData['point'])) {
         ?>
         <div class="no-listings">
             <p>You have no trade listings yet.</p>
-            <a href="create_listing.php" class="btn-create">Create Your First Listing</a>
+            <a href="../../pages/CommonPages/mainTrade.php" class="c-btn c-btn-primary">Create Your First Listing</a>
         </div>
         <?php } ?>
     </div>
@@ -1053,7 +1074,7 @@ function getUserFullname($userID) {
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
             </div>
             <div>
                 <b>Community</b><br>
