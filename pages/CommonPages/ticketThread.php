@@ -896,7 +896,7 @@ if (isset($_POST['reopen_ticket'])) {
                     <b>Helps</b><br>
                     <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                     <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                    <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
                 </div>
                 <div>
                     <b>Community</b><br>
