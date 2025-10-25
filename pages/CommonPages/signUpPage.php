@@ -662,7 +662,8 @@ mysqli_close($connection);
             </section>
             <br>
         </main>
-
+        
+        <script>const isAdmin = false;</script>
         <script src="../../javascript/mainScript.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {

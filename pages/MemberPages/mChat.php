@@ -18,6 +18,105 @@ function getInitials($name) {
     return strtoupper(substr($words[0], 0, 2));
 }
 
+// render trade request message
+function renderTradeRequest($requestID, $connection, $currentUserID) {
+    $query = "SELECT tr.*, 
+                     tl.title, tl.category, tl.imageUrl, tl.status as listing_status,
+                     sender.username as sender_name,
+                     receiver.username as receiver_name
+              FROM tbltrade_requests tr
+              LEFT JOIN tbltrade_listings tl ON tr.listingID = tl.listingID
+              LEFT JOIN tblusers sender ON tr.senderID = sender.userID
+              LEFT JOIN tblusers receiver ON tr.receiverID = receiver.userID
+              WHERE tr.requestID = ?";
+    
+    $stmt = mysqli_prepare($connection, $query);
+    mysqli_stmt_bind_param($stmt, "i", $requestID);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $data = mysqli_fetch_assoc($result);
+    
+    if (!$data) return '';
+    
+    $isSender = $data['senderID'] == $currentUserID;
+    $isExpired = strtotime($data['expiresAt']) < time();
+    $status = $data['status'];
+    
+    // Check if sender, receiver, or listing is deleted
+    $senderDeleted = ($data['senderID'] === null || $data['sender_name'] === null);
+    $receiverDeleted = ($data['receiverID'] === null || $data['receiver_name'] === null);
+    $listingDeleted = ($data['listingID'] === null || $data['title'] === null);
+    $isListingInactive = ($data['listing_status'] !== 'active');
+    
+    // Determine if request should be marked as cancelled due to deletions
+    $isCancelledDueToDeletion = ($senderDeleted || $receiverDeleted || $listingDeleted);
+    
+    // Prepare display data
+    $senderDisplay = $senderDeleted ? '[Deleted User]' : htmlspecialchars($data['sender_name']);
+    $requestTypeText = ($data['requestType'] === 'offer') ? 'offered' : 'requested';
+    $imageUrl = $data['imageUrl'] ?: '../../assets/images/placeholder-image.jpg';
+    
+    mysqli_stmt_close($stmt);
+    
+    // Build HTML string
+    $html = '<div class="trade-request-container">';
+    $html .= '<div class="trade-request-header">';
+    $html .= '<strong>' . $senderDisplay . '</strong> ' . $requestTypeText . ' this item:';
+    $html .= '</div>';
+    
+    // Listing Preview
+    if ($listingDeleted) {
+        $html .= '<div class="trade-request-preview deleted-listing">';
+        $html .= '<img src="../../assets/images/placeholder-image.jpg" alt="Deleted Listing">';
+        $html .= '<div class="trade-request-info">';
+        $html .= '<h4>[Listing Deleted]</h4>';
+        $html .= '<p class="trade-category">This listing is no longer available</p>';
+        $html .= '</div>';
+        $html .= '</div>';
+    } else {
+        $html .= '<div class="trade-request-preview">';
+        $html .= '<img src="' . htmlspecialchars($imageUrl) . '" alt="' . htmlspecialchars($data['title']) . '" onerror="this.src=\'../../assets/images/placeholder-image.jpg\'">';
+        $html .= '<div class="trade-request-info">';
+        $html .= '<h4>' . htmlspecialchars($data['title']) . '</h4>';
+        $html .= '<p class="trade-category">' . htmlspecialchars($data['category']) . '</p>';
+        $html .= '</div>';
+        $html .= '</div>';
+    }
+    
+    // Action Buttons
+    $html .= '<div class="trade-request-actions">';
+    
+    if ($isCancelledDueToDeletion) {
+        $html .= '<button class="trade-btn-disabled" disabled>This offer/request is cancelled</button>';
+    } elseif ($status === 'accepted') {
+        $html .= '<button class="trade-btn-disabled" disabled>Accepted</button>';
+    } elseif ($status === 'declined') {
+        $html .= '<button class="trade-btn-disabled" disabled>Declined</button>';
+    } elseif ($status === 'cancelled') {
+        $html .= '<button class="trade-btn-disabled" disabled>Cancelled</button>';
+    } elseif ($isExpired) {
+        $html .= '<button class="trade-btn-disabled" disabled>Expired</button>';
+    } elseif ($isListingInactive) {
+        $html .= '<button class="trade-btn-disabled" disabled>Unavailable</button>';
+    } elseif ($isSender) {
+        $html .= '<button class="trade-btn-cancel" onclick="respondTradeRequest(' . $requestID . ', \'cancel\')">Cancel</button>';
+    } else {
+        $html .= '<button class="trade-btn-accept" onclick="respondTradeRequest(' . $requestID . ', \'accept\')">Accept</button>';
+        $html .= '<button class="trade-btn-decline" onclick="respondTradeRequest(' . $requestID . ', \'decline\')">Decline</button>';
+    }
+    
+    $html .= '</div>';
+    
+    // Note for pending requests
+    if ($status === 'pending' && !$isCancelledDueToDeletion) {
+        $html .= '<p class="trade-request-note">* Offer/request will expire after 30 days</p>';
+    }
+    
+    $html .= '</div>';
+    
+    return $html;
+}
+
 // Initialize variables
 $conversation_id = isset($_GET['conversation_id']) ? (int)$_GET['conversation_id'] : 0;
 $start_chat_with_userID = isset($_GET['start_chat_with']) ? (int)$_GET['start_chat_with'] : 0;
@@ -25,7 +124,6 @@ $temporary_chat_mode = false;
 $messages = [];
 $other_user = null;
 
-// Handle new message submission FIRST (before any other logic)
 if (isset($_POST['send_message'])) {
     $message_text = mysqli_real_escape_string($connection, $_POST['message']);
     $receiver_id = (int)$_POST['receiver_id'];
@@ -35,23 +133,19 @@ if (isset($_POST['send_message'])) {
         $current_conversation_id = isset($_POST['conversation_id']) ? (int)$_POST['conversation_id'] : 0;
         
         if ($current_conversation_id == 0 && $receiver_id > 0) {
-            // Create new conversation for temporary chat
             $create_conv_query = "INSERT INTO tblconversations (user1ID, user2ID, lastMessageTime) 
                                  VALUES ('$userID', '$receiver_id', NOW())";
             
             if (mysqli_query($connection, $create_conv_query)) {
                 $conversation_id = mysqli_insert_id($connection);
                 
-                // Now insert the message
                 $insert_query = "INSERT INTO tblmessages (conversationID, senderID, receiverID, messageText) 
                                 VALUES ('$conversation_id', '$userID', '$receiver_id', '$message_text')";
                 
                 if (mysqli_query($connection, $insert_query)) {
-                    // Update conversation last message time
                     $update_conv = "UPDATE tblconversations SET lastMessageTime = NOW() WHERE conversationID = '$conversation_id'";
                     mysqli_query($connection, $update_conv);
                     
-                    // Redirect to the new conversation
                     header("Location: mChat.php?conversation_id=$conversation_id");
                     exit();
                 } else {
@@ -61,16 +155,13 @@ if (isset($_POST['send_message'])) {
                 $_SESSION['error'] = "Error creating conversation: " . mysqli_error($connection);
             }
         } elseif ($current_conversation_id > 0) {
-            // Existing conversation - insert message normally
             $insert_query = "INSERT INTO tblmessages (conversationID, senderID, receiverID, messageText) 
                             VALUES ('$current_conversation_id', '$userID', '$receiver_id', '$message_text')";
             
             if (mysqli_query($connection, $insert_query)) {
-                // Update conversation last message time
                 $update_conv = "UPDATE tblconversations SET lastMessageTime = NOW() WHERE conversationID = '$current_conversation_id'";
                 mysqli_query($connection, $update_conv);
                 
-                // Redirect to refresh
                 header("Location: mChat.php?conversation_id=$current_conversation_id");
                 exit();
             } else {
@@ -92,9 +183,7 @@ if (isset($_POST['send_message'])) {
     exit();
 }
 
-// Now handle the display logic
 if ($start_chat_with_userID > 0 && $conversation_id == 0) {
-    // Check if conversation already exists between these two users
     $check_conv_query = "SELECT conversationID FROM tblconversations 
                         WHERE (user1ID = '$userID' AND user2ID = '$start_chat_with_userID')
                         OR (user1ID = '$start_chat_with_userID' AND user2ID = '$userID')
@@ -234,12 +323,97 @@ if ($conversations_result) {
     
     <!-- chat-specific styles -->
     <link rel="stylesheet" href="../../style/chatStyle.css">
+
     <title>Chat - ReLeaf</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
 </head>
 
 <body>
     <div id="cover" class="" onclick="hideMenu()"></div>
+
+    <!-- Trade Modal -->
+    <div class="trade-modal-overlay" id="tradeModalOverlay">
+        <div class="trade-modal" id="tradeModal">
+            <button class="trade-modal-close" onclick="closeTradeModal()">&times;</button>
+            
+            <!-- Initial Choice Screen -->
+            <div id="tradeChoiceScreen">
+                <div class="trade-modal-header">
+                    <h2 class="trade-modal-title">Trading</h2>
+                </div>
+                <div class="trade-modal-content">
+                    <button class="trade-choice-button" onclick="showRequestScreen()">
+                        I want to request a listing
+                    </button>
+                    <button class="trade-choice-button" onclick="showOfferScreen()">
+                        I want to offer a listing
+                    </button>
+                </div>
+            </div>
+
+            <!-- Request Screen -->
+            <div id="tradeRequestScreen" style="display: none;">
+                <div class="trade-modal-header">
+                    <button class="trade-modal-back" onclick="backToChoice()">
+                        <img src="../../assets/images/icon-back-light.svg" alt="Back" id="request-back-icon" />
+                    </button>
+                    <h2 class="trade-modal-title">Request Listing</h2>
+                </div>
+                <div class="trade-modal-content">
+                    <label class="trade-select-label">I would like to request:</label>
+                    <select class="c-input c-input-select" id="requestListingSelect" onchange="previewRequestListing()">
+                        <option value="">Select a listing...</option>
+                    </select>
+                    
+                    <!-- if no listings -->
+                    <div class="no-listings-message" id="noListingsMessageRequest"></div>
+                    
+                    <div class="trade-listing-preview" id="requestPreview">
+                        <img id="requestPreviewImage" src="" alt="">
+                        <div class="trade-listing-details">
+                            <h4 id="requestPreviewTitle"></h4>
+                            <p id="requestPreviewCategory"></p>
+                        </div>
+                    </div>
+                    
+                    <button class="trade-send-button" id="requestSendBtn" disabled onclick="sendTradeRequest('request')">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- Offer Screen -->
+            <div id="tradeOfferScreen" style="display: none;">
+                <div class="trade-modal-header">
+                    <button class="trade-modal-back" onclick="backToChoice()">
+                        <img src="../../assets/images/icon-back-light.svg" alt="Back" id="offer-back-icon" />
+                    </button>
+                    <h2 class="trade-modal-title">Offer Listing</h2>
+                </div>
+                <div class="trade-modal-content">
+                    <label class="trade-select-label">I would like to offer:</label>
+                    <select class="c-input c-input-select" id="offerListingSelect" onchange="previewOfferListing()">
+                        <option value="">Select a listing...</option>
+                    </select>
+
+                    <!-- if no listings -->
+                    <div class="no-listings-message" id="noListingsMessageOffer"></div>
+                    
+                    <div class="trade-listing-preview" id="offerPreview">
+                        <img id="offerPreviewImage" src="" alt="">
+                        <div class="trade-listing-details">
+                            <h4 id="offerPreviewTitle"></h4>
+                            <p id="offerPreviewCategory"></p>
+                        </div>
+                    </div>
+                    
+                    <button class="trade-send-button" id="offerSendBtn" disabled onclick="sendTradeRequest('offer')">
+                        Send Offer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Chat Container -->
     <section class="chat-container">
@@ -278,7 +452,11 @@ if ($conversations_result) {
                                                 <span class="content-message-text">
                                                     <?php 
                                                     $lastMessage = $conv['last_message'] ?? 'No messages yet';
-                                                    echo htmlspecialchars($lastMessage); 
+                                                    if (strpos($lastMessage, 'TRADE_REQUEST:') === 0) {
+                                                        echo 'Trade request sent';
+                                                    } else {
+                                                        echo htmlspecialchars($lastMessage);
+                                                    }
                                                     ?>
                                                 </span>
                                             </span>
@@ -327,12 +505,21 @@ if ($conversations_result) {
                         </div>
                     </div>
 
-                    <!-- Alert Error Messages -->
+                    <!-- Alert Messages -->
                     <?php if (isset($_SESSION['error'])): ?>
                         <div class="alert alert-error">
                             <?php 
                             echo htmlspecialchars($_SESSION['error']); 
                             unset($_SESSION['error']);
+                            ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (isset($_SESSION['success'])): ?>
+                        <div class="alert alert-success">
+                            <?php 
+                            echo htmlspecialchars($_SESSION['success']); 
+                            unset($_SESSION['success']);
                             ?>
                         </div>
                     <?php endif; ?>
@@ -353,12 +540,36 @@ if ($conversations_result) {
                                     $msg_date = date('Y-m-d', strtotime($msg['sentAt']));
                                     $is_me = $msg['senderID'] == $userID;
                                     
-                                    // Show date divider only when date changes
                                     if ($last_date != $msg_date) {
                                         $last_date = $msg_date;
                                         $display_date = date('F j, Y', strtotime($msg['sentAt']));
                                         echo '<div class="coversation-divider"><span>' . $display_date . '</span></div>';
                                     }
+                                    
+                                    // Check if message is a trade request
+                                    if (strpos($msg['messageText'], 'TRADE_REQUEST:') === 0) {
+                                        $requestID = (int)str_replace('TRADE_REQUEST:', '', $msg['messageText']);
+                                        echo '<li class="conversation-item ' . ($is_me ? 'me' : '') . '">';
+                                        echo '<div class="conversation-item-side">';
+                                        echo '<div class="conversation-item-avatar avatar-initials">';
+                                        echo getInitials($msg['fullName']);
+                                        echo '</div>';
+                                        echo '</div>';
+                                        echo '<div class="conversation-item-content">';
+                                        echo '<div class="conversation-item-wrapper">';
+                                        echo '<div class="conversation-item-box" style="max-width: 100%;">';
+                                        echo renderTradeRequest($requestID, $connection, $userID);
+                                        echo '<div class="conversation-item-time">';
+                                        echo date('g:i A', strtotime($msg['sentAt']));
+                                        if ($is_me && $msg['isRead']) {
+                                            echo '<span style="margin-left: 4px;">✓✓</span>';
+                                        }
+                                        echo '</div>';
+                                        echo '</div>';
+                                        echo '</div>';
+                                        echo '</div>';
+                                        echo '</li>';
+                                    } else {
                                 ?>
                                     <li class="conversation-item <?php echo $is_me ? 'me' : ''; ?>">
                                         <div class="conversation-item-side">
@@ -382,13 +593,20 @@ if ($conversations_result) {
                                             </div>
                                         </div>
                                     </li>
-                                <?php endforeach; ?>
+                                <?php 
+                                    }
+                                endforeach; 
+                                ?>
                             <?php endif; ?>
                         </ul>
                     </div>
                                                                 
                     <?php if ($conversation_id > 0 || $temporary_chat_mode): ?>
                         <div class="conversation-form">
+                            <button type="button" class="trade-form-button" onclick="openTradeModal()" title="Trade">
+                                <span class="trade-icon"></span>
+                            </button>
+                            
                             <form method="POST" id="messageForm">
                                 <input type="hidden" name="receiver_id" value="<?php echo $other_user['id']; ?>">
                                 <input type="hidden" name="conversation_id" value="<?php echo $conversation_id; ?>">
@@ -402,7 +620,7 @@ if ($conversations_result) {
                                 </div>
                                 
                                 <button type="submit" name="send_message" class="conversation-form-button">
-                                    <img src="../../assets/images/send-icon-light.svg" alt="send" id="send-icon" />
+                                    <img src="../../assets/images/send-icon.svg" alt="send" id="send-icon" />
                                 </button>
                             </form>
                         </div>
@@ -414,24 +632,293 @@ if ($conversations_result) {
 
     <script>
         const isAdmin = false;
+        const unreadCount = <?php echo $unread_count; ?>;
 
-        // Function to show conversation list/sidebar
+        const currentConversationID = <?php echo $conversation_id ?: 0; ?>;
+        const otherUserID = <?php echo $other_user['id'] ?? 0; ?>;
+        let currentListings = [];
+
+        // Trade Modal Functions
+        function openTradeModal() {
+            document.getElementById('tradeModalOverlay').classList.add('active');
+            showChoiceScreen();
+        }
+
+        function closeTradeModal() {
+            document.getElementById('tradeModalOverlay').classList.remove('active');
+            resetModal();
+        }
+
+        function showChoiceScreen() {
+            document.getElementById('tradeChoiceScreen').style.display = 'block';
+            document.getElementById('tradeRequestScreen').style.display = 'none';
+            document.getElementById('tradeOfferScreen').style.display = 'none';
+        }
+
+        function backToChoice() {
+            showChoiceScreen();
+            resetSelections();
+        }
+
+        function resetModal() {
+            showChoiceScreen();
+            resetSelections();
+        }
+
+        function resetSelections() {
+            document.getElementById('requestListingSelect').value = '';
+            document.getElementById('offerListingSelect').value = '';
+            document.getElementById('requestPreview').classList.remove('active');
+            document.getElementById('offerPreview').classList.remove('active');
+            document.getElementById('requestSendBtn').disabled = true;
+            document.getElementById('offerSendBtn').disabled = true;
+        }
+
+        async function showRequestScreen() {
+            document.getElementById('tradeChoiceScreen').style.display = 'none';
+            document.getElementById('tradeRequestScreen').style.display = 'block';
+            
+            // Fetch other user's listings
+            await fetchListings('request');
+        }
+
+        async function showOfferScreen() {
+            document.getElementById('tradeChoiceScreen').style.display = 'none';
+            document.getElementById('tradeOfferScreen').style.display = 'block';
+            
+            // Fetch current user's listings
+            await fetchListings('offer');
+        }
+
+        async function fetchListings(type) {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'get_listings');
+                formData.append('targetUserID', otherUserID);
+                formData.append('requestType', type);
+                
+                const response = await fetch('../../php/tradeRequest.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentListings = data.listings;
+                    populateListingSelect(type, data.listings);
+                } else {
+                    showAlert('Error loading listings', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error loading listings', 'error');
+            }
+        }
+
+        function populateListingSelect(type, listings) {
+            const selectId = type === 'request' ? 'requestListingSelect' : 'offerListingSelect';
+            const messageId = type === 'request' ? 'noListingsMessageRequest' : 'noListingsMessageOffer';
+            const select = document.getElementById(selectId);
+            const messageDiv = document.getElementById(messageId);
+            
+            select.innerHTML = '<option value="">Select a listing...</option>';
+            
+            // Clear any existing message first
+            if (messageDiv) {
+                messageDiv.innerHTML = '';
+            }
+            
+            if (listings.length === 0) {
+                select.disabled = true;
+                messageDiv.style.display = "block";
+                if (messageDiv) {
+                    messageDiv.innerHTML = `
+                        <p>
+                            ${type === 'request' ? 'This user has no active listings at the moment.' : 'You have no active listings to offer.'}
+                        </p>
+                        <small>
+                            ${type === 'request' ? 'Please check back later.' : 'Create a listing first to make an offer.'}
+                        </small>
+                    `;
+                }
+            } else {
+                select.disabled = false;
+                listings.forEach(listing => {
+                    const option = document.createElement('option');
+                    option.value = listing.listingID;
+                    
+                    // Truncate long titles
+                    let title = listing.title;
+                    if (title.length > 40) {
+                        title = title.substring(0, 37) + '...';
+                    }
+                    
+                    option.textContent = title;
+                    option.dataset.image = listing.imageUrl || '../../assets/images/placeholder-image.jpg';
+                    option.dataset.category = listing.category;
+                    option.dataset.fullTitle = listing.title;
+                    
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        function previewRequestListing() {
+            previewListing('request');
+        }
+
+        function previewOfferListing() {
+            previewListing('offer');
+        }
+
+        function previewListing(type) {
+            const selectId = type === 'request' ? 'requestListingSelect' : 'offerListingSelect';
+            const previewId = type === 'request' ? 'requestPreview' : 'offerPreview';
+            const btnId = type === 'request' ? 'requestSendBtn' : 'offerSendBtn';
+            
+            const select = document.getElementById(selectId);
+            const preview = document.getElementById(previewId);
+            const btn = document.getElementById(btnId);
+            
+            if (select.value) {
+                const option = select.options[select.selectedIndex];
+                
+                const imageId = type === 'request' ? 'requestPreviewImage' : 'offerPreviewImage';
+                const titleId = type === 'request' ? 'requestPreviewTitle' : 'offerPreviewTitle';
+                const categoryId = type === 'request' ? 'requestPreviewCategory' : 'offerPreviewCategory';
+                
+                document.getElementById(imageId).src = option.dataset.image;
+                document.getElementById(titleId).textContent = option.dataset.fullTitle;
+                document.getElementById(categoryId).textContent = 'Category: ' + option.dataset.category;
+                
+                preview.classList.add('active');
+                btn.disabled = false;
+            } else {
+                preview.classList.remove('active');
+                btn.disabled = true;
+            }
+        }
+
+        async function sendTradeRequest(type) {
+            const selectId = type === 'request' ? 'requestListingSelect' : 'offerListingSelect';
+            const listingID = document.getElementById(selectId).value;
+            
+            if (!listingID) {
+                showAlert('Please select a listing', 'error');
+                return;
+            }
+            
+            if (currentConversationID === 0) {
+                showAlert('Please send a message first to start the conversation', 'error');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'send_request');
+                formData.append('conversationID', currentConversationID);
+                formData.append('receiverID', otherUserID);
+                formData.append('listingID', listingID);
+                formData.append('requestType', type);
+                
+                const response = await fetch('../../php/tradeRequest.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    closeTradeModal();
+                    
+                    // Reload page to show the trade request
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Error occurred, please try again', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error occurred, please try again', 'error');
+            }
+        }
+
+        async function respondTradeRequest(requestID, response) {
+            if (!confirm(`Are you sure you want to ${response} this trade request?`)) {
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'respond_request');
+                formData.append('requestID', requestID);
+                formData.append('response', response);
+                
+                const res = await fetch('../../php/tradeRequest.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    
+                    // Reload page to update UI
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Error occurred', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error occurred, please try again', 'error');
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const conversationTop = document.querySelector('.conversation-top');
+            if (conversationTop) {
+                conversationTop.insertAdjacentElement('afterend', alertDiv);
+                
+                setTimeout(() => {
+                    alertDiv.style.opacity = '0';
+                    alertDiv.style.transform = 'translateY(-10px)';
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 300);
+                }, 3000);
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('tradeModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTradeModal();
+            }
+        });
+
         function showConversationList() {
             const sidebar = document.querySelector('.content-sidebar');
             const conversation = document.querySelector('.conversation.active');
             const conversationDefault = document.querySelector('.conversation-default');
             
             if (window.innerWidth <= 768) {
-                // Mobile: Show sidebar, hide conversation
                 if (sidebar) sidebar.style.display = 'flex';
                 if (conversation) conversation.style.display = 'none';
                 if (conversationDefault) conversationDefault.style.display = 'none';
                 
-                // Update URL without page reload
                 const newUrl = window.location.origin + window.location.pathname;
                 window.history.pushState({}, '', newUrl);
             } else {
-                // Desktop: Navigate to main chat page
                 window.location.href = 'mChat.php';
             }
         }
@@ -455,7 +942,6 @@ if ($conversations_result) {
                 }, 3000);
             });
 
-            // Mobile: Hide sidebar if conversation is active on mobile
             const urlParams = new URLSearchParams(window.location.search);
             const conversationId = urlParams.get('conversation_id');
             const startChatWith = urlParams.get('start_chat_with');
@@ -464,17 +950,14 @@ if ($conversations_result) {
                 document.querySelector('.content-sidebar').style.display = 'none';
             }
 
-            // Handle browser back button
             window.addEventListener('popstate', function(event) {
                 if (window.innerWidth <= 768) {
                     showConversationList();
                 }
             });
 
-            // Prevent form submission from interfering with navigation
             const messageForm = document.getElementById('messageForm');
             if (messageForm) {
-                // Store the current state before form submission
                 messageForm.addEventListener('submit', function() {
                     if (window.innerWidth <= 768) {
                         sessionStorage.setItem('shouldShowConversation', 'true');
@@ -482,10 +965,8 @@ if ($conversations_result) {
                 });
             }
             
-            // Check if we should show conversation list after page load (after form submission)
             if (window.innerWidth <= 768 && sessionStorage.getItem('shouldShowConversation') === 'true') {
                 sessionStorage.removeItem('shouldShowConversation');
-                // Small delay to ensure page is fully loaded
                 setTimeout(() => {
                     const currentUrlParams = new URLSearchParams(window.location.search);
                     if (!currentUrlParams.has('conversation_id') && !currentUrlParams.has('start_chat_with')) {
@@ -524,7 +1005,6 @@ if ($conversations_result) {
         // Handle window resize
         window.addEventListener('resize', function() {
             if (window.innerWidth > 768) {
-                // Show both sidebar and conversation on desktop
                 document.querySelector('.content-sidebar').style.display = 'flex';
             }
         });

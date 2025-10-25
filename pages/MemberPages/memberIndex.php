@@ -3,19 +3,6 @@ session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
-// Get unread message count for the current user (if not admin)
-$unread_count = 0;
-if (!$isAdmin) {
-    $unread_query = "SELECT COUNT(*) as unread_count 
-                    FROM tblmessages 
-                    WHERE receiverID = '$userID' AND isRead = FALSE";
-    $unread_result = mysqli_query($connection, $unread_query);
-    if ($unread_result) {
-        $unread_data = mysqli_fetch_assoc($unread_result);
-        $unread_count = $unread_data['unread_count'];
-    }
-}
-
 // Initialize variables
 $showWelcomePopup = false;
 $userName = '';
@@ -40,11 +27,11 @@ $query = "SELECT fullName, username, bio, point, tradesCompleted, country FROM t
 
 if ($stmt = $connection->prepare($query)) {
     $stmt->bind_param("i", $userID);
-    
+
     if ($stmt->execute()) {
         $result = $stmt->get_result();
         $userData = $result->fetch_assoc();
-        
+
         if ($userData) {
             // Get user initials
             function getInitials($name) {
@@ -54,10 +41,10 @@ if ($stmt = $connection->prepare($query)) {
                 }
                 return strtoupper(substr($words[0], 0, 2));
             }
-            
+
             $initials = getInitials($userData['fullName']);
             $tradesCompleted = $userData['tradesCompleted'] ?? 0;
-            
+
             // Get events joined count
             $eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
                                 FROM tblregistration r 
@@ -66,7 +53,7 @@ if ($stmt = $connection->prepare($query)) {
                                 AND r.status = 'active' 
                                 AND e.endDate < CURDATE() 
                                 AND e.status != 'cancelled'";
-            
+
             if ($eventsJoinedStmt = $connection->prepare($eventsJoinedQuery)) {
                 $eventsJoinedStmt->bind_param("i", $userID);
                 if ($eventsJoinedStmt->execute()) {
@@ -120,7 +107,7 @@ if ($userRank == 0 && isset($userData['point'])) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    
+
     <style>
         .profile-container {
             max-width: 1200px;
@@ -458,7 +445,7 @@ if ($userRank == 0 && isset($userData['point'])) {
             transform: scale(1.1);
             box-shadow: 0 6px 12px var(--MainGreen);
         }
-        
+
         /* Trade items styls */
         .tradelisting {
             width: 100%;
@@ -583,6 +570,27 @@ if ($userRank == 0 && isset($userData['point'])) {
             border-top: 1px solid var(--border-color);
         }
 
+        .no-listings {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 3rem 2rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px dashed #dee2e6;
+            margin: 2rem 0;
+        }
+
+        .no-listings p {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
         @media (max-width: 768px) {
             .profile-top {
                 flex-direction: column;
@@ -637,17 +645,17 @@ if ($userRank == 0 && isset($userData['point'])) {
             .profile-header {
                 padding: 1.5rem 1rem;
             }
-            
+
             .profile-top {
                 gap: 1rem;
             }
-            
+
             .avatar-circle {
                 width: 70px;
                 height: 70px;
                 font-size: 1.75rem;
             }
-            
+
             .profile-name {
                 font-size: 1.25rem;
             }
@@ -711,9 +719,9 @@ if ($userRank == 0 && isset($userData['point'])) {
         });
     </script>
     <?php endif; ?>
-    
+
     <div id="cover" class="" onclick="hideMenu()"></div>
-    
+
     <!-- Logo + Name & Navbar -->
     <header>
         <!-- Logo + Name -->
@@ -736,12 +744,10 @@ if ($userRank == 0 && isset($userData['point'])) {
                             <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                         </button>
                         <div class="c-chatbox" id="chatboxMobile">
-                            <a href="../../pages/MemberPages/mChat.php">
+                            <a href="../../pages/MemberPages/mChat.html">
                                 <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                             </a>
-                            <?php if ($unread_count > 0): ?>
-                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
-                            <?php endif; ?>
+                            <span class="c-notification-badge" id="chatBadgeMobile"></span>
                         </div>
                         <a href="../../pages/MemberPages/mSetting.php">
                             <img src="../../assets/images/setting-light.svg" alt="Settings">
@@ -770,11 +776,9 @@ if ($userRank == 0 && isset($userData['point'])) {
             <button id="themeToggle2">
                 <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
             </button>
-            <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
+            <a href="../../pages/MemberPages/mChat.html" class="c-chatbox" id="chatboxDesktop">
                 <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                <?php if ($unread_count > 0): ?>
-                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
-                <?php endif; ?>
+                <span class="c-notification-badge" id="chatBadgeDesktop"></span>
             </a>
             <a href="../../pages/MemberPages/mSetting.php">
                 <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
@@ -843,7 +847,7 @@ if ($userRank == 0 && isset($userData['point'])) {
                     <span class="stat-label">Points</span>
                 </div>
             </div>
-            
+
             <!-- Leaderboard -->
             <section class="leaderboard">
                 <h2 class="leaderboard-title">Leaderboard</h2>
@@ -863,7 +867,7 @@ if ($userRank == 0 && isset($userData['point'])) {
                             </li>
                         </a>
                     <?php endforeach; ?>
-                    
+
                     <?php if ($userRank > 5): ?>
                         <a href="../../pages/CommonPages/viewProfile.php?userID=<?php echo $userID; ?>" class="leaderboard-link">
                             <li class="leaderboard-item current-user" style="margin-top: 1rem; border-top: 2px solid var(--MainGreen);">
@@ -884,17 +888,17 @@ if ($userRank == 0 && isset($userData['point'])) {
 
             <section class="tradelisting">
     <h2 class="tradelisting-title">Your Trade Listings</h2>
-    
+
     <div class="listings-grid">
         <?php
         $userID = $_SESSION['userID'];
-        
+
         $query = "SELECT * FROM tbltrade_listings WHERE userID = ? AND status = 'active' ORDER BY dateListed DESC";
         $stmt = $connection->prepare($query);
         $stmt->bind_param("i", $userID);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         if ($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
                 // Determine card type based on category
@@ -906,10 +910,10 @@ if ($userRank == 0 && isset($userData['point'])) {
                 } elseif ($row["category"] == 'Garden Decor') {
                     $cardClass = 'item-special';
                 }
-                
+
                 // Format date
                 $formattedDate = formatRelativeDate($row["dateListed"]);
-                
+
                 // Get user initials for avatar
                 $userInitials = getUserInitials($row["userID"]);
                 $userFullname = getUserFullname($row["userID"]);
@@ -928,7 +932,7 @@ if ($userRank == 0 && isset($userData['point'])) {
                     </div>
                 </div>
                 <div class="listing-description"><?php echo htmlspecialchars($row['description']); ?></div>
-                
+
                 <div class="listing-details">
                     <span class="detail-badge"><?php echo htmlspecialchars($row['itemCondition']); ?></span>
                     <span class="detail-badge"><?php echo htmlspecialchars($row['category']); ?></span>
@@ -961,7 +965,7 @@ if ($userRank == 0 && isset($userData['point'])) {
         ?>
         <div class="no-listings">
             <p>You have no trade listings yet.</p>
-            <a href="create_listing.php" class="btn-create">Create Your First Listing</a>
+            <a href="../../pages/CommonPages/mainTrade.php" class="c-btn c-btn-primary">Create Your First Listing</a>
         </div>
         <?php } ?>
     </div>
@@ -973,7 +977,7 @@ function formatRelativeDate($dateString) {
     $date = new DateTime($dateString);
     $now = new DateTime();
     $interval = $date->diff($now);
-    
+
     if ($interval->days == 0) {
         return 'Today';
     } elseif ($interval->days == 1) {
@@ -993,7 +997,7 @@ function getUserInitials($userID) {
     $stmt->bind_param("i", $userID);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
         $names = explode(' ', $user['fullname']);
@@ -1014,7 +1018,7 @@ function getUserFullname($userID) {
     $stmt->bind_param("i", $userID);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
         return $user['fullname'];
@@ -1040,7 +1044,7 @@ function getUserFullname($userID) {
         <div class="results" id="results"></div>
     </section>
     <hr>
-    
+
     <!-- Footer -->
     <footer>
         <section class="c-footer-info-section">
@@ -1058,12 +1062,12 @@ function getUserFullname($userID) {
                 abc@gmail.com
             </div>
         </section>
-        
+
         <section class="c-footer-links-section">
             <div>
                 <b>My Account</b><br>
                 <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
-                <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
+                <a href="../../pages/MemberPages/mChat.html">My Chat</a><br>
                 <a href="../../pages/MemberPages/mSetting.php">Settings</a>
             </div>
             <div>
@@ -1081,10 +1085,7 @@ function getUserFullname($userID) {
         </section>
     </footer>
 
-    <script>
-        const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
-        const unreadCount = <?php echo $unread_count; ?>;
-    </script>
+    <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
     <script src="../../javascript/mainScript.js"></script>
 </body>
 </html>
