@@ -620,7 +620,7 @@ if ($conversations_result) {
                                 </div>
                                 
                                 <button type="submit" name="send_message" class="conversation-form-button">
-                                    <img src="../../assets/images/send-icon.svg" alt="send" id="send-icon" />
+                                    <img src="../../assets/images/send-icon.svg" alt="send"/>
                                 </button>
                             </form>
                         </div>
