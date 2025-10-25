@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lee Xin Ci - ICT Student & Web Developer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        nav {
+            background-color: #667eea;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: flex-start;
+            gap: 2rem;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        nav li:first-child {
+            margin-right: auto;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: normal;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: #667eea;
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        header p {
+            font-size: 1rem;
+            font-weight: normal;
+        }
+
+        section {
+            background: white;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        h3 {
+            color: #764ba2;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .info-item {
+            margin-bottom: 0.8rem;
+        }
+
+        .info-item b {
+            color: #667eea;
+        }
+
+        .hobbies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .hobby-card {
+            border: 1px solid #ddd;
+            padding: 1.5rem;
+            background-color: #fafafa;
+        }
+
+        .hobby-card img {
+            width: 100%;
+            max-width: 100%;
+            height: 150px;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+        }
+
+        .hobby-card p {
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .skills-list {
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .contact-section {
+            text-align: center;
+        }
+
+        .contact-section p {
+            font-size: 1.1rem;
+            margin: 1rem 0;
+        }
+
+        .email-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .email-link:hover {
+            text-decoration: underline;
+        }
+
+        .pages-section {
+            background-color: #f9f9f9;
+        }
+
+        .pages-role {
+            margin-bottom: 2rem;
+        }
+
+        .pages-role h3 {
+            background-color: #667eea;
+            color: white;
+            padding: 0.7rem 1rem;
+            margin-left: -2rem;
+            margin-right: -2rem;
+            margin-bottom: 1rem;
+            margin-top: -2rem;
+        }
+
+        .pages-list {
+            margin-left: 1rem;
+        }
+
+        .pages-list li {
+            margin-bottom: 0.5rem;
+            list-style-position: inside;
+        }
+
+        .pages-list li.sub-page {
+            margin-left: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .pages-list li.sub-page::before {
+            content: "→ ";
+        }
+
+        .pages-list li.note {
+            font-size: 0.9rem;
+            color: #666;
+            list-style: none;
+            margin-left: 2rem;
+            font-weight: normal;
+        }
+
+        .about-intro {
+            line-height: 1.7;
+        }
+
+        .edu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .edu-item {
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-left: 3px solid #667eea;
+        }
+
+        .edu-item b {
+            color: #667eea;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+            }
+
+            .hobbies-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .edu-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="../../pages/CommonPages/aboutUs.php">&larr; Back</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#education">Education</a></li>
+            <li><a href="#hobbies">Hobbies</a></li>
+            <li><a href="#pages">Pages</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h1>Lee Xin Ci</h1>
+        <p>ICT Student | Web Developer | Tech Enthusiast</p>
+    </header>
+
+    <div class="container">
+        <section id="about">
+            <h2>About Me</h2>
+            <div class="about-intro">
+                <p>Hi, I'm Lee Xin Ci, an Information and Communication Technology (ICT) student at APU University with a strong interest in web development and new technologies.</p>
+                <p>I enjoy solving problems through coding and am eager to apply my skills in a practical setting. I'm a fast learner and always open to new challenges.</p>
+                <p>My goal is to create fully functional websites from scratch while continuously learning and improving along the way.</p>
+                
+                <div style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                    <div><b>📍 Location:</b> Selangor, Malaysia</div>
+                    <div><b>🎂 Age:</b> 18</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="education">
+            <h2>Educational Background</h2>
+            <div class="edu-grid">
+                <div class="edu-item">
+                    <b>Institution</b>
+                    Asia Pacific University (APU)
+                </div>
+                <div class="edu-item">
+                    <b>Program</b>
+                    Diploma in ICT
+                </div>
+                <div class="edu-item">
+                    <b>Duration</b>
+                    2024 - 2026
+                </div>
+                <div class="edu-item">
+                    <b>Status</b>
+                    Currently Pursuing
+                </div>
+            </div>
+        </section>
+
+        <section id="hobbies">
+            <h2>Hobbies & Interests</h2>
+            <div class="hobbies-grid">
+                <div class="hobby-card">
+                    <h3>Programming</h3>
+                    <img src="../../assets/images/programming.jpg" alt="Programming">
+                    <p>I love exploring new programming languages and building projects. Currently learning React. I spend my free time working on personal coding projects.</p>
+                    <p class="skills-list"><b>Skills:</b> HTML, CSS, JavaScript, Python, Java, React, MySQL</p>
+                </div>
+
+                <div class="hobby-card">
+                    <h3>Learning Different Languages</h3>
+                    <img src="../../assets/images/languages.jpg" alt="Languages">
+                    <p>I enjoy learning different languages as it allows me to connect with diverse cultures and expand my communication skills.</p>
+                    <p class="skills-list"><b>Languages:</b> Mandarin, English, Malay, Spanish</p>
+                </div>
+
+                <div class="hobby-card">
+                    <h3>Drawing</h3>
+                    <img src="../../assets/images/drawing.png" alt="Drawing">
+                    <p>I enjoy creating digital illustrations in my free time. It allows me to express creativity and improve my sense of visual design.</p>
+                </div>
+
+                <div class="hobby-card">
+                    <h3>Fitness</h3>
+                    <img src="../../assets/images/fitness.jpg" alt="Fitness">
+                    <p>I'm passionate about fitness and working out, as it helps me stay focused, disciplined, and motivated. It keeps me driven in my academic journey.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="pages" class="pages-section">
+            <h2>Website Group Assignment - Pages I Contributed</h2>
+            
+            <div class="pages-role">
+                <h3>Admin Pages</h3>
+                <ul class="pages-list">
+                    <li>Edit Profile</li>
+                </ul>
+            </div>
+
+            <div class="pages-role">
+                <h3>Blog Pages</h3>
+                <ul class="pages-list">
+                    <li class="sub-page">Main Blog (showing all blogs)</li>
+                    <li class="sub-page">Read Blog</li>
+                    <li class="sub-page">Add Blog</li>
+                </ul>
+            </div>
+
+            <div class="pages-role">
+                <h3>Member Pages</h3>
+                <ul class="pages-list">
+                    <li class="sub-page">Edit Profile</li>
+                    <li class="sub-page">Settings</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="contact" class="contact-section">
+            <h2>Contact</h2>
+            <p>Feel free to reach out to me:</p>
+            <p><a href="mailto:0903xinci@gmail.com" class="email-link">0903xinci@gmail.com</a></p>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Lee Xin Ci. All rights reserved.</p>
+    </footer>
+
+</body>
+
+</html>
