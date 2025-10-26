@@ -34,7 +34,8 @@ if ($stmt = $connection->prepare($query)) {
 
         if ($userData) {
             // Get user initials
-            function getInitials($name) {
+            function getInitials($name)
+            {
                 $words = explode(' ', trim($name));
                 if (count($words) >= 2) {
                     return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
@@ -61,6 +62,18 @@ if ($stmt = $connection->prepare($query)) {
                     $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
                 }
                 $eventsJoinedStmt->close();
+            }
+
+            $blogsPostedQuery = "SELECT COUNT(*) as blogsPosted FROM tblblog WHERE userID = ?";
+
+            if ($blogStmt = $connection->prepare($blogsPostedQuery)) {
+                $blogStmt->bind_param("i", $userID);
+                if ($blogStmt->execute()) {
+                    $blogResult = $blogStmt->get_result();
+                    $blogData = $blogResult->fetch_assoc();
+                    $blogsPosted = $blogData['blogsPosted'] ?? 0;
+                }
+                $blogStmt->close();
             }
         }
     }
@@ -97,6 +110,7 @@ if ($userRank == 0 && isset($userData['point'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -236,7 +250,7 @@ if ($userRank == 0 && isset($userData['point'])) {
             background: none;
             border: none;
             cursor: pointer;
-            padding: 0.75rem;    
+            padding: 0.75rem;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
@@ -304,7 +318,8 @@ if ($userRank == 0 && isset($userData['point'])) {
             color: var(--Gray);
         }
 
-        .leaderboard, .tradelisting {
+        .leaderboard,
+        .tradelisting {
             background: var(--bg-color);
             border: 1px solid var(--Gray);
             border-radius: 16px;
@@ -312,7 +327,8 @@ if ($userRank == 0 && isset($userData['point'])) {
             margin-top: 2rem;
         }
 
-        .leaderboard-title, .tradelisting-title {
+        .leaderboard-title,
+        .tradelisting-title {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--text-color);
@@ -673,50 +689,51 @@ if ($userRank == 0 && isset($userData['point'])) {
         }
     </style>
 </head>
+
 <body>
     <?php if ($showWelcomePopup): ?>
-    <!-- Welcome Popup -->
-    <div class="welcome-overlay" id="welcomeOverlay">
-        <div class="welcome-popup">
-            <h2 class="welcome-title">Welcome Back!</h2>
-            <p class="welcome-message">
-                Hello, <span class="welcome-username"><?php echo htmlspecialchars($userName); ?></span><br>
-                Great to see you again! 🌱
-            </p>
-            <button class="welcome-close-btn" onclick="closeWelcomePopup()">
-                Get Started
-            </button>
+        <!-- Welcome Popup -->
+        <div class="welcome-overlay" id="welcomeOverlay">
+            <div class="welcome-popup">
+                <h2 class="welcome-title">Welcome Back!</h2>
+                <p class="welcome-message">
+                    Hello, <span class="welcome-username"><?php echo htmlspecialchars($userName); ?></span><br>
+                    Great to see you again! 🌱
+                </p>
+                <button class="welcome-close-btn" onclick="closeWelcomePopup()">
+                    Get Started
+                </button>
+            </div>
         </div>
-    </div>
 
-    <script>
-        // Show welcome popup on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            const welcomeOverlay = document.getElementById('welcomeOverlay');
-            if (welcomeOverlay) {
-                setTimeout(() => {
-                    welcomeOverlay.classList.add('show');
-                }, 100);
-            }
-        });
+        <script>
+            // Show welcome popup on page load
+            window.addEventListener('DOMContentLoaded', function() {
+                const welcomeOverlay = document.getElementById('welcomeOverlay');
+                if (welcomeOverlay) {
+                    setTimeout(() => {
+                        welcomeOverlay.classList.add('show');
+                    }, 100);
+                }
+            });
 
-        function closeWelcomePopup() {
-            const welcomeOverlay = document.getElementById('welcomeOverlay');
-            if (welcomeOverlay) {
-                welcomeOverlay.classList.remove('show');
-                setTimeout(() => {
-                    welcomeOverlay.style.display = 'none';
-                }, 300);
+            function closeWelcomePopup() {
+                const welcomeOverlay = document.getElementById('welcomeOverlay');
+                if (welcomeOverlay) {
+                    welcomeOverlay.classList.remove('show');
+                    setTimeout(() => {
+                        welcomeOverlay.style.display = 'none';
+                    }, 300);
+                }
             }
-        }
 
-        document.addEventListener('click', function(e) {
-            const welcomeOverlay = document.getElementById('welcomeOverlay');
-            if (e.target === welcomeOverlay) {
-                closeWelcomePopup();
-            }
-        });
-    </script>
+            document.addEventListener('click', function(e) {
+                const welcomeOverlay = document.getElementById('welcomeOverlay');
+                if (e.target === welcomeOverlay) {
+                    closeWelcomePopup();
+                }
+            });
+        </script>
     <?php endif; ?>
 
     <div id="cover" class="" onclick="hideMenu()"></div>
@@ -808,11 +825,11 @@ if ($userRank == 0 && isset($userData['point'])) {
                         </div>
                         <div class="profile-bio-wrapper">
                             <p class="profile-bio">
-                            <?php 
-                            echo $userData['bio'] 
-                                ? htmlspecialchars($userData['bio']) 
-                                : '<span style="color: var(--Gray);">This user has yet to set their bio</span>';
-                            ?>
+                                <?php
+                                echo $userData['bio']
+                                    ? htmlspecialchars($userData['bio'])
+                                    : '<span style="color: var(--Gray);">This user has yet to set their bio</span>';
+                                ?>
                             </p>
                         </div>
                     </div>
@@ -886,146 +903,149 @@ if ($userRank == 0 && isset($userData['point'])) {
             </section>
 
             <section class="tradelisting">
-    <h2 class="tradelisting-title">Your Trade Listings</h2>
+                <h2 class="tradelisting-title">Your Trade Listings</h2>
 
-    <?php
-    $userID = $_SESSION['userID'];
+                <?php
+                $userID = $_SESSION['userID'];
 
-    $query = "SELECT * FROM tbltrade_listings WHERE userID = ? AND status = 'active' ORDER BY dateListed DESC";
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param("i", $userID);
-    $stmt->execute();
-    $result = $stmt->get_result();
+                $query = "SELECT * FROM tbltrade_listings WHERE userID = ? AND status = 'active' ORDER BY dateListed DESC";
+                $stmt = $connection->prepare($query);
+                $stmt->bind_param("i", $userID);
+                $stmt->execute();
+                $result = $stmt->get_result();
 
-    if ($result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
-            // Determine card type based on category
-            $cardClass = 'item-special';
-            if ($row["category"] == 'Plants') {
-                $cardClass = 'plant-special';
-            } elseif ($row["category"] == 'Seeds & Saplings') {
-                $cardClass = 'plant-special';
-            } elseif ($row["category"] == 'Garden Decor') {
-                $cardClass = 'item-special';
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        // Determine card type based on category
+                        $cardClass = 'item-special';
+                        if ($row["category"] == 'Plants') {
+                            $cardClass = 'plant-special';
+                        } elseif ($row["category"] == 'Seeds & Saplings') {
+                            $cardClass = 'plant-special';
+                        } elseif ($row["category"] == 'Garden Decor') {
+                            $cardClass = 'item-special';
+                        }
+
+                        // Format date
+                        $formattedDate = formatRelativeDate($row["dateListed"]);
+
+                        // Get user initials for avatar
+                        $userInitials = getUserInitials($row["userID"]);
+                        $userFullname = getUserFullname($row["userID"]);
+                ?>
+                        <div class="listings-grid">
+                            <div class="listing-card">
+                                <div class="listing-image">
+                                    <img src="<?php echo !empty($row['imageUrl']) ? htmlspecialchars($row['imageUrl']) : '../../assets/images/placeholder-image.jpg'; ?>"
+                                        alt="<?php echo htmlspecialchars($row['title']); ?>"
+                                        style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div class="listing-content">
+                                    <div class="listing-header">
+                                        <div>
+                                            <div class="listing-title"><?php echo htmlspecialchars($row['title']); ?></div>
+                                            <div class="listing-category c-text"><?php echo htmlspecialchars($row['category']); ?></div>
+                                        </div>
+                                    </div>
+                                    <div class="listing-description"><?php echo htmlspecialchars($row['description']); ?></div>
+
+                                    <div class="listing-details">
+                                        <span class="detail-badge"><?php echo htmlspecialchars($row['itemCondition']); ?></span>
+                                        <span class="detail-badge"><?php echo htmlspecialchars($row['category']); ?></span>
+                                        <?php if (!empty($row['species'])): ?>
+                                            <span class="detail-badge"><?php echo htmlspecialchars($row['species']); ?></span>
+                                        <?php endif; ?>
+                                        <?php if (!empty($row['growthStage'])): ?>
+                                            <span class="detail-badge"><?php echo htmlspecialchars($row['growthStage']); ?></span>
+                                        <?php endif; ?>
+                                        <?php if (!empty($row['brand'])): ?>
+                                            <span class="detail-badge"><?php echo htmlspecialchars($row['brand']); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div class="listing-meta">
+                                        <div>
+                                            Created on
+                                        </div>
+                                        <div class="listing-date c-text">
+                                            <?php if (!empty($row['dateListed'])): ?>
+                                                <?php echo htmlspecialchars($row['dateListed']); ?>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php
+                    }
+                } else {
+                    ?>
+                    <div class="no-listings">
+                        <p>You have no trade listings yet.</p>
+                        <a href="../../pages/CommonPages/mainTrade.php" class="c-btn c-btn-primary">Create Your First Listing</a>
+                    </div>
+                <?php } ?>
+
+            </section>
+
+            <?php
+            // Helper function to format relative dates
+            function formatRelativeDate($dateString)
+            {
+                $date = new DateTime($dateString);
+                $now = new DateTime();
+                $interval = $date->diff($now);
+
+                if ($interval->days == 0) {
+                    return 'Today';
+                } elseif ($interval->days == 1) {
+                    return 'Yesterday';
+                } elseif ($interval->days < 7) {
+                    return $interval->days . ' days ago';
+                } else {
+                    return $date->format('n/j/Y');
+                }
             }
 
-            // Format date
-            $formattedDate = formatRelativeDate($row["dateListed"]);
+            // Helper function to get user initials
+            function getUserInitials($userID)
+            {
+                global $connection;
+                $query = "SELECT fullname FROM tblusers WHERE userID = ?";
+                $stmt = $connection->prepare($query);
+                $stmt->bind_param("i", $userID);
+                $stmt->execute();
+                $result = $stmt->get_result();
 
-            // Get user initials for avatar
-            $userInitials = getUserInitials($row["userID"]);
-            $userFullname = getUserFullname($row["userID"]);
-    ?>
-    <div class="listings-grid">
-        <div class="listing-card">
-            <div class="listing-image">
-                <img src="<?php echo !empty($row['imageUrl']) ? htmlspecialchars($row['imageUrl']) : '../../assets/images/placeholder-image.jpg'; ?>" 
-                     alt="<?php echo htmlspecialchars($row['title']); ?>" 
-                     style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
-            <div class="listing-content">
-                <div class="listing-header">
-                    <div>
-                        <div class="listing-title"><?php echo htmlspecialchars($row['title']); ?></div>
-                        <div class="listing-category c-text"><?php echo htmlspecialchars($row['category']); ?></div>
-                    </div>
-                </div>
-                <div class="listing-description"><?php echo htmlspecialchars($row['description']); ?></div>
+                if ($result->num_rows > 0) {
+                    $user = $result->fetch_assoc();
+                    $names = explode(' ', $user['fullname']);
+                    $initials = '';
+                    foreach ($names as $name) {
+                        $initials .= strtoupper(substr($name, 0, 1));
+                    }
+                    return substr($initials, 0, 2);
+                }
+                return 'UU'; // Unknown User
+            }
 
-                <div class="listing-details">
-                    <span class="detail-badge"><?php echo htmlspecialchars($row['itemCondition']); ?></span>
-                    <span class="detail-badge"><?php echo htmlspecialchars($row['category']); ?></span>
-                    <?php if (!empty($row['species'])): ?>
-                        <span class="detail-badge"><?php echo htmlspecialchars($row['species']); ?></span>
-                    <?php endif; ?>
-                    <?php if (!empty($row['growthStage'])): ?>
-                        <span class="detail-badge"><?php echo htmlspecialchars($row['growthStage']); ?></span>
-                    <?php endif; ?>
-                    <?php if (!empty($row['brand'])): ?>
-                        <span class="detail-badge"><?php echo htmlspecialchars($row['brand']); ?></span>
-                    <?php endif; ?>
-                </div>
+            // Helper function to get user fullname
+            function getUserFullname($userID)
+            {
+                global $connection;
+                $query = "SELECT fullname FROM tblusers WHERE userID = ?";
+                $stmt = $connection->prepare($query);
+                $stmt->bind_param("i", $userID);
+                $stmt->execute();
+                $result = $stmt->get_result();
 
-                <div class="listing-meta">
-                    <div>
-                        Created on
-                    </div>
-                    <div class="listing-date c-text">
-                    <?php if (!empty($row['dateListed'])): ?>
-                        <?php echo htmlspecialchars($row['dateListed']); ?>
-                    <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php
-        }
-    } else {
-    ?>
-    <div class="no-listings">
-        <p>You have no trade listings yet.</p>
-        <a href="../../pages/CommonPages/mainTrade.php" class="c-btn c-btn-primary">Create Your First Listing</a>
-    </div>
-    <?php } ?>
-    
-</section>
-
-<?php
-// Helper function to format relative dates
-function formatRelativeDate($dateString) {
-    $date = new DateTime($dateString);
-    $now = new DateTime();
-    $interval = $date->diff($now);
-
-    if ($interval->days == 0) {
-        return 'Today';
-    } elseif ($interval->days == 1) {
-        return 'Yesterday';
-    } elseif ($interval->days < 7) {
-        return $interval->days . ' days ago';
-    } else {
-        return $date->format('n/j/Y');
-    }
-}
-
-// Helper function to get user initials
-function getUserInitials($userID) {
-    global $connection;
-    $query = "SELECT fullname FROM tblusers WHERE userID = ?";
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param("i", $userID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-        $names = explode(' ', $user['fullname']);
-        $initials = '';
-        foreach ($names as $name) {
-            $initials .= strtoupper(substr($name, 0, 1));
-        }
-        return substr($initials, 0, 2);
-    }
-    return 'UU'; // Unknown User
-}
-
-// Helper function to get user fullname
-function getUserFullname($userID) {
-    global $connection;
-    $query = "SELECT fullname FROM tblusers WHERE userID = ?";
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param("i", $userID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-        return $user['fullname'];
-    }
-    return 'Unknown User';
-}
-?>
+                if ($result->num_rows > 0) {
+                    $user = $result->fetch_assoc();
+                    return $user['fullname'];
+                }
+                return 'Unknown User';
+            }
+            ?>
 
             <a href="../../pages/MemberPages/mQuiz.php" class="floating-btn" title="Take a Quiz">
                 <img src="../../assets/images/quiz-icon-dark.svg" alt="Quiz">
@@ -1091,4 +1111,5 @@ function getUserFullname($userID) {
     </script>
     <script src="../../javascript/mainScript.js"></script>
 </body>
+
 </html>

@@ -31,31 +31,32 @@ if ($profileUserID <= 0) {
     }
     // Fetch profile user data with proper error handling
     $query = "SELECT fullName, username, bio, point, tradesCompleted, country, userType FROM tblusers WHERE userID = ?";
-    
+
     if ($stmt = $connection->prepare($query)) {
         $stmt->bind_param("i", $profileUserID);
-        
+
         if ($stmt->execute()) {
             $result = $stmt->get_result();
-            
+
             if ($result->num_rows === 0) {
                 showErrorPopup("User profile not found.", $previousPage);
             } else {
                 $userData = $result->fetch_assoc();
                 $profileUserIsAdmin = ($userData['userType'] === 'admin');
-                
+
                 // Get user initials
-                function getInitials($name) {
+                function getInitials($name)
+                {
                     $words = explode(' ', trim($name));
                     if (count($words) >= 2) {
                         return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
                     }
                     return strtoupper(substr($words[0], 0, 2));
                 }
-                
+
                 $initials = getInitials($userData['fullName']);
                 $tradesCompleted = $userData['tradesCompleted'] ?? 0;
-                
+
                 // Only get events joined count for members (non-admin profile users)
                 if (!$profileUserIsAdmin) {
                     $eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
@@ -65,7 +66,7 @@ if ($profileUserID <= 0) {
                                         AND r.status = 'active' 
                                         AND e.endDate < CURDATE() 
                                         AND e.status != 'cancelled'";
-                    
+
                     if ($eventsJoinedStmt = $connection->prepare($eventsJoinedQuery)) {
                         $eventsJoinedStmt->bind_param("i", $profileUserID);
                         if ($eventsJoinedStmt->execute()) {
@@ -74,6 +75,18 @@ if ($profileUserID <= 0) {
                             $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
                         }
                         $eventsJoinedStmt->close();
+                    }
+
+                    $blogsPostedQuery = "SELECT COUNT(*) as blogsPosted FROM tblblog WHERE userID = ?";
+
+                    if ($blogStmt = $connection->prepare($blogsPostedQuery)) {
+                        $blogStmt->bind_param("i", $profileUserID);
+                        if ($blogStmt->execute()) {
+                            $blogResult = $blogStmt->get_result();
+                            $blogData = $blogResult->fetch_assoc();
+                            $blogsPosted = $blogData['blogsPosted'] ?? 0;
+                        }
+                        $blogStmt->close();
                     }
                 }
             }
@@ -89,6 +102,7 @@ if ($profileUserID <= 0) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,7 +112,7 @@ if ($profileUserID <= 0) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    
+
     <style>
         .profile-container {
             max-width: 1200px;
@@ -314,9 +328,10 @@ if ($profileUserID <= 0) {
         }
     </style>
 </head>
+
 <body>
     <div id="cover" class="" onclick="hideMenu()"></div>
-    
+
     <header>
         <!-- Logo + Navbar -->
         <section class="c-logo-section">
@@ -330,7 +345,7 @@ if ($profileUserID <= 0) {
             <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
             <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
             <div id="sidebarNav" class="c-navbar-side-menu">
-                
+
                 <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
                 <div class="c-navbar-side-items">
                     <section class="c-navbar-side-more">
@@ -425,7 +440,7 @@ if ($profileUserID <= 0) {
         </section>
     </header>
     <hr>
-    
+
     <!-- Main Content -->
     <main class="content" id="content">
         <section class="profile-container content">
@@ -447,11 +462,11 @@ if ($profileUserID <= 0) {
                         </div>
                         <div class="profile-bio-wrapper">
                             <p class="profile-bio">
-                            <?php 
-                            echo $userData['bio'] 
-                                ? htmlspecialchars($userData['bio']) 
-                                : '<span style="color: var(--Gray);">This user has yet to set their bio</span>';
-                            ?>
+                                <?php
+                                echo $userData['bio']
+                                    ? htmlspecialchars($userData['bio'])
+                                    : '<span style="color: var(--Gray);">This user has yet to set their bio</span>';
+                                ?>
                             </p>
                         </div>
                     </div>
@@ -461,9 +476,9 @@ if ($profileUserID <= 0) {
                         <a href="../../pages/MemberPages/mCreateTicket.php" class="action-btn" title="Report User">
                             <img src="../../assets/images/report-icon-light.svg" alt="Report" class="report-icon">
                         </a>
-                        <a href="../../pages/MemberPages/mChat.php?start_chat_with=<?php echo urlencode($profileUserID); ?>" 
-                        class="action-btn" 
-                        title="Chat with <?php echo htmlspecialchars($userData['fullName']); ?>">
+                        <a href="../../pages/MemberPages/mChat.php?start_chat_with=<?php echo urlencode($profileUserID); ?>"
+                            class="action-btn"
+                            title="Chat with <?php echo htmlspecialchars($userData['fullName']); ?>">
                             <img src="../../assets/images/chat-light.svg" alt="Chat" class="chat-icon">
                         </a>
                     </div>
@@ -471,24 +486,24 @@ if ($profileUserID <= 0) {
             </div>
 
             <?php if (!$profileUserIsAdmin): ?>
-            <div class="stats-bar">
-                <div class="stat-item">
-                    <span class="stat-value"><?php echo $blogsPosted; ?></span>
-                    <span class="stat-label">Blogs Posted</span>
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <span class="stat-value"><?php echo $blogsPosted; ?></span>
+                        <span class="stat-label">Blogs Posted</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value"><?php echo $tradesCompleted; ?></span>
+                        <span class="stat-label">Trades Completed</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value"><?php echo $eventsJoined; ?></span>
+                        <span class="stat-label">Events Joined</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value"><?php echo number_format($userData['point']); ?></span>
+                        <span class="stat-label">Points</span>
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-value"><?php echo $tradesCompleted; ?></span>
-                    <span class="stat-label">Trades Completed</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value"><?php echo $eventsJoined; ?></span>
-                    <span class="stat-label">Events Joined</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value"><?php echo number_format($userData['point']); ?></span>
-                    <span class="stat-label">Points</span>
-                </div>
-            </div>
             <?php endif; ?>
         </section>
     </main>
@@ -503,48 +518,48 @@ if ($profileUserID <= 0) {
         </div>
         <div class="results" id="results"></div>
     </section>
-    
+
     <?php if (!$isAdmin): ?>
-    <!-- Footer (Member Only) -->
-    <hr>
-    <footer>
-        <section class="c-footer-info-section">
-            <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
-            <div class="c-text">ReLeaf</div>
-            <div class="c-text c-text-center">
-                "Relief for the Planet, One Leaf at a Time."
-                <br>
-                "Together, We Can ReLeaf the Earth."
-            </div>
-            <div class="c-text c-text-label">
-                +60 12 345 6789
-            </div>
-            <div class="c-text">
-                abc@gmail.com
-            </div>
-        </section>
-        
-        <section class="c-footer-links-section">
-            <div>
-                <b>My Account</b><br>
-                <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
-                <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
-                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
-            </div>
-            <div>
-                <b>Helps</b><br>
-                <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
-                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
-            </div>
-            <div>
-                <b>Community</b><br>
-                <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
-                <a href="../../pages/CommonPages/mainBlog.php">Blogs</a><br>
-                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-            </div>
-        </section>
-    </footer>
+        <!-- Footer (Member Only) -->
+        <hr>
+        <footer>
+            <section class="c-footer-info-section">
+                <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                <div class="c-text">ReLeaf</div>
+                <div class="c-text c-text-center">
+                    "Relief for the Planet, One Leaf at a Time."
+                    <br>
+                    "Together, We Can ReLeaf the Earth."
+                </div>
+                <div class="c-text c-text-label">
+                    +60 12 345 6789
+                </div>
+                <div class="c-text">
+                    abc@gmail.com
+                </div>
+            </section>
+
+            <section class="c-footer-links-section">
+                <div>
+                    <b>My Account</b><br>
+                    <a href="../../pages/MemberPages/mProfile.php">My Account</a><br>
+                    <a href="../../pages/MemberPages/mChat.php">My Chat</a><br>
+                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                </div>
+                <div>
+                    <b>Helps</b><br>
+                    <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
+                    <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
+                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                </div>
+                <div>
+                    <b>Community</b><br>
+                    <a href="../../pages/CommonPages/mainEvent.php">Events</a><br>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blogs</a><br>
+                    <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                </div>
+            </section>
+        </footer>
     <?php endif; ?>
 
     <script>
@@ -553,6 +568,7 @@ if ($profileUserID <= 0) {
     </script>
     <script src="../../javascript/mainScript.js"></script>
 </body>
+
 </html>
 
 <?php
