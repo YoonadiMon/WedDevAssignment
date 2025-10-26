@@ -158,7 +158,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit();
             } else {
-                $registerError = 'Registration failed. Please try again. Error: ' . mysqli_error($connection);
+                $registerError = 'Registration failed. Please try again.';  
+                error_log('Registration error: ' . mysqli_error($connection));
             }
         }
     }
@@ -358,7 +359,7 @@ mysqli_close($connection);
                 gap: 0.5rem;
                 background: var(--Red);
                 color: var(--White);
-                padding: 1rem;
+                padding: 0.5rem 0.75rem;
                 border-radius: 8px;
                 margin-bottom: 1rem;
                 font-size: 0.9rem;
@@ -366,6 +367,7 @@ mysqli_close($connection);
 
             .error-message {
                 margin: 0;
+                padding: 0.3rem;
                 flex: 1;
             }
 
@@ -375,7 +377,6 @@ mysqli_close($connection);
                 object-fit: contain;
             }
 
-            .error-message.show,
             .error-message-wrapper.show {
                 display: flex;
                 animation: shake 0.3s ease;
@@ -405,7 +406,6 @@ mysqli_close($connection);
                 object-fit: contain;
             }
 
-            .success-message.show,
             .success-message-wrapper.show {
                 display: flex;
                 animation: shake 0.3s ease;
@@ -524,14 +524,14 @@ mysqli_close($connection);
                 <?php if ($registrationSuccess): ?>
                 <section class="success-message-wrapper show">
                     <img src="../../assets/images/circle-check-icon.svg" alt="Success">
-                    <section class="success-message">Registration successful! Please login to proceed.</section>
+                    <span class="success-message">Registration successful! Please login to proceed.</span>
                 </section>
                 <?php endif; ?>
                 
                 <?php if (!empty($loginError)): ?>
                 <section class="error-message-wrapper show">
                     <img src="../../assets/images/warning-icon.svg" alt="Warning">
-                    <section class="error-message"><?php echo htmlspecialchars($loginError); ?></section>
+                    <span class="error-message"><?php echo htmlspecialchars($loginError); ?></span>
                 </section>
                 <?php endif; ?>
 
