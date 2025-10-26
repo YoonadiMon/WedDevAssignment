@@ -1028,6 +1028,7 @@ if ($stmt = $connection->prepare($query)) {
             }
         });
     </script>
+    <script src="../../javascript/mainScript.js"></script>
 </body>
 </html>
 
