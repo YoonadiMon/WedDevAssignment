@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ng Xiao Wei - Personal Website</title>
+    <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
+    <style>
+        :root {
+            --primary: #d8a7a7;
+            --primary-light: #e8c9c9;
+            --primary-lighter: #f5eaea;
+            --primary-lightest: #f9f9f9; 
+            --primary-dark: #b68686;
+            --primary-darker: #8a6c6c; 
+            --bg-body: #f6f6f6;
+            --bg-card: #ffffff; 
+            --text-primary: #222222;
+            --text-secondary: #555555;
+            --white: #ffffff;
+            --border: #e0e0e0;
+            --shadow: rgba(0, 0, 0, 0.07); 
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-lighter) 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-button {
+            font-size: 20px;
+            color: var(--primary-darker);
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+
+        header {
+            background: var(--white);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeUp 0.8s ease-out;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: var(--primary-darker);
+            font-weight: 300;
+        }
+
+        .section {
+            background: var(--white);
+            backdrop-filter: blur(10px);
+            padding: 35px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px var(--shadow);
+            animation: fadeInUp 0.8s ease-out;
+            border: 2px solid var(--primary-lightest);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary-lighter);
+        }
+
+        .profile-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .profile-image {
+            width: 200px;
+            height: 250px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px var(--shadow);
+            object-fit: cover;
+            border: 2px solid var(--primary-lighter);
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .info-item {
+            background: linear-gradient(135deg, var(--primary-lightest) 0%, var(--primary-lighter) 100%);
+            padding: 15px;
+            border-radius: 10px;
+            color: var(--primary-darker);
+            text-align: center;
+            border: 2px solid var(--primary-light);
+        }
+
+        .info-item strong {
+            display: block;
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .info-item span {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%);
+        }
+
+        .timeline-item {
+            
+            position: relative;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid var(--primary-lightest);
+        }
+
+        .timeline-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px var(--shadow);
+        }
+
+        .timeline-item a{
+            text-decoration: none;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 25px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid var(--white);
+            box-shadow: 0 0 0 3px var(--primary-lighter);
+        }
+
+        .timeline-title {
+            font-weight: bold;
+            color: var(--primary-darker);
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .timeline-institution {
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+
+        .timeline-date {
+            color: var(--primary-dark);
+            font-size: 0.9em;
+        }
+
+        .hobbies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .hobby-card {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid var(--primary-lightest);
+        }
+
+        .hobby-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px var(--shadow);
+        }
+
+        .hobby-images {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .hobby-images img {
+            height: 120px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px var(--shadow);
+            border: 2px solid var(--primary-lighter);
+        }
+
+        .hobby-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+
+        .hobby-description {
+            margin-top: 20px;
+            justify-content: center;
+            text-align: center;
+            color: var(--primary);
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .skills-section {
+            margin-top: 20px;
+        }
+
+        .skill-item {
+            margin-bottom: 25px;
+        }
+        
+        .skill-item h3{
+            font-size: 1.2em;
+            color: var(--primary-dark); 
+            margin-bottom: 10px;
+        }
+
+        .skill-item p{
+            color: var(--text-secondary); 
+            line-height: 1.6;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .project-card {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid var(--primary-lightest);
+            box-shadow: 0 8px 25px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px var(--shadow);
+        }
+
+        .project-title {
+            color: var(--primary-dark);
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .project-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        .project-link {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .project-link:hover {
+            color: var(--primary-dark);
+        }
+
+        .releaf p{
+            color: var(--primary-darker);
+        }
+
+        .releaf-list {
+            margin: 10px 0 0 20px;
+            padding: 0;
+            list-style-type: disc;
+            line-height: 1.6;
+        }
+
+        .releaf-list li {
+            margin-bottom: 6px;
+        }
+
+        .contact {
+            text-align: left;
+            margin-top: 15px;
+            color: var(--text-secondary);
+        }
+
+        .contact p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .contact strong {
+            color: var(--primary-dark);
+            margin-right: 8px;
+        }
+
+        .contact a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease, text-decoration 0.3s ease;
+        }
+
+        .contact a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--primary-dark);
+            margin-top: 30px;
+            font-weight: 500;
+        }
+
+        /* Phones (≤768px) */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            h2 {
+                font-size: 1.4em;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .profile-card {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .profile-image {
+                width: 140px;
+                height: 180px;
+            }
+
+            .profile-info {
+                min-width: 100%;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .hobbies-grid,
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .hobby-images img {
+                height: 100px;
+            }
+
+            .timeline {
+                padding-left: 20px;
+            }
+
+            .timeline::before {
+                left: 8px;
+            }
+
+            .timeline-item::before {
+                left: -25px;
+            }
+
+            .contact p {
+                font-size: 14px;
+            }
+        }
+
+        /* Small Mobile  */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.6em;
+            }
+
+            h2 {
+                font-size: 1.2em;
+            }
+
+            .profile-image {
+                width: 120px;
+                height: 160px;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            .project-card,
+            .hobby-card {
+                padding: 18px;
+            }
+
+            .timeline-item {
+                padding: 15px;
+            }
+
+            footer {
+                font-size: 0.9em;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../../pages/CommonPages/aboutUs.php" class="back-button">← Back to About Us</a>
+        <header>
+            <h1>Ng Xiao Wei</h1>
+            <p class="subtitle">Information Communication Technology Student | Visual Thinker</p>
+        </header>
+
+        <div class="section">
+            <h2>About Me</h2>
+            <div class="profile-card">
+                <img src="../../assets/portfolio/xw-profile-pic.jpg" alt="Ng Xiao Wei" class="profile-image">
+                <div class="profile-info">
+                    <p>
+                        Hello! I'm a passionate ICT student currently in my fourth semester at Asia Pacific University. 
+                        I have a strong interest in technology, creative arts, and gaming. I enjoy combining technical 
+                        skills with creativity to build interesting projects and explore new possibilities in the digital world.
+                    </p>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Age</strong>
+                            <span>19</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Intake</strong>
+                            <span>UCDF2405ICT</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Educational Journey</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <a href="https://www.apu.edu.my/" target="_blank">
+                        <div class="timeline-title">Diploma in Information Communication Technology</div>
+                        <div class="timeline-institution">Asia Pacific University</div>
+                        <div class="timeline-date">2024 - 2026</div>
+                    </a>
+                </div>
+                <div class="timeline-item">
+                    <a href="https://chspj.edu.my/">
+                        <div class="timeline-title">Secondary School Education (Science Stream)</div>
+                        <div class="timeline-institution">SMJK Katholik</div>
+                        <div class="timeline-date">2019 - 2023</div>
+                    </a>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-title">Primary School Education</div>
+                    <div class="timeline-institution">SJK(C) Puay Chai</div>
+                    <div class="timeline-date">2013 - 2018</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Hobbies & Interests</h2>
+            <div class="hobbies-grid">
+                <div class="hobby-card">
+                    <div class="hobby-images">
+                        <img src="../../assets/portfolio/diy1.jpg" alt="DIY craft 1">
+                        <img src="../../assets/portfolio/diy2.jpg" alt="DIY craft 2">
+                        <img src="../../assets/portfolio/diy3.jpg" alt="DIY craft 3">
+                    </div>
+                    <div class="hobby-title">DIY Activities</div>
+                </div>
+                
+                <div class="hobby-card">
+                    <div class="hobby-images">
+                        <img src="../../assets/portfolio/game.jpg" alt="Gaming">
+                    </div>
+                    <div class="hobby-title">Gaming</div>
+                </div>
+                
+                <div class="hobby-card">
+                    <div class="hobby-images">
+                        <img src="../../assets/portfolio/video.gif" alt="Video editing">
+                    </div>
+                    <div class="hobby-title">Video Editing</div>
+                </div>
+            </div>
+            <div class="hobby-description">
+                Other: Watching dramas, Drawing
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Skills & Expertise</h2>
+            <div class="skills-section">
+                <div class="skill-item">
+                    <h3>Canva & Figma</h3>
+                    <p> 
+                        Experienced using Canva for branding and promotional designs, and Figma for 
+                        prototyping web and app interfaces.
+                    </p>
+                </div>
+
+                <div class="skill-item">
+                    <h3>Web Development Design</h3>
+                    <p>
+                        Recently learnt building responsive and minimal web pages using HTML, CSS, Javascript, PHP and MySQL. 
+                    </p>
+                </div>
+
+                <div class="skill-item">
+                    <h3>Python & Java</h3>
+                    <p>
+                        Knows basic problem-solving and application development using Python and Java. 
+                    </p>
+                </div>
+
+                <div class="skill-item">
+                    <h3>Creative Design & Video Editing</h3>
+                    <p>
+                        I edit short videos, design visuals, and craft layouts that reflect both creativity and clarity.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Projects</h2>
+            <p>
+                I’m still learning and exploring new tools and technologies as I grow in this field.
+                These are some projects I've done in the past.
+            </p>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <h3 class="project-title">Penny Juice Website Redesign</h3>
+                    <p class="project-description">
+                        This was a redesign of the existing Penny Juice website, 
+                        focusing on improving the overall layout, color balance, and navigation flow.    
+                    </p>
+                    <a href="https://www.figma.com/design/sQHXLzFcml0fioRF3tMHqM/PennyJuice-Redesign?node-id=15-2&t=kWSatYX9YVux1gdM-1"
+                        target="_blank" class="project-link">View on Figma →</a>
+                </div>
+
+                <div class="project-card">
+                    <h3 class="project-title">ReLoved</h3>
+                    <p class="project-description">
+                        ReLoved is a Figma prototype built during my first hackathon with my team.
+                        It’s a sustainable trading platform to exchange pre-loved items. 
+                    </p>
+                    <a href="https://devpost.com/software/reloved" target="_blank" class="project-link">View on Devpost →</a>
+                </div>
+
+                <div class="project-card">
+                    <h3 class="project-title">Shadows of Suspicion</h3>
+                    <p class="project-description">
+                        A mystery-themed fundraising event organized by my team where I contributed to the 
+                        marketing design and poster creation.
+                    </p>
+                    <a href="https://www.canva.com/design/DAGVnPXZV3w/rA8GRDoUS8T0kRLxesEIqA/edit?utm_content=DAGVnPXZV3w&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
+                     target="_blank" class="project-link">View on Canva →</a>
+                </div>
+
+                <div class="project-card">
+                    <h3 class="project-title">Car Sales System</h3>
+                    <p class="project-description">
+                        A basic desktop application built with my team using Java Swing.
+                        Includes CRUD functionality and admin management features.
+                    </p>
+                    <a href="https://github.com/xweii06/ACSSJava" target="_blank" class="project-link">View on GitHub →</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section releaf">
+            <h2>ReLeaf</h2>
+            <p><b>In this project, I’ve contributed to these main features:</b></p>
+            <ul class="releaf-list">
+                <li><b>Member Features:</b> Register+Login, Home, Profile-viewing, Chat Box</li>
+                <li><b>General Features:</b> Event (Event-browsing, Creation, Registration, Management), FAQ</li>
+                <li><b>Admin Pages:</b> Admin Dashboard, User Management, Event Management</li>
+            </ul>
+            <br>
+            <ul class="releaf-list">
+                <li><b>Back-end PHP:</b> sessionCheck, errorPopUp. getUnread, tradeRequest, logOut</li>
+                <li><b>Database:</b> tblusers, tblevents, tblregistration, tblfaq, tblconversation, tblmessages, tbltrade_requests</li>
+                <li><b>Others:</b> Global Search Bar, Responsive Design, NgXiaoWei.html</li>
+            </ul>
+            <br>
+            <p>ReLeaf was a collaborative web project where I mainly contributed to the event, chat, 
+                and admin modules. Through this project, I learned teamwork, debugging, and managing 
+                both front-end and back-end components.</p>
+        </div>
+        
+
+        <div class="section">
+            <h2>Contact</h2>
+            <div class="contact">
+                <p><strong>Email:</strong> <a href="mailto:xiaoweii7766@gmail.com">xiaoweii7766@gmail.com</a></p>
+                <p><strong>GitHub:</strong> <a href="https://github.com/xweii06" target="_blank">github.com/xweii06</a></p>
+            </div>
+        </div>
+
+        <footer>
+            <p>- Thanks for reading ^o^ -</p>
+            <p>Created by Ng Xiao Wei - 2025</p>
+        </footer>
+    </div>
+</body>
+</html>
