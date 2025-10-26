@@ -64,7 +64,6 @@ if ($profileUserID <= 0) {
                                         INNER JOIN tblevents e ON r.eventID = e.eventID 
                                         WHERE r.userID = ? 
                                         AND r.status = 'active' 
-                                        AND e.endDate < CURDATE() 
                                         AND e.status != 'cancelled'";
 
                     if ($eventsJoinedStmt = $connection->prepare($eventsJoinedQuery)) {
