@@ -1,6 +1,3 @@
-
-
-
 <?php
 session_start();
 include("../../php/dbConn.php");
@@ -72,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Update with new password
                 $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
                 $stmt = $connection->prepare("UPDATE tblusers SET fullName = ?, username = ?, gender = ?, email = ?, password = ?, bio = ?, country = ? WHERE userID = ?");
-                
+
                 if (!$stmt) {
                     $message = "Database error: " . $connection->error;
                     $messageType = "error";
@@ -93,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             // Update without password change
             $stmt = $connection->prepare("UPDATE tblusers SET fullName = ?, username = ?, gender = ?, email = ?, bio = ?, country = ? WHERE userID = ?");
-            
+
             if (!$stmt) {
                 $message = "Database error: " . $connection->error;
                 $messageType = "error";
@@ -219,67 +216,67 @@ $connection->close();
 
 <body>
     <div id="cover" class="" onclick="hideMenu()"></div>
-        
-        <!-- Logo + Name & Navbar -->
-        <header>
-            <!-- Logo + Name -->
-            <section class="c-logo-section">
-                <a href="../../pages/adminPages/adminIndex.php" class="c-logo-link">
-                    <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
-                    <div class="c-text">ReLeaf</div>
-                </a>
-            </section>
 
-            <!-- Menu Links -->
+    <!-- Logo + Name & Navbar -->
+    <header>
+        <!-- Logo + Name -->
+        <section class="c-logo-section">
+            <a href="../../pages/adminPages/adminIndex.php" class="c-logo-link">
+                <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
+                <div class="c-text">ReLeaf</div>
+            </a>
+        </section>
 
-            <!-- Menu Links Mobile -->
-            <nav class="c-navbar-side">
-                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-                <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
-                <div id="sidebarNav" class="c-navbar-side-menu">
-                    
-                    <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
-                    <div class="c-navbar-side-items">
-                        <section class="c-navbar-side-more">
-                            <button id="themeToggle1">
-                                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
-                            </button>
-                            <a href="../../pages/adminPages/aProfile.php">
-                                <img src="../../assets/images/profile-light.svg" alt="Profile">
-                            </a>
-                        </section>
+        <!-- Menu Links -->
 
-                        <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
-                        <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
-                    </div>
+        <!-- Menu Links Mobile -->
+        <nav class="c-navbar-side">
+            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
+            <div id="sidebarNav" class="c-navbar-side-menu">
+
+                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
+                <div class="c-navbar-side-items">
+                    <section class="c-navbar-side-more">
+                        <button id="themeToggle1">
+                            <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+                        </button>
+                        <a href="../../pages/adminPages/aProfile.php">
+                            <img src="../../assets/images/profile-light.svg" alt="Profile">
+                        </a>
+                    </section>
+
+                    <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                    <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                    <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                    <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
+                    <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
                 </div>
+            </div>
 
-            </nav>
+        </nav>
 
-            <!-- Menu Links Desktop + Tablet -->
-            <nav class="c-navbar-desktop">
-                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
-                <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
-            </nav>          
-            <section class="c-navbar-more">
-                <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-                <button id="themeToggle2">
-                    <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon" >
-                </button>
-                <a href="../../pages/adminPages/aProfile.php">
-                    <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
-                </a>
-            </section>
-        </header>
-        <hr>
+        <!-- Menu Links Desktop + Tablet -->
+        <nav class="c-navbar-desktop">
+            <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
+            <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+            <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+            <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+            <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
+            <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
+        </nav>
+        <section class="c-navbar-more">
+            <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+            <button id="themeToggle2">
+                <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
+            </button>
+            <a href="../../pages/adminPages/aProfile.php">
+                <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
+            </a>
+        </section>
+    </header>
+    <hr>
 
     <!-- Main Content -->
     <main class="content" id="content">
@@ -325,10 +322,9 @@ $connection->close();
                             <div class="label">Gender:</div>
                             <select id="gender" name="gender" class="input">
                                 <option value="">Select gender</option>
-                                <option value="Male" <?php echo (($user['gender'] ?? '') === 'Male') ? 'selected' : ''; ?>>Male</option>
-                                <option value="Female" <?php echo (($user['gender'] ?? '') === 'Female') ? 'selected' : ''; ?>>Female</option>
-                                <option value="other" <?php echo (($user['gender'] ?? '') === 'other') ? 'selected' : ''; ?>>Other</option>
-                                <option value="prefer not to say" <?php echo (($user['gender'] ?? '') === 'prefer not to say') ? 'selected' : ''; ?>>Prefer not to say</option>
+                                <option value="male" <?php echo (($user['gender'] ?? '') === 'male') ? 'selected' : ''; ?>>Male</option>
+                                <option value="female" <?php echo (($user['gender'] ?? '') === 'female') ? 'selected' : ''; ?>>Female</option>
+                                <option value="rather not to say" <?php echo (($user['gender'] ?? '') === 'rather not to say') ? 'selected' : ''; ?>>Rather not to say</option>
                             </select>
                         </div>
 
@@ -640,9 +636,11 @@ $connection->close();
         </div>
         <div class="results" id="results"></div>
     </section>
-    
+
     <!-- Scripts -->
-    <script>const isAdmin = false;</script>
+    <script>
+        const isAdmin = false;
+    </script>
     <script src="../../javascript/mainScript.js"></script>
     <script>
         // Profile data from PHP
@@ -660,7 +658,8 @@ $connection->close();
             toast: document.getElementById('toast')
         };
 
-        const AVATAR_COLOR =' #2fd26b'
+        const AVATAR_COLOR = ' #2fd26b'
+
         function generateAvatar(name) {
             const initials = name.split(/\s+/).map(s => s[0]).slice(0, 2).join('').toUpperCase();
             const canvas = document.createElement('canvas');
@@ -692,20 +691,20 @@ $connection->close();
 
         window.addEventListener('load', () => {
             generateAvatar(userData.fullName);
-            
+
             <?php if (!empty($message)): ?>
                 showToast(<?php echo json_encode($message); ?>, <?php echo $messageType === 'error' ? 'true' : 'false'; ?>);
             <?php endif; ?>
         });
 
         // Show/hide password logic
-        (function () {
+        (function() {
             const eyeSVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></circle></svg>';
             const eyeOffSVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10.58 10.58A3 3 0 0 0 13.42 13.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 12s4-7 10-7c2.12 0 4.09.6 5.8 1.64M22 12s-4 7-10 7c-1.6 0-3.09-.36-4.4-.99" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 
             document.querySelectorAll('.toggle-password').forEach(btn => {
                 btn.innerHTML = eyeSVG;
-                btn.addEventListener('click', function (e) {
+                btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const targetId = this.getAttribute('data-target');
                     const input = document.getElementById(targetId);
@@ -719,4 +718,5 @@ $connection->close();
         })();
     </script>
 </body>
+
 </html>

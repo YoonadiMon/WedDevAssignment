@@ -31,16 +31,20 @@
         nav ul {
             list-style: none;
             display: flex;
-            justify-content: flex-start;
+            justify-content: center;
+            align-items: center;
             gap: 2rem;
             flex-wrap: wrap;
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+            position: relative;
         }
 
         nav li:first-child {
-            margin-right: auto;
+            position: absolute;
+            left: 20px;
+            margin-right: 0;
         }
 
         nav a {
@@ -249,6 +253,11 @@
                 gap: 1rem;
             }
 
+            nav li:first-child {
+                position: static;
+                margin-right: auto;
+            }
+
             .hobbies-grid {
                 grid-template-columns: 1fr;
             }
@@ -271,11 +280,6 @@
             <li><a href="#contact">Contact</a></li>
         </ul>
     </nav>
-
-    <header>
-        <h1>Lee Xin Ci</h1>
-        <p>ICT Student | Web Developer | Tech Enthusiast</p>
-    </header>
 
     <div class="container">
         <section id="about">
