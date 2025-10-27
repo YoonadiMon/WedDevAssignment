@@ -2,7 +2,8 @@
     include("../../php/dbConn.php");
     session_start();
     include("../../php/sessionCheck.php");
-    // Initialize variables
+
+    // get active user info of curent session
     $currentUserID = $_SESSION['userID']; 
 ?>
 <!DOCTYPE html>
@@ -501,7 +502,7 @@
             // Process form submission
             $successMessage = "";
             $errorMessage = "";
-            $imageUrl = "../../assets/images/placeholder-image.jpg"; // Default placeholder
+            $imageUrl = "../../assets/images/placeholder-image.jpg"; // default placeholder img
 
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Handle file upload similar to event banner
@@ -897,7 +898,7 @@
                 fileInput.click();
             });
             
-            // Drag and drop functionality
+            // drag and drop functionality
             fileUploadArea.addEventListener('dragover', function(e) {
                 e.preventDefault();
                 fileUploadArea.classList.add('dragover');
@@ -923,12 +924,12 @@
                 if (fileInput.files.length > 0) {
                     const files = Array.from(fileInput.files);
                     
-                    // Clear previous previews
+                    // clear previous previews
                     attachmentsPreview.innerHTML = '';
                     
-                    // Process each file
+                    // process each file
                     files.forEach((file, index) => {
-                        // Check file size (5MB limit)
+                        // check file size for 5mb limit
                         if (file.size > 5 * 1024 * 1024) {
                             showFileError(`File "${file.name}" is too large. Maximum size is 5MB.`);
                             return;
@@ -975,7 +976,7 @@
                             <button type="button" class="remove-attachment" data-file-index="${index}">×</button>
                         `;
                         
-                        // Add event listener to remove button
+                        // event listener to remove button
                         attachmentItem.querySelector('.remove-attachment').addEventListener('click', function() {
                             removeFile(index);
                         });
@@ -987,7 +988,7 @@
             }
             
             function removeFile(index) {
-                // Create a new FileList without the removed file
+                // create a new FileList without the removed file
                 const dt = new DataTransfer();
                 const files = Array.from(fileInput.files);
                 
@@ -1014,7 +1015,7 @@
                 errorDiv.textContent = message;
                 attachmentsPreview.appendChild(errorDiv);
                 
-                // Remove error message after 5 seconds
+                // Remove the error message after 5 sec
                 setTimeout(() => {
                     errorDiv.remove();
                 }, 5000);
@@ -1042,11 +1043,11 @@
                     }
                 });
                 
-                // Initialize count
+                // Initialize count value
                 countElement.textContent = `${inputElement.value.length}/${maxLength}`;
             }
             
-            // Form validation
+            // some form validations
             form.addEventListener('submit', function(e) {
                 if (!validateForm()) {
                     e.preventDefault();
