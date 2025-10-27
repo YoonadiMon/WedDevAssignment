@@ -1,42 +1,44 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    include("../../php/dbConn.php");
+    if(!isset($_SESSION)) {
+        session_start();
+    }
+    include("../../php/sessionCheck.php");
 
-$user_type = $_SESSION['userType'];
-$user_id = $_SESSION['userID'];
-$user_name = $_SESSION['username'];
+    // get active user info of curent session
+    $userID = $_SESSION['userID'];
 
-$userID = $_SESSION['userID'];
+    $unread_count = 0;
 
-// Fetch user info and points
-$userQuery = "SELECT fullName, username, point FROM tblusers WHERE userID = ?";
-$stmt = $connection->prepare($userQuery);
-$stmt->bind_param("i", $userID);
-$stmt->execute();
-$userResult = $stmt->get_result();
-$userData = $userResult->fetch_assoc();
-$stmt->close();
+    // get user info and points
+    $userQuery = "SELECT fullName, username, point FROM tblusers WHERE userID = '$userID'";
+    $userResult = mysqli_query($connection, $userQuery);
+    if (!$userResult) { // error handling
+        die("Query failed: " . mysqli_error($connection));
+    }
+    $userData = mysqli_fetch_assoc($userResult);
 
-// Fetch all quiz stages
-$stagesQuery = "SELECT stageID, stageName, stageOrder, description, points FROM tblquiz_stages ORDER BY stageOrder";
-$stagesResult = $connection->query($stagesQuery);
-$stages = [];
-while ($row = $stagesResult->fetch_assoc()) {
-    $stages[] = $row;
-}
+    // get all quiz stages
+    $stagesQuery = "SELECT stageID, stageName, stageOrder, description, points FROM tblquiz_stages ORDER BY stageOrder";
+    $stagesResult = mysqli_query($connection, $stagesQuery);
+    if (!$stagesResult) { // error handling
+        die("Query failed: " . mysqli_error($connection));
+    }
+    $stages = [];
+    while ($row = mysqli_fetch_assoc($stagesResult)) {
+        $stages[] = $row;
+    }
 
-// Fetch user progress for all stages
-$progressQuery = "SELECT stageID, score, completed FROM tbluser_quiz_progress WHERE userID = ?";
-$stmt = $connection->prepare($progressQuery);
-$stmt->bind_param("i", $userID);
-$stmt->execute();
-$progressResult = $stmt->get_result();
-$userProgress = [];
-while ($row = $progressResult->fetch_assoc()) {
-    $userProgress[$row['stageID']] = $row;
-}
-$stmt->close();
+    // Fetch user progress for all stages
+    $progressQuery = "SELECT stageID, score, completed FROM tbluser_quiz_progress WHERE userID = '$userID'";
+    $progressResult = mysqli_query($connection, $progressQuery);
+    if (!$progressResult) { // error handling
+        die("Query failed: " . mysqli_error($connection));
+    }
+    $userProgress = [];
+    while ($row = mysqli_fetch_assoc($progressResult)) {
+        $userProgress[$row['stageID']] = $row;
+    }
 ?>
 
 <!DOCTYPE html>
@@ -504,7 +506,7 @@ $stmt->close();
         </footer>
 
         <script>
-            const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+            const isAdmin = false;
             const unreadCount = <?php echo $unread_count; ?>;
             
             function startStage(stageID) {
