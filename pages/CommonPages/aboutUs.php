@@ -2,15 +2,17 @@
     // Start the session
     session_start();
     include("../../php/sessionCheck.php");
+
+    // get active user info of curent session
     $user_type = $_SESSION["userType"];
     
-    // Redirect if user type is not member
+    // redirect if user type is not member
     if ($user_type !== "member") {
         echo "Access denied. About Us is page is for member view only. Redirecting to admin page...";
         echo "<script>
                 setTimeout(function() {
                     window.location.href = '../../pages/adminPages/adminIndex.php';
-                }, 2000); // Redirect after 3 seconds
+                }, 2000); // redirect after 2 sec
               </script>";
         exit();
     }
@@ -34,7 +36,7 @@
         <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
         
         <style>
-            /* Additional styles for About page */
+            /* extra styles unique to page */
             a {
                 text-decoration: none;
                 color: inherit;
@@ -295,6 +297,7 @@
                     </section>
 
                     <!-- Our Values -->
+                    <!-- use emoji so less img -->
                     <section class="values-section">
                         <h2 class="c-heading-2">Our Values</h2>
                         <div class="values-grid">
