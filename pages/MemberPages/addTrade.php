@@ -499,25 +499,25 @@
 
             <!-- PHP Form Processing -->
             <?php
-            // Process form submission
+            // form submission
             $successMessage = "";
             $errorMessage = "";
             $imageUrl = "../../assets/images/placeholder-image.jpg"; // default placeholder img
 
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                // Handle file upload similar to event banner
+                // handle file upload similar like in event banner
                 if (isset($_FILES['fileInput']) && $_FILES['fileInput']['error'] !== UPLOAD_ERR_NO_FILE) {
-                    if ($_FILES['fileInput']['error'] === UPLOAD_ERR_OK) { // FIXED: Changed UPLIAD_ERR_OK to UPLOAD_ERR_OK
+                    if ($_FILES['fileInput']['error'] === UPLOAD_ERR_OK) { // upload error for folder doesn't exist
                         $uploadDir = '../../uploads/tradeListings/';
                         
-                        // Create upload directory if it doesn't exist
+                        // create upload folder if it doesn't exist
                         if (!file_exists($uploadDir)) {
                             if (!mkdir($uploadDir, 0755, true)) {
                                 $errorMessage = "Failed to create upload directory";
                             }
                         }
                         
-                        // Only proceed if directory was created successfully or already exists
+                        // continue only if folder is ok
                         if (empty($errorMessage)) {
                             $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
                             $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
@@ -559,9 +559,9 @@
                     }
                 }
 
-                // Only proceed with database insertion if no file upload errors
+                // only proceed with db insertion when no file upload errors
                 if (empty($errorMessage)) {
-                    // Collect and sanitize form data
+                    // get form data
                     $title = mysqli_real_escape_string($connection, $_POST['title']);
                     $description = mysqli_real_escape_string($connection, $_POST['description']);
                     $tags = mysqli_real_escape_string($connection, $_POST['tags']);
@@ -570,7 +570,7 @@
                     $itemCondition = mysqli_real_escape_string($connection, $_POST['condition']);
                     $lookingFor = mysqli_real_escape_string($connection, $_POST['lookingFor']);
                     
-                    // Handle type-specific fields
+                    // handle type-specific fields
                     $species = "";
                     $growthStage = "";
                     $careInstructions = "";
@@ -588,7 +588,7 @@
                         $usageHistory = mysqli_real_escape_string($connection, $_POST['usageHistory']);
                     }
                     
-                    // Insert into database
+                    // sql to insert new listing into db
                     $sql = "INSERT INTO tbltrade_listings (
                         userID, title, description, tags, imageUrl, category, dateListed, 
                         status, itemType, itemCondition, species, growthStage, careInstructions, 
@@ -601,7 +601,7 @@
                     
                     if (mysqli_query($connection, $sql)) {
                         $successMessage = "Your listing has been created successfully!";
-                        // Clear form fields on success
+                        // clear form when listing is created successfully
                         $_POST = array();
                     } else {
                         $errorMessage = "Error creating listing: " . mysqli_error($connection);
@@ -609,7 +609,7 @@
                 }
             }
 
-            // Display success or error message
+            // display either success or error message
             if (!empty($successMessage)) {
                 echo "<div style='background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #c3e6cb;'>$successMessage</div>";
             }
@@ -862,7 +862,7 @@
             const attachmentsPreview = document.getElementById('attachmentsPreview');
             const fileUploadText = fileUploadArea.querySelector('.file-upload-text');
             
-            // Character counters
+            // character counters html elements 
             const titleInput = document.getElementById('listingTitle');
             const descriptionInput = document.getElementById('listingDescription');
             const tagsInput = document.getElementById('listingTags');
@@ -870,7 +870,7 @@
             const usageInput = document.getElementById('itemUsage');
             const lookingForInput = document.getElementById('lookingFor');
 
-            // Initialize character counters
+            // initialize character counters
             setupCharacterCounter(titleInput, 'titleCount', 100);
             setupCharacterCounter(descriptionInput, 'descriptionCount', 500);
             setupCharacterCounter(tagsInput, 'tagsCount', 200);
@@ -878,10 +878,10 @@
             setupCharacterCounter(usageInput, 'usageCount', 200);
             setupCharacterCounter(lookingForInput, 'lookingForCount', 200);
             
-            // Show/hide plant or item specific fields based on initial value
+            // show/hide specific fields unqiue to plant or item based on initial value
             updateFieldVisibility();
             
-            // Show/hide plant or item specific fields
+            // show/hide specific fields unqiue to plant or item 
             listingType.addEventListener('change', function() {
                 updateFieldVisibility();
             });
@@ -893,7 +893,7 @@
                 itemFields.style.display = type === 'Item' ? 'block' : 'none';
             }
             
-            // Enhanced file upload handling
+            // file upload handling
             fileUploadArea.addEventListener('click', function() {
                 fileInput.click();
             });
