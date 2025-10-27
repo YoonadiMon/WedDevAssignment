@@ -3,89 +3,133 @@ session_start();
 include("../../php/dbConn.php");
 include("../../php/sessionCheck.php");
 
-$user_type = $_SESSION['userType'];
+$user_type = $_SESSION['userType'] ?? 'user';
+
+
 
 // Fetch all blogs with author info
-$query = "
+$blogs = [];
+$blogQuery = "
     SELECT b.blogID, b.userID, b.title, b.excerpt, b.category, b.date, u.fullName
     FROM tblblog b
     JOIN tblusers u ON b.userID = u.userID
     ORDER BY b.date DESC
 ";
-
-$result = mysqli_query($connection, $query);
-$blogs = [];
-
-while ($row = mysqli_fetch_assoc($result)) {
-    $blogs[] = $row;
+$blogResult = mysqli_query($connection, $blogQuery);
+if ($blogResult && mysqli_num_rows($blogResult) > 0) {
+    while ($row = mysqli_fetch_assoc($blogResult)) {
+        $blogs[] = $row;
+    }
 }
 
 // Fetch all tags for filtering
-$tagsQuery = "SELECT DISTINCT tagID, tagName FROM tbltag ORDER BY tagName";
-$tagsResult = mysqli_query($connection, $tagsQuery);
 $tags = [];
-
-while ($row = mysqli_fetch_assoc($tagsResult)) {
-    $tags[] = $row;
+$tagQuery = "SELECT DISTINCT tagID, tagName FROM tbltag ORDER BY tagName";
+$tagResult = mysqli_query($connection, $tagQuery);
+if ($tagResult && mysqli_num_rows($tagResult) > 0) {
+    while ($row = mysqli_fetch_assoc($tagResult)) {
+        $tags[] = $row;
+    }
 }
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
+    $action = $_POST['action'];
 
-    if ($_POST['action'] === 'getBlogs') {
+    //  Get all blogs
+    if ($action === 'getBlogs') {
+        $query = "
+            SELECT b.blogID, b.userID, b.title, b.excerpt, b.category, b.date, u.fullName
+            FROM tblblog b
+            JOIN tblusers u ON b.userID = u.userID
+            ORDER BY b.date DESC
+        ";
+        $result = mysqli_query($connection, $query);
+        $blogs = mysqli_fetch_all($result, MYSQLI_ASSOC);
         echo json_encode(['blogs' => $blogs, 'count' => count($blogs)]);
-    } elseif ($_POST['action'] === 'getTags') {
+    }
+
+    //  Get all tags
+    elseif ($action === 'getTags') {
+        $query = "SELECT DISTINCT tagID, tagName FROM tbltag ORDER BY tagName";
+        $result = mysqli_query($connection, $query);
+        $tags = mysqli_fetch_all($result, MYSQLI_ASSOC);
         echo json_encode(['tags' => $tags]);
-    } elseif ($_POST['action'] === 'searchBlogs') {
-        $searchQuery = isset($_POST['query']) ? strtolower($_POST['query']) : '';
-        $filtered = array_filter($blogs, function ($blog) use ($searchQuery) {
-            return stripos($blog['title'], $searchQuery) !== false ||
-                stripos($blog['excerpt'], $searchQuery) !== false;
-        });
-        echo json_encode(['blogs' => array_values($filtered), 'count' => count($filtered)]);
-    } elseif ($_POST['action'] === 'filterBlogs') {
-        $filterType = isset($_POST['type']) ? $_POST['type'] : 'all';
-        $filtered = $blogs;
+    }
 
-        if ($filterType === 'recent') {
-            $threeDaysAgo = strtotime('-3 days');
-            $filtered = array_filter($blogs, function ($blog) use ($threeDaysAgo) {
-                return strtotime($blog['date']) >= $threeDaysAgo;
-            });
-        }
+    //  Search blogs
+    elseif ($action === 'searchBlogs') {
+        $searchQuery = mysqli_real_escape_string($connection, $_POST['query'] ?? '');
+        $query = "
+            SELECT b.blogID, b.userID, b.title, b.excerpt, b.category, b.date, u.fullName
+            FROM tblblog b
+            JOIN tblusers u ON b.userID = u.userID
+            WHERE b.title LIKE '%$searchQuery%' OR b.excerpt LIKE '%$searchQuery%'
+            ORDER BY b.date DESC
+        ";
+        $result = mysqli_query($connection, $query);
+        $blogs = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        echo json_encode(['blogs' => $blogs, 'count' => count($blogs)]);
+    }
 
-        echo json_encode(['blogs' => array_values($filtered), 'count' => count($filtered)]);
-    } elseif ($_POST['action'] === 'filterByTag') {
-        $tagName = isset($_POST['tag']) ? $_POST['tag'] : 'all';
-
-        if ($tagName === 'all') {
-            $filtered = $blogs;
-        } else {
-            $tagQuery = "
-                SELECT b.blogID
+    // Filter blogs (recent)
+    elseif ($action === 'filterBlogs') {
+        $type = $_POST['type'] ?? 'all';
+        if ($type === 'recent') {
+            $query = "
+                SELECT b.blogID, b.userID, b.title, b.excerpt, b.category, b.date, u.fullName
                 FROM tblblog b
+                JOIN tblusers u ON b.userID = u.userID
+                WHERE b.date >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+                ORDER BY b.date DESC
+            ";
+        } else {
+            $query = "
+                SELECT b.blogID, b.userID, b.title, b.excerpt, b.category, b.date, u.fullName
+                FROM tblblog b
+                JOIN tblusers u ON b.userID = u.userID
+                ORDER BY b.date DESC
+            ";
+        }
+        $result = mysqli_query($connection, $query);
+        $blogs = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        echo json_encode(['blogs' => $blogs, 'count' => count($blogs)]);
+    }
+
+    //  Filter by tag
+    elseif ($action === 'filterByTag') {
+        $tagName = mysqli_real_escape_string($connection, $_POST['tag'] ?? 'all');
+        if ($tagName === 'all') {
+            $query = "
+                SELECT b.blogID, b.userID, b.title, b.excerpt, b.category, b.date, u.fullName
+                FROM tblblog b
+                JOIN tblusers u ON b.userID = u.userID
+                ORDER BY b.date DESC
+            ";
+        } else {
+            $query = "
+                SELECT b.blogID, b.userID, b.title, b.excerpt, b.category, b.date, u.fullName
+                FROM tblblog b
+                JOIN tblusers u ON b.userID = u.userID
                 JOIN tblblogtag bt ON b.blogID = bt.blogID
                 JOIN tbltag t ON bt.tagID = t.tagID
-                WHERE t.tagName = '" . mysqli_real_escape_string($connection, $tagName) . "'
+                WHERE t.tagName = '$tagName'
+                ORDER BY b.date DESC
             ";
-            $tagResult = mysqli_query($connection, $tagQuery);
-            $taggedBlogIds = [];
-
-            while ($row = mysqli_fetch_assoc($tagResult)) {
-                $taggedBlogIds[] = $row['blogID'];
-            }
-
-            $filtered = array_filter($blogs, function ($blog) use ($taggedBlogIds) {
-                return in_array($blog['blogID'], $taggedBlogIds);
-            });
         }
-
-        echo json_encode(['blogs' => array_values($filtered), 'count' => count($filtered)]);
+        $result = mysqli_query($connection, $query);
+        $blogs = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        echo json_encode(['blogs' => $blogs, 'count' => count($blogs)]);
     }
+
     exit;
 }
+
+mysqli_close($connection);
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">

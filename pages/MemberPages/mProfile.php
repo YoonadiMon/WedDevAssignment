@@ -9,29 +9,26 @@ if (!isset($_SESSION['userID'])) {
     exit();
 }
 
-$userID = $_SESSION['userID'];
+$userID = intval($_SESSION['userID']); 
 $message = '';
 $messageType = '';
 
 // Fetch user data
-$stmt = mysqli_prepare($connection, "SELECT fullName, username, gender, email, password, bio, country FROM tblusers WHERE userID = ?");
-mysqli_stmt_bind_param($stmt, "i", $userID);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$user = mysqli_fetch_assoc($result);
-mysqli_stmt_close($stmt);
+$userQuery = "SELECT fullName, username, gender, email, password, bio, country FROM tblusers WHERE userID = $userID";
+$userResult = mysqli_query($connection, $userQuery);
+$user = mysqli_fetch_assoc($userResult);
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $fullName = trim($_POST['fullName']);
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $gender = $_POST['gender'];
+    $fullName = mysqli_real_escape_string($connection, trim($_POST['fullName']));
+    $username = mysqli_real_escape_string($connection, trim($_POST['username']));
+    $email = mysqli_real_escape_string($connection, trim($_POST['email']));
+    $gender = mysqli_real_escape_string($connection, $_POST['gender']);
     $oldPassword = trim($_POST['oldPassword']);
     $newPassword = trim($_POST['password']);
     $confirmPassword = trim($_POST['confirmPassword']);
-    $bio = trim($_POST['bio']);
-    $country = $_POST['country'];
+    $bio = mysqli_real_escape_string($connection, trim($_POST['bio']));
+    $country = mysqli_real_escape_string($connection, $_POST['country']);
 
     // Validation
     if (empty($fullName) || empty($username)) {
@@ -49,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Check if user wants to change password
         if (!empty($newPassword) || !empty($confirmPassword)) {
-            // Password change validation
             if (empty($oldPassword)) {
                 $message = "Current password is required to change password.";
                 $messageType = "error";
@@ -66,62 +62,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = "Password must contain uppercase, lowercase, and numbers.";
                 $messageType = "error";
             } else {
-                // Update with new password
                 $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-                $stmt = mysqli_prepare($connection, "UPDATE tblusers SET fullName = ?, username = ?, gender = ?, email = ?, password = ?, bio = ?, country = ? WHERE userID = ?");
 
-                if (!$stmt) {
-                    $message = "Database error: " . mysqli_error($connection);
-                    $messageType = "error";
+                $updateQuery = "
+                    UPDATE tblusers 
+                    SET fullName = '$fullName',
+                        username = '$username',
+                        gender = '$gender',
+                        email = '$email',
+                        password = '$hashedPassword',
+                        bio = '$bio',
+                        country = '$country'
+                    WHERE userID = $userID
+                ";
+
+                if (mysqli_query($connection, $updateQuery)) {
+                    $updateSuccess = true;
+                    $passwordChanged = true;
+                    $message = "Password updated successfully ✓";
+                    $messageType = "success";
                 } else {
-                    mysqli_stmt_bind_param($stmt, "sssssssi", $fullName, $username, $gender, $email, $hashedPassword, $bio, $country, $userID);
-                    if (mysqli_stmt_execute($stmt)) {
-                        $updateSuccess = true;
-                        $passwordChanged = true;
-                        $message = "Password updated successfully ✓";
-                        $messageType = "success";
-                    } else {
-                        $message = "Error updating profile: " . mysqli_stmt_error($stmt);
-                        $messageType = "error";
-                    }
-                    mysqli_stmt_close($stmt);
+                    $message = "Error updating profile: " . mysqli_error($connection);
+                    $messageType = "error";
                 }
             }
         } else {
             // Update without password change
-            $stmt = mysqli_prepare($connection, "UPDATE tblusers SET fullName = ?, username = ?, gender = ?, email = ?, bio = ?, country = ? WHERE userID = ?");
+            $updateQuery = "
+                UPDATE tblusers 
+                SET fullName = '$fullName',
+                    username = '$username',
+                    gender = '$gender',
+                    email = '$email',
+                    bio = '$bio',
+                    country = '$country'
+                WHERE userID = $userID
+            ";
 
-            if (!$stmt) {
-                $message = "Database error: " . mysqli_error($connection);
-                $messageType = "error";
+            if (mysqli_query($connection, $updateQuery)) {
+                $updateSuccess = true;
+                $message = "Profile updated successfully ✓";
+                $messageType = "success";
             } else {
-                mysqli_stmt_bind_param($stmt, "ssssssi", $fullName, $username, $gender, $email, $bio, $country, $userID);
-                if (mysqli_stmt_execute($stmt)) {
-                    $updateSuccess = true;
-                    $message = "Profile updated successfully ✓";
-                    $messageType = "success";
-                } else {
-                    $message = "Error updating profile: " . mysqli_stmt_error($stmt);
-                    $messageType = "error";
-                }
-                mysqli_stmt_close($stmt);
+                $message = "Error updating profile: " . mysqli_error($connection);
+                $messageType = "error";
             }
         }
 
-        
+        // Refresh user data if update succeeded
         if ($updateSuccess) {
-            $stmt = mysqli_prepare($connection, "SELECT fullName, username, gender, email, password, bio, country FROM tblusers WHERE userID = ?");
-            mysqli_stmt_bind_param($stmt, "i", $userID);
-            mysqli_stmt_execute($stmt);
-            $result = mysqli_stmt_get_result($stmt);
-            $user = mysqli_fetch_assoc($result);
-            mysqli_stmt_close($stmt);
+            $refreshQuery = "SELECT fullName, username, gender, email, password, bio, country FROM tblusers WHERE userID = $userID";
+            $refreshResult = mysqli_query($connection, $refreshQuery);
+            $user = mysqli_fetch_assoc($refreshResult);
         }
     }
 }
 
 mysqli_close($connection);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 

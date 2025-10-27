@@ -42,12 +42,12 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
     $tags[] = $row['tagName'];
 }
 
-// Fetch next blog (for navigation)
+// Fetch next blog (for navigation) - Fixed query
 $nextQuery = "
     SELECT blogID, title
     FROM tblblog
-    WHERE date > '{$blog['date']}'
-    ORDER BY date ASC
+    WHERE (date > '{$blog['date']}' OR (date = '{$blog['date']}' AND blogID > $blogID))
+    ORDER BY date ASC, blogID ASC
     LIMIT 1
 ";
 
@@ -466,6 +466,7 @@ $nextBlog = mysqli_fetch_assoc($nextResult);
             <?php endif; ?>
         </div>
     </main>
+
     <!-- Search & Results -->
     <section class="search-container" id="searchContainer" style="display: none;">
         <div class="tabs" id="tabs">
