@@ -29,7 +29,7 @@ while ($row = mysqli_fetch_assoc($tagsResult)) {
     $tags[] = $row;
 }
 
-// Return JSON for AJAX
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
 
