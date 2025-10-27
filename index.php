@@ -1,28 +1,32 @@
 <?php
     include("php/dbConn.php");
     
-    // Active Members 
+    // sql data for active members 
     $activeMembersQuery = "SELECT COUNT(*) as count FROM tblusers";
     $result = mysqli_query($connection, $activeMembersQuery);
-    $row = mysqli_fetch_assoc($result);
+    if (!$result) { die("Query failed: " . mysqli_error($connection)); } // error handling
+    $row = mysqli_fetch_assoc($result); // step 4 - process the result
     $activeMembers = $row['count'];
     
-    // Community Events
+    // sql data for events
     $communityEventsQuery = "SELECT COUNT(*) as count FROM tblevents";
     $result = mysqli_query($connection, $communityEventsQuery);
-    $row = mysqli_fetch_assoc($result);
+    if (!$result) { die("Query failed: " . mysqli_error($connection)); } // error handling
+    $row = mysqli_fetch_assoc($result); // step 4 - process the result
     $communityEvents = $row['count'];
     
-    // Products Swapped 
+    // sql data for products swapped 
     $productsSwappedQuery = "SELECT SUM(tradesCompleted) as count FROM tblusers";
     $result = mysqli_query($connection, $productsSwappedQuery);
-    $row = mysqli_fetch_assoc($result);
-    $productsSwapped = $row['count'] ?: 0; // Handle NULL case
+    if (!$result) { die("Query failed: " . mysqli_error($connection)); } // error handling
+    $row = mysqli_fetch_assoc($result); // step 4 - process the result
+    $productsSwapped = $row['count'] ?: 0; // Handle if its null
     
-    // Quizzes
+    // sql data for total quizzes
     $quizzesQuery = "SELECT COUNT(*) as count FROM tblquiz_stages";
     $result = mysqli_query($connection, $quizzesQuery);
-    $row = mysqli_fetch_assoc($result);
+    if (!$result) { die("Query failed: " . mysqli_error($connection)); } // error handling
+    $row = mysqli_fetch_assoc($result); // step 4 - process the result
     $quizzes = $row['count'];
 ?>
 <!DOCTYPE html>
@@ -40,7 +44,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     
     <style>
-        /* Additional styling for enhanced visual appeal */
+        /* Additional styling unique to page */
         body {
             width: 100vw;
             margin: 0;
@@ -569,46 +573,16 @@
     </section>
     
     <script>
-        // This script handles potential GitHub Pages routing issues
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if we're on GitHub Pages
-            const isGitHubPages = window.location.hostname === 'github.io' || 
-                                window.location.hostname.includes('github.io');
             
-            if (isGitHubPages) {
-                console.log('GitHub Pages environment detected');
-                
-                // Modify all internal links to work with GitHub Pages
-                document.querySelectorAll('a').forEach(link => {
-                    const href = link.getAttribute('href');
-                    
-                    // Skip external links and anchor links
-                    if (href && !href.startsWith('http') && !href.startsWith('#') && 
-                        !href.startsWith('mailto:') && !href.startsWith('tel:')) {
-                        
-                        // Ensure the link has the correct path for GitHub Pages
-                        if (!href.startsWith('/')) {
-                            // Get the base path for the GitHub Pages site
-                            const basePath = window.location.pathname.split('/').slice(0, -1).join('/');
-                            
-                            // Check if the link points to a file that exists in our structure
-                            if (!href.startsWith(basePath) && basePath !== '') {
-                                // Prepend the base path to ensure correct routing
-                                link.setAttribute('href', basePath + '/' + href);
-                            }
-                        }
-                    }
-                });
-            }
+            // uncomment this to add click event listeners to every link in page for debugging purpose
+            // document.querySelectorAll('a').forEach(link => {
+            //     link.addEventListener('click', function(e) {
+            //         console.log('Navigating to:', this.getAttribute('href'));
+            //     });
+            // });
             
-            // Add click event listeners to all links for debugging
-            document.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    console.log('Navigating to:', this.getAttribute('href'));
-                });
-            });
-            
-            // Intersection Observer for scroll animations
+            // data value for scroll animations
             const observerOptions = {
                 threshold: 0.1,
                 rootMargin: '0px 0px -50px 0px'
@@ -619,7 +593,7 @@
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
                         
-                        // If it's the stats section, trigger the number animation
+                        // If user is looking at stats section, starts the number animation
                         if (entry.target.id === 'stats') {
                             animateNumbers();
                         }
@@ -627,19 +601,19 @@
                 });
             }, observerOptions);
             
-            // Observe all sections
+            // check all sections to see whether user is viewing that sec
             document.querySelectorAll('.content-section, .stats-section, .cta-section').forEach(section => {
                 observer.observe(section);
             });
             
-            // Number animation function
+            // Function to animate the numbers in a counting motion
             function animateNumbers() {
                 const statNumbers = document.querySelectorAll('.stat-number');
                 
                 statNumbers.forEach(stat => {
                     const target = parseInt(stat.getAttribute('data-count'));
-                    const duration = 2000; // 2 seconds
-                    const step = target / (duration / 16); // 60fps
+                    const duration = 2000; // the total time for animation in sec
+                    const step = target / (duration / 16); // formula to calculate fps, 60fps
                     let current = 0;
                     
                     const timer = setInterval(() => {
