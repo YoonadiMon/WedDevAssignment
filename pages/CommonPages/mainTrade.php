@@ -15,6 +15,8 @@ try {
         throw new Exception("Database connection not established.");
     }
 
+    // in trade page requires two tables (tbltrade_listings and tblusers) to get all necessary user info
+    // sql query joins both tables and get all the data
     $query = "
         SELECT 
             tl.listingID,
@@ -47,6 +49,7 @@ try {
 
     $result = mysqli_query($connection, $query);
 
+    // error handling
     if (!$result) {
         throw new Exception("SQL Error: " . mysqli_error($connection));
     }
@@ -82,7 +85,7 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
     <style>
-        /* Additional styling for enhanced visual appeal */
+        /* extra styles unique to page */
         .trade-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -965,7 +968,7 @@ try {
 
             <!-- Listings Grid -->
             <div class="listings-grid" id="listingsGrid">
-                <!-- Listings will be populated by JavaScript -->
+                <!-- this is where javascript will input html dynamically -->
             </div>
         </div>
 
@@ -974,7 +977,7 @@ try {
             <div class="listing-modal">
                 <button class="modal-close" id="modalClose">×</button>
                 <div class="modal-content" id="modalContent">
-                    <!-- Modal content will be populated by JavaScript -->
+                    <!-- this is where javascript will input html dynamically -->
                 </div>
             </div>
         </div>
@@ -1044,7 +1047,7 @@ try {
     
 
     <script>
-        // Pass PHP variables to JavaScript
+        // Pass php var to javascript to make the page dynamic depnding on user type
         const isAdmin = <?php echo $user_type === 'admin' ? 'true' : 'false'; ?>;
         const unreadCount = <?php echo $unread_count; ?>;
         const listingsData = <?php echo $listings_json ?: '[]'; ?>;
