@@ -1,202 +1,202 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
-
-$user_type = $_SESSION['userType'];
-$user_id = $_SESSION['userID'];
-$user_name = $_SESSION['username'];
-
-// Get ticket ID from URL
-if (!isset($_GET['ticket_id'])) {
-    // Redirect based on user type
-    if ($user_type === 'admin') {
-        header("Location: ../../pages/adminPages/aHelpTicket.php");
-    } else {
-        header("Location: ../../pages/MemberPages/mContactSupport.php");
+    include("../../php/dbConn.php");
+    if(!isset($_SESSION)) {
+        session_start();
     }
-    exit();
-}
-$ticket_id = mysqli_real_escape_string($connection, $_GET['ticket_id']);
+    include("../../php/sessionCheck.php");
 
-// Fetch ticket details
-$ticket_query = "SELECT t.*, u.username, u.email 
-                 FROM tbltickets t 
-                 LEFT JOIN tblusers u ON t.userID = u.userID 
-                 WHERE t.ticketID = '$ticket_id'";
-$ticket_result = mysqli_query($connection, $ticket_query);
+    // get active user info of curent session
+    $user_type = $_SESSION['userType'];
+    $user_id = $_SESSION['userID'];
+    $user_name = $_SESSION['username'];
 
-if (!$ticket_result || mysqli_num_rows($ticket_result) == 0) {
-    // Redirect based on user type
-    if ($user_type === 'admin') {
-        header("Location: ../../pages/adminPages/aHelpTicket.php?error=Ticket not found");
-    } else {
-        header("Location: ../../pages/MemberPages/mContactSupport.php?error=Ticket not found");
+    // get ticket ID from URL
+    if (!isset($_GET['ticket_id'])) {
+        // backward return, redirect based on user type
+        if ($user_type === 'admin') {
+            header("Location: ../../pages/adminPages/aHelpTicket.php");
+        } else {
+            header("Location: ../../pages/MemberPages/mContactSupport.php");
+        }
+        exit();
     }
-    exit();
-}
+    $ticket_id = mysqli_real_escape_string($connection, $_GET['ticket_id']);
 
-$ticket = mysqli_fetch_assoc($ticket_result);
+    // get ticket details from db
+    $ticket_query = "SELECT t.*, u.username, u.email 
+                    FROM tbltickets t 
+                    LEFT JOIN tblusers u ON t.userID = u.userID 
+                    WHERE t.ticketID = '$ticket_id'";
+    $ticket_result = mysqli_query($connection, $ticket_query);
 
-// Fetch attachments for this ticket
-$attachments_query = "SELECT * FROM tblticket_attachments WHERE ticketId = '$ticket_id' ORDER BY uploadedAt ASC";
-$attachments_result = mysqli_query($connection, $attachments_query);
-$attachments = [];
-if ($attachments_result) {
-    while ($row = mysqli_fetch_assoc($attachments_result)) {
-        $attachments[] = $row;
-    }
-}
-
-// Permission checks based on user type
-if ($user_type === 'admin') {
-    // Check if admin can access this ticket (either not assigned or assigned to this admin)
-    if ($ticket['adminAssignedID'] != NULL && $ticket['adminAssignedID'] != $user_id) {
-        header("Location: ../../pages/adminPages/aHelpTicket.php?error=You don't have permission to access this ticket");
+    if (!$ticket_result || mysqli_num_rows($ticket_result) == 0) {
+        // redirect based on user type
+        if ($user_type === 'admin') {
+            header("Location: ../../pages/adminPages/aHelpTicket.php?error=Ticket not found");
+        } else {
+            header("Location: ../../pages/MemberPages/mContactSupport.php?error=Ticket not found");
+        }
         exit();
     }
 
-    // If ticket is not assigned, assign it to current admin
-    if ($ticket['adminAssignedID'] == NULL) {
-        $assign_query = "UPDATE tbltickets SET adminAssignedID = '$user_id', updatedAt = NOW() WHERE ticketID = '$ticket_id'";
-        mysqli_query($connection, $assign_query);
-        $ticket['adminAssignedID'] = $user_id;
-    }
-} else {
-    // Member permission check - can only access their own tickets
-    if ($ticket['userID'] != $user_id) {
-        header("Location: ../../pages/MemberPages/mContactSupport.php?error=You don't have permission to access this ticket");
-        exit();
-    }
-}
+    $ticket = mysqli_fetch_assoc($ticket_result);
 
-// Fetch all responses for this ticket
-$responses_query = "SELECT tr.*, 
-                   CASE 
-                       WHEN tr.responderType = 'admin' THEN 'Admin'
-                       ELSE u.username 
-                   END as responder_name,
-                   CASE 
-                       WHEN tr.responderType = 'admin' THEN 'admin'
-                       ELSE 'member'
-                   END as user_type
-                   FROM tblticket_responses tr
-                   LEFT JOIN tblusers u ON tr.responderId = u.userID AND tr.responderType = 'member'
-                   WHERE tr.ticketID = '$ticket_id'
-                   ORDER BY tr.createdAt ASC";
-$responses_result = mysqli_query($connection, $responses_query);
-
-$responses = [];
-if ($responses_result) {
-    while ($row = mysqli_fetch_assoc($responses_result)) {
-        $responses[] = $row;
+    // get attachments of this ticket from the attachments table
+    $attachments_query = "SELECT * FROM tblticket_attachments WHERE ticketId = '$ticket_id' ORDER BY uploadedAt ASC";
+    $attachments_result = mysqli_query($connection, $attachments_query);
+    $attachments = [];
+    if ($attachments_result) {
+        while ($row = mysqli_fetch_assoc($attachments_result)) {
+            $attachments[] = $row;
+        }
     }
-}
 
-// Handle new response submission
-if (isset($_POST['send_response']) && isset($_POST['message'])) {
-    $message = mysqli_real_escape_string($connection, $_POST['message']);
-    
-    if (!empty($message)) {
-        // Use the correct user type and ID for response
-        $insert_query = "INSERT INTO tblticket_responses (ticketID, responderId, responderType, message) 
-                        VALUES ('$ticket_id', '$user_id', '$user_type', '$message')";
+    // access based on user type
+    if ($user_type === 'admin') {
+        // check admin's access 
+        if ($ticket['adminAssignedID'] != NULL && $ticket['adminAssignedID'] != $user_id) {
+            header("Location: ../../pages/adminPages/aHelpTicket.php?error=You don't have permission to access this ticket");
+            exit();
+        }
+
+        // if ticket not assigned, assign it to current admin
+        if ($ticket['adminAssignedID'] == NULL) {
+            $assign_query = "UPDATE tbltickets SET adminAssignedID = '$user_id', updatedAt = NOW() WHERE ticketID = '$ticket_id'";
+            mysqli_query($connection, $assign_query);
+            $ticket['adminAssignedID'] = $user_id;
+        }
+    } else {
+        // check member's access 
+        if ($ticket['userID'] != $user_id) {
+            header("Location: ../../pages/MemberPages/mContactSupport.php?error=You don't have permission to access this ticket");
+            exit();
+        }
+    }
+
+    // get all responses data for this ticket
+    $responses_query = "SELECT tr.*, 
+                    CASE 
+                        WHEN tr.responderType = 'admin' THEN 'Admin'
+                        ELSE u.username 
+                    END as responder_name,
+                    CASE 
+                        WHEN tr.responderType = 'admin' THEN 'admin'
+                        ELSE 'member'
+                    END as user_type
+                    FROM tblticket_responses tr
+                    LEFT JOIN tblusers u ON tr.responderId = u.userID AND tr.responderType = 'member'
+                    WHERE tr.ticketID = '$ticket_id'
+                    ORDER BY tr.createdAt ASC";
+    $responses_result = mysqli_query($connection, $responses_query);
+
+    $responses = [];
+    if ($responses_result) {
+        while ($row = mysqli_fetch_assoc($responses_result)) {
+            $responses[] = $row;
+        }
+    }
+
+    // handle new response submission
+    if (isset($_POST['send_response']) && isset($_POST['message'])) {
+        $message = mysqli_real_escape_string($connection, $_POST['message']);
         
-        if (mysqli_query($connection, $insert_query)) {
-            // Update ticket's last reply time
-            $update_query = "UPDATE tbltickets SET lastReplyAt = NOW(), updatedAt = NOW() WHERE ticketID = '$ticket_id'";
-            mysqli_query($connection, $update_query);
+        if (!empty($message)) {
+            $insert_query = "INSERT INTO tblticket_responses (ticketID, responderId, responderType, message) 
+                            VALUES ('$ticket_id', '$user_id', '$user_type', '$message')";
             
-            $success_message = "Response sent successfully!";
-            
-            // Refresh responses
-            $responses_result = mysqli_query($connection, $responses_query);
-            $responses = [];
-            if ($responses_result) {
-                while ($row = mysqli_fetch_assoc($responses_result)) {
-                    $responses[] = $row;
-                }
-            }
-        } else {
-            $error_message = "Error sending response: " . mysqli_error($connection);
-        }
-    } else {
-        $error_message = "Message cannot be empty";
-    }
-}
-
-// Handle file upload for attachments
-if (isset($_POST['add_attachment']) && isset($_FILES['attachment_file']) && $_FILES['attachment_file']['error'] === UPLOAD_ERR_OK) {
-    $file = $_FILES['attachment_file'];
-    $fileName = mysqli_real_escape_string($connection, $file['name']);
-    $fileSize = $file['size'];
-    $fileType = mysqli_real_escape_string($connection, $file['type']);
-    
-    // Check file size (10MB limit)
-    if ($fileSize > 10 * 1024 * 1024) {
-        $error_message = "File size too large. Maximum size is 10MB.";
-    } else {
-        // Check file type
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 
-                       'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-        if (!in_array($fileType, $allowedTypes)) {
-            $error_message = "File type not supported. Please upload PDF, JPG, PNG, or DOC files.";
-        } else {
-            // Read file content
-            $fileContent = file_get_contents($file['tmp_name']);
-            
-            // Insert file into database
-            $insert_query = "INSERT INTO tblticket_attachments (ticketId, fileName, fileData, fileSize, fileType, uploadedBy) 
-                          VALUES (?, ?, ?, ?, ?, ?)";
-            
-            $stmt = mysqli_prepare($connection, $insert_query);
-            
-            if ($stmt) {
-                $null = null; // Needed for binding BLOB parameter
-                mysqli_stmt_bind_param($stmt, "isbisi", $ticket_id, $fileName, $null, $fileSize, $fileType, $user_id);
-                mysqli_stmt_send_long_data($stmt, 2, $fileContent); // Bind BLOB data
+            if (mysqli_query($connection, $insert_query)) {
+                // update ticket's last reply time
+                $update_query = "UPDATE tbltickets SET lastReplyAt = NOW(), updatedAt = NOW() WHERE ticketID = '$ticket_id'";
+                mysqli_query($connection, $update_query);
                 
-                if (mysqli_stmt_execute($stmt)) {
-                    $success_message = "Attachment added successfully!";
-                    // Refresh attachments
-                    $attachments_result = mysqli_query($connection, $attachments_query);
-                    $attachments = [];
-                    if ($attachments_result) {
-                        while ($row = mysqli_fetch_assoc($attachments_result)) {
-                            $attachments[] = $row;
-                        }
+                $success_message = "Response sent successfully!";
+                
+                // reload responses
+                $responses_result = mysqli_query($connection, $responses_query);
+                $responses = [];
+                if ($responses_result) {
+                    while ($row = mysqli_fetch_assoc($responses_result)) {
+                        $responses[] = $row;
                     }
-                } else {
-                    $error_message = "Error adding attachment: " . mysqli_error($connection);
                 }
+            } else {
+                $error_message = "Error sending response: " . mysqli_error($connection);
+            }
+        } else {
+            $error_message = "Message cannot be empty";
+        }
+    }
+
+    // handle file upload for attachments
+    if (isset($_POST['add_attachment']) && isset($_FILES['attachment_file']) && $_FILES['attachment_file']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['attachment_file'];
+        $fileName = mysqli_real_escape_string($connection, $file['name']);
+        $fileSize = $file['size'];
+        $fileType = mysqli_real_escape_string($connection, $file['type']);
+        
+        // check file info
+        if ($fileSize > 10 * 1024 * 1024) {
+            $error_message = "File size too large. Maximum size is 10MB.";
+        } else {
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 
+                        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!in_array($fileType, $allowedTypes)) {
+                $error_message = "File type not supported. Please upload PDF, JPG, PNG, or DOC files.";
+            } else {
+                $fileContent = file_get_contents($file['tmp_name']);
                 
-                mysqli_stmt_close($stmt);
+                // sql to insert file into database
+                $insert_query = "INSERT INTO tblticket_attachments (ticketId, fileName, fileData, fileSize, fileType, uploadedBy) 
+                            VALUES (?, ?, ?, ?, ?, ?)";
+                
+                $stmt = mysqli_prepare($connection, $insert_query);
+                
+                if ($stmt) {
+                    $null = null; // for binding BLOB parameter
+                    mysqli_stmt_bind_param($stmt, "isbisi", $ticket_id, $fileName, $null, $fileSize, $fileType, $user_id);
+                    mysqli_stmt_send_long_data($stmt, 2, $fileContent); // for binding BLOB data
+                    
+                    if (mysqli_stmt_execute($stmt)) {
+                        $success_message = "Attachment added successfully!";
+                        // refresh attachments
+                        $attachments_result = mysqli_query($connection, $attachments_query);
+                        $attachments = [];
+                        if ($attachments_result) {
+                            while ($row = mysqli_fetch_assoc($attachments_result)) {
+                                $attachments[] = $row;
+                            }
+                        }
+                    } else {
+                        $error_message = "Error adding attachment: " . mysqli_error($connection);
+                    }
+                    
+                    mysqli_stmt_close($stmt);
+                }
             }
         }
     }
-}
 
-// Handle mark as solved (admin only)
-if (isset($_POST['mark_solved']) && $user_type === 'admin') {
-    $update_query = "UPDATE tbltickets SET status = 'solved', updatedAt = NOW() WHERE ticketID = '$ticket_id'";
-    if (mysqli_query($connection, $update_query)) {
-        $success_message = "Ticket marked as solved!";
-        $ticket['status'] = 'solved';
-    } else {
-        $error_message = "Error updating ticket: " . mysqli_error($connection);
+    // handle mark as solved for admin only
+    if (isset($_POST['mark_solved']) && $user_type === 'admin') {
+        $update_query = "UPDATE tbltickets SET status = 'solved', updatedAt = NOW() WHERE ticketID = '$ticket_id'";
+        if (mysqli_query($connection, $update_query)) {
+            $success_message = "Ticket marked as solved!";
+            $ticket['status'] = 'solved';
+        } else {
+            $error_message = "Error updating ticket: " . mysqli_error($connection);
+        }
     }
-}
 
-// Handle reopen ticket
-if (isset($_POST['reopen_ticket'])) {
-    $update_query = "UPDATE tbltickets SET status = 'open', updatedAt = NOW() WHERE ticketID = '$ticket_id'";
-    if (mysqli_query($connection, $update_query)) {
-        $success_message = "Ticket reopened!";
-        $ticket['status'] = 'open';
-    } else {
-        $error_message = "Error reopening ticket: " . mysqli_error($connection);
+    // handle reopen ticket
+    if (isset($_POST['reopen_ticket'])) {
+        $update_query = "UPDATE tbltickets SET status = 'open', updatedAt = NOW() WHERE ticketID = '$ticket_id'";
+        if (mysqli_query($connection, $update_query)) {
+            $success_message = "Ticket reopened!";
+            $ticket['status'] = 'open';
+        } else {
+            $error_message = "Error reopening ticket: " . mysqli_error($connection);
+        }
     }
-}
 ?>
 
 <!DOCTYPE html>
@@ -652,7 +652,7 @@ if (isset($_POST['reopen_ticket'])) {
         <div class="ticket-detail-container">
             <!-- Back button -->
             <?php 
-            // Determine the correct back URL
+            // backlick depending on the user type
             $back_url = '';
             if ($user_type === 'admin') {
                 $back_url = '../../pages/adminPages/aHelpTicket.php';
@@ -913,7 +913,7 @@ if (isset($_POST['reopen_ticket'])) {
         const unreadCount = <?php echo $unread_count; ?>;
     </script>
     <script>
-        // Attachments Slider Functionality
+        // attachments side to side slider function
         document.addEventListener('DOMContentLoaded', function() {
             const track = document.getElementById('attachmentsTrack');
             const slides = document.querySelectorAll('.attachment-slide');
@@ -934,12 +934,12 @@ if (isset($_POST['reopen_ticket'])) {
                     dot.classList.toggle('active', index === currentSlide);
                 });
                 
-                // Update arrows
+                // update arrows
                 prevArrow.disabled = currentSlide === 0;
                 nextArrow.disabled = currentSlide === totalSlides - 1;
             }
 
-            // Arrow click handlers
+            // arrow click handlers
             if (prevArrow) {
                 prevArrow.addEventListener('click', () => {
                     if (currentSlide > 0) {
@@ -958,7 +958,7 @@ if (isset($_POST['reopen_ticket'])) {
                 });
             }
 
-            // Dot click handlers
+            // dot click handlers
             dots.forEach(dot => {
                 dot.addEventListener('click', () => {
                     currentSlide = parseInt(dot.getAttribute('data-index'));
@@ -966,7 +966,7 @@ if (isset($_POST['reopen_ticket'])) {
                 });
             });
 
-            // Initialize slider
+            // init slider
             updateSlider();
         });
     </script>
@@ -975,38 +975,38 @@ if (isset($_POST['reopen_ticket'])) {
 </html>
 
 <?php
-// Helper functions
-function formatCategory($category) {
-    $categories = [
-        'technical' => 'Technical',
-        'account' => 'Account',
-        'billing' => 'Billing',
-        'feature' => 'Feature',
-        'bug' => 'Bug',
-        'general' => 'General',
-        'other' => 'Others'
-    ];
-    return $categories[$category] ?? $category;
-}
+    // some helper functions
+    function formatCategory($category) {
+        $categories = [
+            'technical' => 'Technical',
+            'account' => 'Account',
+            'billing' => 'Billing',
+            'feature' => 'Feature',
+            'bug' => 'Bug',
+            'general' => 'General',
+            'other' => 'Others'
+        ];
+        return $categories[$category] ?? $category;
+    }
 
-function formatPriority($priority) {
-    $priorities = [
-        'low' => 'Low',
-        'medium' => 'Medium',
-        'high' => 'High',
-        'urgent' => 'Urgent'
-    ];
-    return $priorities[$priority] ?? $priority;
-}
+    function formatPriority($priority) {
+        $priorities = [
+            'low' => 'Low',
+            'medium' => 'Medium',
+            'high' => 'High',
+            'urgent' => 'Urgent'
+        ];
+        return $priorities[$priority] ?? $priority;
+    }
 
-function formatFileSize($bytes) {
-    if ($bytes == 0) return '0 Bytes';
-    $k = 1024;
-    $sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    $i = floor(log($bytes) / log($k));
-    return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
-}
+    function formatFileSize($bytes) {
+        if ($bytes == 0) return '0 Bytes';
+        $k = 1024;
+        $sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        $i = floor(log($bytes) / log($k));
+        return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+    }
 
-// last step - close the connection
-mysqli_close($connection);
+    // last step - close the connection
+    mysqli_close($connection);
 ?>
