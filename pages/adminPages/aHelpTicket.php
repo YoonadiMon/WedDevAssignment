@@ -1,123 +1,126 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    include("../../php/dbConn.php");
+    if(!isset($_SESSION)) {
+        session_start();
+    }
+    include("../../php/sessionCheck.php");
 
-$_SESSION['admin_id'] = $_SESSION['userID'];
-$admin_id = $_SESSION['admin_id'];
-$admin_name = $_SESSION['fullName'];
+    // get active user info of curent session
+    $_SESSION['admin_id'] = $_SESSION['userID'];
+    $admin_id = $_SESSION['admin_id'];
+    $admin_name = $_SESSION['fullName'];
 
-// Handle mark solved action
-if (isset($_POST['mark_solved']) && isset($_POST['ticket_id'])) {
-    $ticket_id = mysqli_real_escape_string($connection, $_POST['ticket_id']);
-    
-    // Check if admin can modify this ticket
-    $check_query = "SELECT adminAssignedID, status FROM tbltickets WHERE ticketID = '$ticket_id'";
-    $check_result = mysqli_query($connection, $check_query);
-    
-    if ($check_result && mysqli_num_rows($check_result) > 0) {
-        $ticket_data = mysqli_fetch_assoc($check_result);
-        $assigned_admin = $ticket_data['adminAssignedID'];
-        $current_status = $ticket_data['status'];
+    // handle mark solved action
+    if (isset($_POST['mark_solved']) && isset($_POST['ticket_id'])) {
+        $ticket_id = mysqli_real_escape_string($connection, $_POST['ticket_id']);
         
-        // Check if admin can modify (either not assigned or assigned to this admin)
-        if ($assigned_admin == NULL || $assigned_admin == $admin_id) {
-            // Update ticket status to solved and assign admin if not already assigned
-            $update_query = "UPDATE tbltickets SET 
-                            status = 'solved', 
-                            adminAssignedID = '$admin_id',
-                            updatedAt = NOW(),
-                            lastReplyAt = NOW()
-                            WHERE ticketID = '$ticket_id'";
+        // check for admin's access
+        $check_query = "SELECT adminAssignedID, status FROM tbltickets WHERE ticketID = '$ticket_id'";
+        $check_result = mysqli_query($connection, $check_query);
+        
+        if ($check_result && mysqli_num_rows($check_result) > 0) {
+            $ticket_data = mysqli_fetch_assoc($check_result);
+            $assigned_admin = $ticket_data['adminAssignedID'];
+            $current_status = $ticket_data['status'];
             
-            if (mysqli_query($connection, $update_query)) {
-                $success_message = "Ticket #$ticket_id marked as solved successfully!";
+            // check for admin's access
+            if ($assigned_admin == NULL || $assigned_admin == $admin_id) {
+                // update ticket status to solved and assign admin if not already assigned
+                $update_query = "UPDATE tbltickets SET 
+                                status = 'solved', 
+                                adminAssignedID = '$admin_id',
+                                updatedAt = NOW(),
+                                lastReplyAt = NOW()
+                                WHERE ticketID = '$ticket_id'";
                 
-                // If ticket was not assigned, update adminAssignedID
-                if ($assigned_admin == NULL) {
-                    $assign_query = "UPDATE tbltickets SET adminAssignedID = '$admin_id' WHERE ticketID = '$ticket_id'";
-                    mysqli_query($connection, $assign_query);
+                if (mysqli_query($connection, $update_query)) {
+                    $success_message = "Ticket #$ticket_id marked as solved successfully!";
+                    
+                    // update adminAssignedID if ticket was not assigned
+                    if ($assigned_admin == NULL) {
+                        $assign_query = "UPDATE tbltickets SET adminAssignedID = '$admin_id' WHERE ticketID = '$ticket_id'";
+                        mysqli_query($connection, $assign_query);
+                    }
+                } else {
+                    $error_message = "Error updating ticket: " . mysqli_error($connection);
                 }
             } else {
-                $error_message = "Error updating ticket: " . mysqli_error($connection);
+                $error_message = "Cannot modify ticket #$ticket_id. It is assigned to another admin.";
             }
         } else {
-            $error_message = "Cannot modify ticket #$ticket_id. It is assigned to another admin.";
+            $error_message = "Ticket not found.";
         }
-    } else {
-        $error_message = "Ticket not found.";
     }
-}
 
-// Handle reopen action
-if (isset($_POST['reopen_ticket']) && isset($_POST['ticket_id'])) {
-    $ticket_id = mysqli_real_escape_string($connection, $_POST['ticket_id']);
-    
-    // Check if admin can modify this ticket
-    $check_query = "SELECT adminAssignedID FROM tbltickets WHERE ticketID = '$ticket_id'";
-    $check_result = mysqli_query($connection, $check_query);
-    
-    if ($check_result && mysqli_num_rows($check_result) > 0) {
-        $ticket_data = mysqli_fetch_assoc($check_result);
-        $assigned_admin = $ticket_data['adminAssignedID'];
+    // handle reopen action
+    if (isset($_POST['reopen_ticket']) && isset($_POST['ticket_id'])) {
+        $ticket_id = mysqli_real_escape_string($connection, $_POST['ticket_id']);
         
-        // Check if admin can modify (either not assigned or assigned to this admin)
-        if ($assigned_admin == NULL || $assigned_admin == $admin_id) {
-            // Update ticket status to open
-            $update_query = "UPDATE tbltickets SET 
-                            status = 'open', 
-                            updatedAt = NOW()
-                            WHERE ticketID = '$ticket_id'";
+        // check for admin's access
+        $check_query = "SELECT adminAssignedID FROM tbltickets WHERE ticketID = '$ticket_id'";
+        $check_result = mysqli_query($connection, $check_query);
+        
+        if ($check_result && mysqli_num_rows($check_result) > 0) {
+            $ticket_data = mysqli_fetch_assoc($check_result);
+            $assigned_admin = $ticket_data['adminAssignedID'];
             
-            if (mysqli_query($connection, $update_query)) {
-                $success_message = "Ticket #$ticket_id reopened successfully!";
+            // check for admin's access
+            if ($assigned_admin == NULL || $assigned_admin == $admin_id) {
+                // update ticket status = open
+                $update_query = "UPDATE tbltickets SET 
+                                status = 'open', 
+                                updatedAt = NOW()
+                                WHERE ticketID = '$ticket_id'";
+                
+                if (mysqli_query($connection, $update_query)) {
+                    $success_message = "Ticket #$ticket_id reopened successfully!";
+                } else {
+                    $error_message = "Error reopening ticket: " . mysqli_error($connection);
+                }
             } else {
-                $error_message = "Error reopening ticket: " . mysqli_error($connection);
+                $error_message = "Cannot modify ticket #$ticket_id. It is assigned to another admin.";
             }
         } else {
-            $error_message = "Cannot modify ticket #$ticket_id. It is assigned to another admin.";
+            $error_message = "Ticket not found.";
         }
-    } else {
-        $error_message = "Ticket not found.";
     }
-}
 
-// Fetch all tickets from database
-$query = "SELECT * FROM tbltickets ORDER BY createdAt DESC";
-$result = mysqli_query($connection, $query);
+    // get all tickets from db
+    $query = "SELECT * FROM tbltickets ORDER BY createdAt DESC";
+    $result = mysqli_query($connection, $query);
 
-$tickets = [];
-if ($result) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $tickets[] = $row;
+    $tickets = [];
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $tickets[] = $row;
+        }
     }
-}
 
-// Count tickets by status for stats
-$stats = [
-    'open' => 0,
-    'pending' => 0,
-    'urgent' => 0,
-    'resolved' => 0
-];
+    // count tickets by status for stats
+    $stats = [
+        'open' => 0,
+        'pending' => 0,
+        'urgent' => 0,
+        'resolved' => 0
+    ];
 
-foreach ($tickets as $ticket) {
-    switch ($ticket['status']) {
-        case 'open':
-            $stats['open']++;
-            break;
-        case 'in_progress':
-            $stats['pending']++;
-            break;
-        case 'solved':
-            $stats['resolved']++;
-            break;
+    foreach ($tickets as $ticket) {
+        switch ($ticket['status']) {
+            case 'open':
+                $stats['open']++;
+                break;
+            case 'in_progress':
+                $stats['pending']++;
+                break;
+            case 'solved':
+                $stats['resolved']++;
+                break;
+        }
+        
+        if ($ticket['priority'] === 'urgent') {
+            $stats['urgent']++;
+        }
     }
-    
-    if ($ticket['priority'] === 'urgent') {
-        $stats['urgent']++;
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -713,7 +716,7 @@ foreach ($tickets as $ticket) {
                             <div class="ticket-item <?php echo $ticket['isUnread'] ? 'unread' : ''; ?>" data-ticket-id="<?php echo $ticket['ticketID']; ?>">
                                 <div class="ticket-avatar">
                                     <?php 
-                                    // Get initials from username
+                                    // get initials from username for user profile
                                     $initials = '';
                                     if (!empty($ticket['username'])) {
                                         $names = explode(' ', $ticket['username']);
@@ -794,7 +797,7 @@ foreach ($tickets as $ticket) {
     <script src="../../javascript/mainScript.js"></script>
     <script src="../../javascript/aHelpTickets.js"></script>
     <!-- <script>
-        // Temporary debug function
+        // debug function, uncomment to use
         function debugTickets() {
             console.log('=== DEBUG TICKETS ===');
             const tickets = document.querySelectorAll('.ticket-item');
@@ -808,51 +811,50 @@ foreach ($tickets as $ticket) {
                 });
             });
         }
-        // Run debug after page loads
         setTimeout(debugTickets, 3000);
     </script> -->
 </body>
 </html>
 
 <?php
-// Helper functions
-function formatCategory($category) {
-    $categories = [
-        'technical' => 'Technical',
-        'account' => 'Account',
-        'billing' => 'Billing',
-        'feature' => 'Feature',
-        'bug' => 'Bug',
-        'general' => 'General',
-        'other' => 'Others'
-    ];
-    return $categories[$category] ?? $category;
-}
+    // some helper functions
+    function formatCategory($category) {
+        $categories = [
+            'technical' => 'Technical',
+            'account' => 'Account',
+            'billing' => 'Billing',
+            'feature' => 'Feature',
+            'bug' => 'Bug',
+            'general' => 'General',
+            'other' => 'Others'
+        ];
+        return $categories[$category] ?? $category;
+    }
 
-function formatPriority($priority) {
-    $priorities = [
-        'low' => 'Low',
-        'medium' => 'Medium',
-        'high' => 'High',
-        'urgent' => 'Urgent'
-    ];
-    return $priorities[$priority] ?? $priority;
-}
+    function formatPriority($priority) {
+        $priorities = [
+            'low' => 'Low',
+            'medium' => 'Medium',
+            'high' => 'High',
+            'urgent' => 'Urgent'
+        ];
+        return $priorities[$priority] ?? $priority;
+    }
 
-function formatTime($timestamp) {
-    $now = new DateTime();
-    $ticketTime = new DateTime($timestamp);
-    $interval = $now->diff($ticketTime);
-    
-    if ($interval->y > 0) return $interval->y . 'y ago';
-    if ($interval->m > 0) return $interval->m . 'mo ago';
-    if ($interval->d > 0) return $interval->d . 'd ago';
-    if ($interval->h > 0) return $interval->h . 'h ago';
-    if ($interval->i > 0) return $interval->i . 'm ago';
-    
-    return 'Just now';
-}
+    function formatTime($timestamp) {
+        $now = new DateTime();
+        $ticketTime = new DateTime($timestamp);
+        $interval = $now->diff($ticketTime);
+        
+        if ($interval->y > 0) return $interval->y . 'y ago';
+        if ($interval->m > 0) return $interval->m . 'mo ago';
+        if ($interval->d > 0) return $interval->d . 'd ago';
+        if ($interval->h > 0) return $interval->h . 'h ago';
+        if ($interval->i > 0) return $interval->i . 'm ago';
+        
+        return 'Just now';
+    }
 
-// last step - close the connection
-mysqli_close($connection);
+    // last step - close the connection
+    mysqli_close($connection);
 ?>
