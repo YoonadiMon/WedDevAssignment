@@ -254,7 +254,7 @@
             }
         });
 
-        // Scroll to top when button clicked
+        
         scrollToTopBtn.addEventListener('click', function() {
             window.scrollTo({
                 top: 0,
@@ -262,15 +262,14 @@
             });
         });
 
-        // Alternative scroll wheel functionality (scroll down with smooth animation)
+        
         let isScrolling = false;
 
         document.addEventListener('wheel', function(e) {
-            // Optional: Add custom scroll handling if needed
-            // This allows native scrolling while adding custom behavior
+            
         }, { passive: true });
 
-        // Keyboard navigation for accessibility
+        
         document.addEventListener('keydown', function(e) {
             if (e.code === 'ArrowUp' && scrollToTopBtn.classList.contains('show')) {
                 e.preventDefault();
