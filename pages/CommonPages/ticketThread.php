@@ -831,7 +831,7 @@
                                         Reopen Ticket
                                     </button>
                                 <?php else: ?>
-                                    <button type="submit" name="mark_solved" class="c-btn c-btn-secondary">
+                                    <button type="submit" name="mark_solved" class="c-btn c-btn-primary">
                                         Mark as Solved
                                     </button>
                                 <?php endif; ?>
