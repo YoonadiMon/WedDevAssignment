@@ -1,35 +1,32 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    session_start();
+    include("../../php/dbConn.php");
+    include("../../php/sessionCheck.php");
 
-$userID = $_SESSION['userID'];
-$stageID = isset($_GET['stage']) ? intval($_GET['stage']) : 1;
+    $userID = $_SESSION['userID'];
+    $stageID = isset($_GET['stage']) ? intval($_GET['stage']) : 1;
 
-// Fetch quiz questions for stage 1
-$quizQuestions = [];
-$questionQuery = "SELECT q.quizID, q.questionText, q.optionA, q.optionB, q.optionC, q.optionD, q.correctAnswer, q.points 
-                  FROM tblquiz_questions q 
-                  WHERE q.stageID = ? 
-                  ORDER BY q.questionOrder";
-$stmt = $connection->prepare($questionQuery);
-$stmt->bind_param("i", $stageID);
-$stmt->execute();
-$result = $stmt->get_result();
+    // get quiz questions for stage 1
+    $quizQuestions = [];
+    $questionQuery = "SELECT q.quizID, q.questionText, q.optionA, q.optionB, q.optionC, q.optionD, q.correctAnswer, q.points 
+                    FROM tblquiz_questions q 
+                    WHERE q.stageID = '$stageID'
+                    ORDER BY q.questionOrder";
+    $result = mysqli_query($connection, $questionQuery);
+    if (!$result) { // error handling
+        die("Query failed: " . mysqli_error($connection));
+    }
+    while ($row = mysqli_fetch_assoc($result)) {
+        $quizQuestions[] = $row;
+    }
 
-while ($row = $result->fetch_assoc()) {
-    $quizQuestions[] = $row;
-}
-$stmt->close();
-
-// Check if user has already completed this stage
-$progressQuery = "SELECT * FROM tbluser_quiz_progress WHERE userID = ? AND stageID = ?";
-$stmt = $connection->prepare($progressQuery);
-$stmt->bind_param("ii", $userID, $stageID);
-$stmt->execute();
-$progressResult = $stmt->get_result();
-$hasCompleted = $progressResult->num_rows > 0;
-$stmt->close();
+    // check if user has already completed this stage
+    $progressQuery = "SELECT * FROM tbluser_quiz_progress WHERE userID = '$userID' AND stageID = '$stageID'";
+    $progressResult = mysqli_query($connection, $progressQuery);
+    if (!$progressResult) { // error handling
+        die("Query failed: " . mysqli_error($connection));
+    }
+    $hasCompleted = mysqli_num_rows($progressResult) > 0;
 ?>
 
 <!DOCTYPE html>
