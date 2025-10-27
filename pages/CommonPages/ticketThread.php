@@ -213,6 +213,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
     <style>
+        /* extra styles unique to page */
         .ticket-detail-container {
             max-width: 1200px;
             margin: 0 auto;

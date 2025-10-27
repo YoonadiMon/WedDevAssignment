@@ -1,8 +1,11 @@
 <?php
-    session_start();
     include("../../php/dbConn.php");
+    if(!isset($_SESSION)) {
+        session_start();
+    }
     include("../../php/sessionCheck.php");
 
+    // get active user info of curent session
     $userID = $_SESSION['userID'];
     $stageID = isset($_GET['stage']) ? intval($_GET['stage']) : 1;
 
@@ -45,6 +48,7 @@
             href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
             rel="stylesheet">
         <style>
+            /* extra styles unique to page */
             .quiz-container {
                 max-width: 800px;
                 margin: 2rem auto;
@@ -581,7 +585,7 @@
 
                 const percentage = Math.round((score / quizData.length) * 100);
                 
-                // Update popup content
+                // update popup content
                 document.getElementById('popupScore').textContent = score + '/' + quizData.length;
                 document.getElementById('popupCorrect').textContent = score;
                 document.getElementById('popupPercentage').textContent = percentage + '%';
@@ -601,10 +605,10 @@
                 
                 document.getElementById('popupMessage').textContent = message;
                 
-                // Save results to database
+                // save results to db
                 saveQuizResults(score, totalPoints, percentage);
                 
-                // Show popup
+                // show popup
                 document.getElementById('resultsPopup').style.display = 'flex';
             }
 
@@ -616,7 +620,6 @@
                 formData.append('totalPoints', totalPoints);
                 formData.append('percentage', percentage);
 
-                // Use the correct path to saveQuizResults.php
                 fetch('../../php/saveQuizResults.php', {
                     method: 'POST',
                     body: formData
