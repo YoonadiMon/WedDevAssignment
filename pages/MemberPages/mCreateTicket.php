@@ -1,116 +1,119 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    include("../../php/dbConn.php");
+    if(!isset($_SESSION)) {
+        session_start();
+    }
+    include("../../php/sessionCheck.php");
 
-// Initialize variables
-$currentUserID = $_SESSION['userID']; 
+    // get active user info of curent session
+    $currentUserID = $_SESSION['userID']; 
+    $username = $_SESSION['username'];
 
-$success_message = "";
-$error_message = "";
+    $success_message = "";
+    $error_message = "";
 
-// Process form submission
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get form data
-    $subject = mysqli_real_escape_string($connection, $_POST['subject']);
-    $category = mysqli_real_escape_string($connection, $_POST['category']);
-    $priority = mysqli_real_escape_string($connection, $_POST['priority']);
-    $email = mysqli_real_escape_string($connection, $_POST['email']);
-    $description = mysqli_real_escape_string($connection, $_POST['description']);
-    
-    // Get username (you might want to get this from session or database)
-    $username = "User" . $currentUserID; // Default username
-    
-    // Set default values
-    $status = "Open";
-    $isUnread = 1;
-    $current_time = date("Y-m-d H:i:s");
-    
-    // Insert ticket into database
-    $query = "INSERT INTO tbltickets (subject, category, priority, status, description, userID, username, userEmail, isUnread, createdAt, updatedAt) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
-    $stmt = mysqli_prepare($connection, $query);
-    
-    if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "sssssisssss", 
-            $subject, $category, $priority, $status, $description, 
-            $currentUserID, $username, $email, $isUnread, $current_time, $current_time);
+    // handle form submission
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        // Get form data
+        $subject = mysqli_real_escape_string($connection, $_POST['subject']);
+        $category = mysqli_real_escape_string($connection, $_POST['category']);
+        $priority = mysqli_real_escape_string($connection, $_POST['priority']);
+        $email = mysqli_real_escape_string($connection, $_POST['email']);
+        $description = mysqli_real_escape_string($connection, $_POST['description']);
         
-        if (mysqli_stmt_execute($stmt)) {
-            $ticketId = mysqli_insert_id($connection); // Get the newly created ticket ID
-            $success_message = "Ticket submitted successfully! We'll get back to you soon.";
+        // set username 
+        $username = "User" . $username; // User + username
+        
+        // set default values
+        $status = "Open";
+        $isUnread = 1;
+        $current_time = date("Y-m-d H:i:s");
+        
+        // sql to insert ticket into db
+        $query = "INSERT INTO tbltickets (subject, category, priority, status, description, userID, username, userEmail, isUnread, createdAt, updatedAt) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        $stmt = mysqli_prepare($connection, $query);
+        
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "sssssisssss", 
+                $subject, $category, $priority, $status, $description, 
+                $currentUserID, $username, $email, $isUnread, $current_time, $current_time);
             
-            // Handle file uploads if any files were uploaded
-            if (!empty($_FILES['attachments']['name'][0])) {
-                $uploadSuccess = handleFileUploads($connection, $ticketId, $currentUserID);
+            if (mysqli_stmt_execute($stmt)) {
+                $ticketId = mysqli_insert_id($connection); // get the newly created ticket ID
+                $success_message = "Ticket submitted successfully! We'll get back to you soon.";
                 
-                if (!$uploadSuccess) {
-                    $success_message .= " Note: Some attachments failed to upload.";
+                // handle file uploads if any files were uploaded
+                if (!empty($_FILES['attachments']['name'][0])) {
+                    $uploadSuccess = handleFileUploads($connection, $ticketId, $currentUserID);
+                    
+                    if (!$uploadSuccess) {
+                        $success_message .= " Note: Some attachments failed to upload.";
+                    }
                 }
+                
+                // clear form fields
+                $_POST = array();
+            } else {
+                $error_message = "Error submitting ticket: " . mysqli_error($connection);
             }
             
-            // Clear form fields
-            $_POST = array();
+            mysqli_stmt_close($stmt);
         } else {
-            $error_message = "Error submitting ticket: " . mysqli_error($connection);
+            $error_message = "Database error: " . mysqli_error($connection);
         }
-        
-        mysqli_stmt_close($stmt);
-    } else {
-        $error_message = "Database error: " . mysqli_error($connection);
     }
-}
 
-// Function to handle file uploads to database
-function handleFileUploads($connection, $ticketId, $uploadedBy) {
-    $attachments = $_FILES['attachments'];
-    $successCount = 0;
-    
-    // Loop through each uploaded file
-    for ($i = 0; $i < count($attachments['name']); $i++) {
-        if ($attachments['error'][$i] === UPLOAD_ERR_OK) {
-            $fileName = mysqli_real_escape_string($connection, $attachments['name'][$i]);
-            $fileSize = $attachments['size'][$i];
-            $fileType = mysqli_real_escape_string($connection, $attachments['type'][$i]);
-            
-            // Read file content
-            $fileContent = file_get_contents($attachments['tmp_name'][$i]);
-            
-            // Check file size (10MB limit)
-            if ($fileSize > 10 * 1024 * 1024) {
-                continue; // Skip files that are too large
-            }
-            
-            // Check file type
-            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 
-                           'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-            if (!in_array($fileType, $allowedTypes)) {
-                continue; // Skip unsupported file types
-            }
-            
-            // Insert file into database
-            $query = "INSERT INTO tblticket_attachments (ticketId, fileName, fileData, fileSize, fileType, uploadedBy) 
-                      VALUES (?, ?, ?, ?, ?, ?)";
-            
-            $stmt = mysqli_prepare($connection, $query);
-            
-            if ($stmt) {
-                $null = null; // Needed for binding BLOB parameter
-                mysqli_stmt_bind_param($stmt, "isbisi", $ticketId, $fileName, $null, $fileSize, $fileType, $uploadedBy);
-                mysqli_stmt_send_long_data($stmt, 2, $fileContent); // Bind BLOB data
+    // function to handle file uploads to db
+    function handleFileUploads($connection, $ticketId, $uploadedBy) {
+        $attachments = $_FILES['attachments'];
+        $successCount = 0;
+        
+        // loop through each uploaded file
+        for ($i = 0; $i < count($attachments['name']); $i++) {
+            if ($attachments['error'][$i] === UPLOAD_ERR_OK) {
+                $fileName = mysqli_real_escape_string($connection, $attachments['name'][$i]);
+                $fileSize = $attachments['size'][$i];
+                $fileType = mysqli_real_escape_string($connection, $attachments['type'][$i]);
                 
-                if (mysqli_stmt_execute($stmt)) {
-                    $successCount++;
+                // read file content
+                $fileContent = file_get_contents($attachments['tmp_name'][$i]);
+                
+                // check file size for 10mb limit
+                if ($fileSize > 10 * 1024 * 1024) {
+                    continue; // skip files that are too large
                 }
                 
-                mysqli_stmt_close($stmt);
+                // check file type
+                $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 
+                            'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                if (!in_array($fileType, $allowedTypes)) {
+                    continue; // Skip unsupported file types
+                }
+                
+                // insert file into db
+                $query = "INSERT INTO tblticket_attachments (ticketId, fileName, fileData, fileSize, fileType, uploadedBy) 
+                        VALUES (?, ?, ?, ?, ?, ?)";
+                
+                $stmt = mysqli_prepare($connection, $query);
+                
+                if ($stmt) {
+                    $null = null; // for binding BLOB parameter
+                    mysqli_stmt_bind_param($stmt, "isbisi", $ticketId, $fileName, $null, $fileSize, $fileType, $uploadedBy);
+                    mysqli_stmt_send_long_data($stmt, 2, $fileContent); // for binding BLOB data
+                    
+                    if (mysqli_stmt_execute($stmt)) {
+                        $successCount++;
+                    }
+                    
+                    mysqli_stmt_close($stmt);
+                }
             }
         }
+        
+        return $successCount > 0;
     }
-    
-    return $successCount > 0;
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -127,6 +130,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
     <style>
+        /* extra styles unique to page */
         .support-ticket-container {
             max-width: 800px;
             margin: 0 auto;
@@ -216,8 +220,8 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
         }
 
         .priority-low { color: var(--MainGreen); }
-        .priority-medium { color: #f59e0b; }
-        .priority-high { color: #ef4444; }
+        .priority-medium { color: var(--Orange); }
+        .priority-high { color: var(--Red); }
 
         .file-upload {
             border: 2px dashed var(--border-color);
@@ -641,7 +645,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
         const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
         const unreadCount = <?php echo $unread_count; ?>;
         
-        // Priority indicator functionality
+        // for priority caption
         document.getElementById('ticketPriority').addEventListener('change', function() {
             const priority = this.value;
             const indicator = document.getElementById('priorityIndicator');
@@ -656,7 +660,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
                         className = 'priority-low';
                         break;
                     case 'Medium':
-                        text = '🟡 Medium priority - We\'ll respond within 1-2 business days';
+                        text = '🟠 Medium priority - We\'ll respond within 1-2 business days';
                         className = 'priority-medium';
                         break;
                     case 'High':
@@ -675,7 +679,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
             }
         });
 
-        // File upload functionality
+        // for file upload functionality
         const fileUploadArea = document.getElementById('fileUploadArea');
         const fileInput = document.getElementById('fileInput');
         const attachmentsPreview = document.getElementById('attachmentsPreview');
@@ -710,13 +714,13 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
 
         function handleFiles(files) {
             for (let file of files) {
-                // Check file size (10MB limit)
+                // check file size for 10mb limit
                 if (file.size > 10 * 1024 * 1024) {
                     alert('File size too large. Maximum size is 10MB.');
                     continue;
                 }
                 
-                // Check file type
+                // check file type
                 const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'application/msword'];
                 if (!allowedTypes.includes(file.type)) {
                     alert('File type not supported. Please upload PDF, JPG, PNG, or DOC files.');
@@ -739,7 +743,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
             attachmentsPreview.appendChild(attachmentItem);
         }
 
-        // Form validation
+        // form validation
         document.getElementById('supportTicketForm').addEventListener('submit', function(e) {
             const subject = document.getElementById('ticketSubject').value.trim();
             const description = document.getElementById('ticketDescription').value.trim();
@@ -750,7 +754,7 @@ function handleFileUploads($connection, $ticketId, $uploadedBy) {
                 return;
             }
             
-            // Disable submit button to prevent double submission
+            // disable submit button for double submit error
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('submitBtn').textContent = 'Submitting...';
         });
