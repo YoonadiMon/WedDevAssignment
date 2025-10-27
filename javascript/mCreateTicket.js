@@ -62,7 +62,7 @@
 
             function handleFiles(files) {
                 for (let file of files) {
-                    // Check file size (10MB limit)
+                    // check file size for 10mb limit
                     if (file.size > 10 * 1024 * 1024) {
                         alert('File size too large. Maximum size is 10MB.');
                         continue;

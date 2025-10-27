@@ -252,7 +252,7 @@ function reportListing(listingId) {
     if (listing) {
         const reason = prompt(`Please provide a reason for reporting "${listing.title}":`);
         if (reason !== null && reason.trim() !== '') {
-            // Make AJAX call to update reported status in database
+            // Make AJAX call to connect js with php to handle db
             fetch('../../php/reportListing.php', {
                 method: 'POST',
                 headers: {
@@ -284,7 +284,7 @@ function reportListing(listingId) {
 // Admin functions
 function deleteListing(listingId) {
     if (confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
-        // Make AJAX call to update status to 'inactive' in database
+        // Make AJAX call to connect js with php to handle db
         fetch('../../php/deleteListingAdmin.php', {
             method: 'POST',
             headers: {
@@ -317,7 +317,7 @@ function deleteListing(listingId) {
 
 function resolveReport(listingId) {
     if (confirm('Are you sure you want to resolve this report? This will mark the listing as no longer reported.')) {
-        // Make AJAX call to update reported status to 0 in database
+        // Make AJAX call to connect js with php to handle db
         fetch('../../php/resolveReport.php', {
             method: 'POST',
             headers: {
@@ -605,7 +605,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function deleteOwnListing(listingId) {
     if (confirm('Are you sure you want to delete your listing? This action cannot be undone.')) {
-        // Make AJAX call to update status to 'inactive' in database
+        // Make AJAX call to connect js with php to handle db
         fetch('../../php/removeUserTradeListings.php', {
             method: 'POST',
             headers: {
