@@ -1,23 +1,25 @@
 <?php
-// Database connection and query for current user's tickets
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    include("../../php/dbConn.php");
+    if(!isset($_SESSION)) {
+        session_start();
+    }
+    include("../../php/sessionCheck.php");
 
-// Start session and get actual logged-in user ID
-$currentUserID = $_SESSION['userID']; 
-$username = $_SESSION['username'] ?? '';
+    // get active user info of curent session
+    $currentUserID = $_SESSION['userID']; 
+    $username = $_SESSION['username'] ?? '';
 
-// Query to fetch tickets for the current user
-$query = "SELECT * FROM tbltickets WHERE userID = $currentUserID ORDER BY ticketID DESC";
-$result = mysqli_query($connection, $query);
+    // sql to fetch current user's tickets
+    $query = "SELECT * FROM tbltickets WHERE userID = $currentUserID ORDER BY ticketID DESC";
+    $result = mysqli_query($connection, $query);
 
-// Error handling
-if (!$result) {
-    die("Query failed: " . mysqli_error($connection));
-}
+    // Error handling
+    if (!$result) {
+        die("Query failed: " . mysqli_error($connection));
+    }
 
-// Count the number of tickets
-$ticketCount = mysqli_num_rows($result);
+    // count the number of tickets
+    $ticketCount = mysqli_num_rows($result);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,6 +38,7 @@ $ticketCount = mysqli_num_rows($result);
             rel="stylesheet">
 
         <style>
+            /* extra styles unique to page */
             .support-container {
                 max-width: 1200px;
                 margin: 0 auto;
@@ -483,7 +486,7 @@ $ticketCount = mysqli_num_rows($result);
                     <tbody>
                         <?php if ($ticketCount > 0): ?>
                             <?php 
-                            // Reset pointer to beginning for table
+                            // reset pointer to beginning for table
                             mysqli_data_seek($result, 0);
                             while ($row = mysqli_fetch_assoc($result)): ?>
                                 <tr onclick="window.location.href='../../pages/CommonPages/ticketThread.php?ticket_id=<?php echo $row['ticketID']; ?>&from=member'">
@@ -522,7 +525,7 @@ $ticketCount = mysqli_num_rows($result);
                 <div class="tickets-cards">
                     <?php if ($ticketCount > 0): ?>
                         <?php 
-                        // Reset pointer to beginning for cards
+                        // reset pointer to beginning for cards
                         mysqli_data_seek($result, 0);
                         while ($row = mysqli_fetch_assoc($result)): ?>
                             <!-- <div class="ticket-card" onclick="window.location.href='mTicketDetails.php?id= 

@@ -1,6 +1,7 @@
 <?php
-    // Start the session
-    session_start();
+    if(!isset($_SESSION)) {
+        session_start();
+    }
     include("../../php/sessionCheck.php");
 
     // get active user info of curent session
