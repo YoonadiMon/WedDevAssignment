@@ -1,295 +1,278 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    session_start();
+    include("../../php/dbConn.php");
+    include("../../php/sessionCheck.php");
 
-$countries = [
-    'Afghanistan', 'Åland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra',
-    'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia',
-    'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh',
-    'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia',
-    'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory',
-    'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon',
-    'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile',
-    'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo',
-    'Congo, The Democratic Republic of The', 'Cook Islands', 'Costa Rica', "Cote D'ivoire",
-    'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica',
-    'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea',
-    'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland',
-    'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon',
-    'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada',
-    'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-bissau', 'Guyana',
-    'Haiti', 'Heard Island and Mcdonald Islands', 'Holy See (Vatican City State)', 'Honduras',
-    'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of',
-    'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey',
-    'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of",
-    'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic",
-    'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libyan Arab Jamahiriya', 'Liechtenstein',
-    'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, The Former Yugoslav Republic of',
-    'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands',
-    'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of',
-    'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco',
-    'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'Netherlands Antilles',
-    'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island',
-    'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied',
-    'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland',
-    'Portugal', 'Puerto Rico', 'Qatar', 'Reunion', 'Romania', 'Russian Federation', 'Rwanda',
-    'Saint Helena', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Pierre and Miquelon',
-    'Saint Vincent and The Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe',
-    'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore',
-    'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa',
-    'South Georgia and The South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan',
-    'Suriname', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland',
-    'Syrian Arab Republic', 'Taiwan', 'Tajikistan', 'Tanzania, United Republic of',
-    'Thailand', 'Timor-leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago',
-    'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu',
-    'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States',
-    'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu',
-    'Venezuela', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.',
-    'Wallis and Futuna', 'Western Sahara', 'Yemen', 'Zambia', 'Zimbabwe'
-];
+    // Check if user is admin, admin cannot host events
+    if ($_SESSION['userType'] === 'admin') {
+        header("Location: ../../pages/adminPages/adminIndex.php");
+        exit();
+    }
 
-// Function to get timezone by country
-function getTimezoneByCountry($country) {
-    $timezoneGroups = [
-        'UTC+13:00' => ['Samoa', 'Tonga'],
-        'UTC+12:00' => ['Fiji', 'Kiribati', 'Marshall Islands', 'Nauru', 'New Zealand', 'Tuvalu', 'Wallis and Futuna'],
-        'UTC+11:00' => ['New Caledonia', 'Norfolk Island', 'Solomon Islands', 'Vanuatu'],
-        'UTC+10:00' => ['Australia', 'Guam', 'Micronesia, Federated States of', 'Northern Mariana Islands', 'Papua New Guinea'],
-        'UTC+09:00' => ['Japan', 'Korea, Democratic People\'s Republic of', 'Korea, Republic of', 'Palau', 'Timor-leste'],
-        'UTC+08:00' => ['China', 'Hong Kong', 'Macao', 'Malaysia', 'Philippines', 'Singapore', 'Taiwan', 'Brunei Darussalam', 'Mongolia'],
-        'UTC+07:00' => ['Cambodia', 'Christmas Island', 'Indonesia', 'Lao People\'s Democratic Republic', 'Thailand', 'Viet Nam'],
-        'UTC+06:30' => ['Cocos (Keeling) Islands', 'Myanmar'],
-        'UTC+06:00' => ['Bangladesh', 'Bhutan', 'British Indian Ocean Territory', 'Kazakhstan', 'Kyrgyzstan'],
-        'UTC+05:45' => ['Nepal'],
-        'UTC+05:30' => ['India', 'Sri Lanka'],
-        'UTC+05:00' => ['Maldives', 'Pakistan', 'French Southern Territories', 'Heard Island and Mcdonald Islands', 'Tajikistan', 'Turkmenistan', 'Uzbekistan'],
-        'UTC+04:30' => ['Afghanistan'],
-        'UTC+04:00' => ['Armenia', 'Azerbaijan', 'Georgia', 'Mauritius', 'Oman', 'Reunion', 'Seychelles', 'United Arab Emirates'],
-        'UTC+03:30' => ['Iran, Islamic Republic of'],
-        'UTC+03:00' => ['Bahrain', 'Belarus', 'Comoros', 'Djibouti', 'Eritrea', 'Ethiopia', 'Iraq', 'Jordan', 'Kenya', 'Kuwait', 'Madagascar', 'Mayotte', 'Qatar', 'Russian Federation', 'Saudi Arabia', 'Somalia', 'South Africa', 'Sudan', 'Syrian Arab Republic', 'Tanzania, United Republic of', 'Turkey', 'Uganda', 'Yemen'],
-        'UTC+02:00' => ['Åland Islands', 'Botswana', 'Bulgaria', 'Burundi', 'Cyprus', 'Egypt', 'Estonia', 'Finland', 'Greece', 'Israel', 'Latvia', 'Lebanon', 'Lesotho', 'Libyan Arab Jamahiriya', 'Lithuania', 'Malawi', 'Moldova, Republic of', 'Mozambique', 'Namibia', 'Palestinian Territory, Occupied', 'Romania', 'Rwanda', 'Swaziland', 'Ukraine', 'Zambia', 'Zimbabwe'],
-        'UTC+01:00' => ['Albania', 'Algeria', 'Andorra', 'Angola', 'Austria', 'Belgium', 'Benin', 'Bosnia and Herzegovina', 'Cameroon', 'Central African Republic', 'Chad', 'Congo', 'Congo, The Democratic Republic of The', 'Croatia', 'Czech Republic', 'Denmark', 'Equatorial Guinea', 'France', 'Gabon', 'Germany', 'Gibraltar', 'Holy See (Vatican City State)', 'Hungary', 'Italy', 'Liechtenstein', 'Luxembourg', 'Macedonia, The Former Yugoslav Republic of', 'Malta', 'Monaco', 'Montenegro', 'Morocco', 'Netherlands', 'Niger', 'Nigeria', 'Norway', 'Poland', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'Tunisia', 'United Kingdom', 'Western Sahara'],
-        'UTC+00:00' => ['Bouvet Island', 'Burkina Faso', 'Cote D\'ivoire', 'Faroe Islands', 'Gambia', 'Ghana', 'Greenland', 'Guernsey', 'Guinea', 'Guinea-bissau', 'Iceland', 'Ireland', 'Isle of Man', 'Jersey', 'Liberia', 'Mali', 'Mauritania', 'Portugal', 'Saint Helena', 'Sao Tome and Principe', 'Senegal', 'Sierra Leone', 'Svalbard and Jan Mayen', 'Togo', 'Tokelau'],
-        'UTC-01:00' => ['Cape Verde'],
-        'UTC-02:00' => ['South Georgia and The South Sandwich Islands'],
-        'UTC-03:00' => ['Antarctica', 'Argentina', 'Brazil', 'Falkland Islands (Malvinas)', 'French Guiana', 'Paraguay', 'Saint Pierre and Miquelon', 'Suriname', 'Uruguay'],
-        'UTC-04:00' => ['Anguilla', 'Antigua and Barbuda', 'Aruba', 'Barbados', 'Bermuda', 'Bolivia', 'Chile', 'Dominica', 'Dominican Republic', 'Grenada', 'Guadeloupe', 'Guyana', 'Martinique', 'Montserrat', 'Netherlands Antilles', 'Puerto Rico', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and The Grenadines', 'Trinidad and Tobago', 'Venezuela', 'Virgin Islands, British', 'Virgin Islands, U.S.'],
-        'UTC-05:00' => ['Bahamas', 'Canada', 'Cayman Islands', 'Colombia', 'Cuba', 'Ecuador', 'Haiti', 'Jamaica', 'Panama', 'Peru', 'Turks and Caicos Islands', 'United States'],
-        'UTC-06:00' => ['Belize', 'Costa Rica', 'El Salvador', 'Guatemala', 'Honduras', 'Mexico', 'Nicaragua'],
-        'UTC-08:00' => ['Pitcairn'],
-        'UTC-10:00' => ['Cook Islands', 'French Polynesia'],
-        'UTC-11:00' => ['American Samoa', 'Niue', 'United States Minor Outlying Islands'],
+    // full list of countries
+    $countries = [
+        'Afghanistan', 'Åland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra',
+        'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia',
+        'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh',
+        'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia',
+        'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory',
+        'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon',
+        'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile',
+        'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo',
+        'Congo, The Democratic Republic of The', 'Cook Islands', 'Costa Rica', "Cote D'ivoire",
+        'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica',
+        'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea',
+        'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland',
+        'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon',
+        'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada',
+        'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-bissau', 'Guyana',
+        'Haiti', 'Heard Island and Mcdonald Islands', 'Holy See (Vatican City State)', 'Honduras',
+        'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of',
+        'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey',
+        'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of",
+        'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic",
+        'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libyan Arab Jamahiriya', 'Liechtenstein',
+        'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, The Former Yugoslav Republic of',
+        'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands',
+        'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of',
+        'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco',
+        'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'Netherlands Antilles',
+        'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island',
+        'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied',
+        'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland',
+        'Portugal', 'Puerto Rico', 'Qatar', 'Reunion', 'Romania', 'Russian Federation', 'Rwanda',
+        'Saint Helena', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Pierre and Miquelon',
+        'Saint Vincent and The Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe',
+        'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore',
+        'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa',
+        'South Georgia and The South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan',
+        'Suriname', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland',
+        'Syrian Arab Republic', 'Taiwan', 'Tajikistan', 'Tanzania, United Republic of',
+        'Thailand', 'Timor-leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago',
+        'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu',
+        'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States',
+        'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu',
+        'Venezuela', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.',
+        'Wallis and Futuna', 'Western Sahara', 'Yemen', 'Zambia', 'Zimbabwe'
     ];
 
-    // Create a flattened array for quick lookup
-    $countryTimezones = [];
-    foreach ($timezoneGroups as $timezone => $countries) {
-        foreach ($countries as $countryName) {
-            $countryTimezones[$countryName] = $timezone;
-        }
-    }
+    // get timezone by country
+    function getTimezoneByCountry($country) {
+        $timezoneGroups = [
+            'UTC+13:00' => ['Samoa', 'Tonga'],
+            'UTC+12:00' => ['Fiji', 'Kiribati', 'Marshall Islands', 'Nauru', 'New Zealand', 'Tuvalu', 'Wallis and Futuna'],
+            'UTC+11:00' => ['New Caledonia', 'Norfolk Island', 'Solomon Islands', 'Vanuatu'],
+            'UTC+10:00' => ['Australia', 'Guam', 'Micronesia, Federated States of', 'Northern Mariana Islands', 'Papua New Guinea'],
+            'UTC+09:00' => ['Japan', 'Korea, Democratic People\'s Republic of', 'Korea, Republic of', 'Palau', 'Timor-leste'],
+            'UTC+08:00' => ['China', 'Hong Kong', 'Macao', 'Malaysia', 'Philippines', 'Singapore', 'Taiwan', 'Brunei Darussalam', 'Mongolia'],
+            'UTC+07:00' => ['Cambodia', 'Christmas Island', 'Indonesia', 'Lao People\'s Democratic Republic', 'Thailand', 'Viet Nam'],
+            'UTC+06:30' => ['Cocos (Keeling) Islands', 'Myanmar'],
+            'UTC+06:00' => ['Bangladesh', 'Bhutan', 'British Indian Ocean Territory', 'Kazakhstan', 'Kyrgyzstan'],
+            'UTC+05:45' => ['Nepal'],
+            'UTC+05:30' => ['India', 'Sri Lanka'],
+            'UTC+05:00' => ['Maldives', 'Pakistan', 'French Southern Territories', 'Heard Island and Mcdonald Islands', 'Tajikistan', 'Turkmenistan', 'Uzbekistan'],
+            'UTC+04:30' => ['Afghanistan'],
+            'UTC+04:00' => ['Armenia', 'Azerbaijan', 'Georgia', 'Mauritius', 'Oman', 'Reunion', 'Seychelles', 'United Arab Emirates'],
+            'UTC+03:30' => ['Iran, Islamic Republic of'],
+            'UTC+03:00' => ['Bahrain', 'Belarus', 'Comoros', 'Djibouti', 'Eritrea', 'Ethiopia', 'Iraq', 'Jordan', 'Kenya', 'Kuwait', 'Madagascar', 'Mayotte', 'Qatar', 'Russian Federation', 'Saudi Arabia', 'Somalia', 'South Africa', 'Sudan', 'Syrian Arab Republic', 'Tanzania, United Republic of', 'Turkey', 'Uganda', 'Yemen'],
+            'UTC+02:00' => ['Åland Islands', 'Botswana', 'Bulgaria', 'Burundi', 'Cyprus', 'Egypt', 'Estonia', 'Finland', 'Greece', 'Israel', 'Latvia', 'Lebanon', 'Lesotho', 'Libyan Arab Jamahiriya', 'Lithuania', 'Malawi', 'Moldova, Republic of', 'Mozambique', 'Namibia', 'Palestinian Territory, Occupied', 'Romania', 'Rwanda', 'Swaziland', 'Ukraine', 'Zambia', 'Zimbabwe'],
+            'UTC+01:00' => ['Albania', 'Algeria', 'Andorra', 'Angola', 'Austria', 'Belgium', 'Benin', 'Bosnia and Herzegovina', 'Cameroon', 'Central African Republic', 'Chad', 'Congo', 'Congo, The Democratic Republic of The', 'Croatia', 'Czech Republic', 'Denmark', 'Equatorial Guinea', 'France', 'Gabon', 'Germany', 'Gibraltar', 'Holy See (Vatican City State)', 'Hungary', 'Italy', 'Liechtenstein', 'Luxembourg', 'Macedonia, The Former Yugoslav Republic of', 'Malta', 'Monaco', 'Montenegro', 'Morocco', 'Netherlands', 'Niger', 'Nigeria', 'Norway', 'Poland', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'Tunisia', 'United Kingdom', 'Western Sahara'],
+            'UTC+00:00' => ['Bouvet Island', 'Burkina Faso', 'Cote D\'ivoire', 'Faroe Islands', 'Gambia', 'Ghana', 'Greenland', 'Guernsey', 'Guinea', 'Guinea-bissau', 'Iceland', 'Ireland', 'Isle of Man', 'Jersey', 'Liberia', 'Mali', 'Mauritania', 'Portugal', 'Saint Helena', 'Sao Tome and Principe', 'Senegal', 'Sierra Leone', 'Svalbard and Jan Mayen', 'Togo', 'Tokelau'],
+            'UTC-01:00' => ['Cape Verde'],
+            'UTC-02:00' => ['South Georgia and The South Sandwich Islands'],
+            'UTC-03:00' => ['Antarctica', 'Argentina', 'Brazil', 'Falkland Islands (Malvinas)', 'French Guiana', 'Paraguay', 'Saint Pierre and Miquelon', 'Suriname', 'Uruguay'],
+            'UTC-04:00' => ['Anguilla', 'Antigua and Barbuda', 'Aruba', 'Barbados', 'Bermuda', 'Bolivia', 'Chile', 'Dominica', 'Dominican Republic', 'Grenada', 'Guadeloupe', 'Guyana', 'Martinique', 'Montserrat', 'Netherlands Antilles', 'Puerto Rico', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and The Grenadines', 'Trinidad and Tobago', 'Venezuela', 'Virgin Islands, British', 'Virgin Islands, U.S.'],
+            'UTC-05:00' => ['Bahamas', 'Canada', 'Cayman Islands', 'Colombia', 'Cuba', 'Ecuador', 'Haiti', 'Jamaica', 'Panama', 'Peru', 'Turks and Caicos Islands', 'United States'],
+            'UTC-06:00' => ['Belize', 'Costa Rica', 'El Salvador', 'Guatemala', 'Honduras', 'Mexico', 'Nicaragua'],
+            'UTC-08:00' => ['Pitcairn'],
+            'UTC-10:00' => ['Cook Islands', 'French Polynesia'],
+            'UTC-11:00' => ['American Samoa', 'Niue', 'United States Minor Outlying Islands'],
+        ];
 
-    return $countryTimezones[$country] ?? 'UTC+08:00';
-}
-
-$errors = [];
-$formData = [];
-$hasError = false;
-
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Store form data for repopulation
-    $formData = [
-        'title' => $_POST['title'] ?? '',
-        'description' => $_POST['description'] ?? '',
-        'startDate' => $_POST['startDate'] ?? '',
-        'endDate' => $_POST['endDate'] ?? '',
-        'time' => $_POST['time'] ?? '',
-        'day' => $_POST['day'] ?? '',
-        'duration' => $_POST['duration'] ?? '',
-        'location' => $_POST['location'] ?? '',
-        'country' => $_POST['country'] ?? '',
-        'maxPax' => $_POST['maxPax'] ?? '',
-        'mode' => $_POST['mode'] ?? '',
-        'type' => $_POST['type'] ?? ''
-    ];
-    
-    // Get form data
-    $title = trim($_POST['title']);
-    $description = trim($_POST['description']);
-    $startDate = $_POST['startDate'];
-    $endDate = $_POST['endDate'];
-    $time = $_POST['time'];
-    $day = $_POST['day'];
-    $duration = $_POST['duration'];
-    $location = trim($_POST['location']);
-    $country = $_POST['country'];
-    $maxPax = $_POST['maxPax'];
-    $mode = $_POST['mode'] ?? '';
-    $type = $_POST['type'] ?? '';
-    $status = 'open';
-    
-    $timeZone = getTimezoneByCountry($country);
-
-    // Validation
-    if (empty($title) || strlen($title) < 5) {
-        $errors['title'] = "Title must be at least 5 characters long";
-    } elseif (strlen($title) > 60) {
-        $errors['title'] = "Title cannot exceed 60 characters";
-    }
-
-    if (empty($description) || strlen($description) < 20) {
-        $errors['description'] = "Description must be at least 20 characters long";
-    } elseif (strlen($description) > 2000) {
-        $errors['description'] = "Description cannot exceed 2000 characters";
-    }
-
-    $today = date('Y-m-d');
-    if (empty($startDate) || $startDate < $today) {
-        $errors['startDate'] = "Start date cannot be in the past";
-    }
-    
-    if (empty($endDate) || $endDate < $startDate) {
-        $errors['endDate'] = "End date cannot be before start date";
-    }
-
-    if (empty($time)) {
-        $errors['time'] = "Time is required";
-    }
-    
-    if (empty($duration) || $duration < 1 || $duration > 24) {
-        $errors['duration'] = "Duration must be between 1 and 24 hours";
-    }
-    
-    if (empty($day) || $day < 1 || $day > 60) {
-        $errors['day'] = "Number of days must be between 1 and 60";
-    }
-
-    if (empty($location) || strlen($location) < 2) {
-        $errors['location'] = "Location must be at least 2 characters long";
-    }
-    
-    if (empty($country) || strlen($country) < 2) {
-        $errors['country'] = "Please enter a valid country name";
-    }
-    
-    if (empty($maxPax) || $maxPax < 20) {
-        $errors['maxPax'] = "Maximum participants must be at least 20";
-    } elseif ($maxPax > 10000) {
-        $errors['maxPax'] = "Maximum participants cannot exceed 10,000";
-    }
-
-    if (empty($mode)) {
-        $errors['mode'] = "Please select an event mode";
-    }
-
-    if (empty($type)) {
-        $errors['type'] = "Please select a valid event type";
-    }
-
-    // Handle file upload
-    $bannerFilePath = null;
-    if (isset($_FILES['banner']) && $_FILES['banner']['error'] !== UPLOAD_ERR_NO_FILE) {
-        if ($_FILES['banner']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = '../../uploads/eventBanner/';
-            
-            if (!file_exists($uploadDir)) {
-                if (!mkdir($uploadDir, 0755, true)) {
-                    $errors['banner'] = "Failed to create upload directory";
-                }
+        // Create a flattened array for quick lookup
+        $countryTimezones = [];
+        foreach ($timezoneGroups as $timezone => $countries) {
+            foreach ($countries as $countryName) {
+                $countryTimezones[$countryName] = $timezone;
             }
-            
-            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-            
-            $fileType = $_FILES['banner']['type'];
-            $fileName = $_FILES['banner']['name'];
-            $fileSize = $_FILES['banner']['size'];
-            $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-            
-            if (!in_array($fileExtension, $allowedExtensions)) {
-                $errors['banner'] = "Only JPG, JPEG, PNG, and GIF files are allowed";
-            } elseif (!in_array($fileType, $allowedTypes)) {
-                $errors['banner'] = "Invalid file type. Please upload a valid image file";
-            } elseif ($fileSize > 5 * 1024 * 1024) {
-                $errors['banner'] = "File size must be less than 5MB";
-            } elseif (!getimagesize($_FILES['banner']['tmp_name'])) {
-                $errors['banner'] = "File is not a valid image";
-            } else {
-                $uniqueFileName = 'event_' . time() . '_' . uniqid() . '.' . $fileExtension;
-                $targetPath = $uploadDir . $uniqueFileName;
+        }
+
+        return $countryTimezones[$country] ?? 'UTC+08:00';
+    }
+
+    $errors = [];
+    $formData = [];
+    $hasError = false;
+    $success_message = '';
+
+    // Handle form submission
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // store form data for repopulation
+        $formData = [
+            'title' => $_POST['title'] ?? '',
+            'description' => $_POST['description'] ?? '',
+            'startDate' => $_POST['startDate'] ?? '',
+            'endDate' => $_POST['endDate'] ?? '',
+            'time' => $_POST['time'] ?? '',
+            'day' => $_POST['day'] ?? '',
+            'duration' => $_POST['duration'] ?? '',
+            'location' => $_POST['location'] ?? '',
+            'country' => $_POST['country'] ?? '',
+            'maxPax' => $_POST['maxPax'] ?? '',
+            'mode' => $_POST['mode'] ?? '',
+            'type' => $_POST['type'] ?? ''
+        ];
+        
+        // get form data
+        $title = trim($_POST['title']);
+        $description = trim($_POST['description']);
+        $startDate = $_POST['startDate'];
+        $endDate = $_POST['endDate'];
+        $time = $_POST['time'];
+        $day = $_POST['day'];
+        $duration = $_POST['duration'];
+        $location = trim($_POST['location']);
+        $country = $_POST['country'];
+        $maxPax = $_POST['maxPax'];
+        $mode = $_POST['mode'] ?? '';
+        $type = $_POST['type'] ?? '';
+        $status = 'open';
+        
+        $timeZone = getTimezoneByCountry($country);
+
+        // Validation:
+        if (empty($title) || strlen($title) < 5) {
+            $errors['title'] = "Title must be at least 5 characters long";
+        } elseif (strlen($title) > 60) {
+            $errors['title'] = "Title cannot exceed 60 characters";
+        }
+
+        if (empty($description) || strlen($description) < 20) {
+            $errors['description'] = "Description must be at least 20 characters long";
+        } elseif (strlen($description) > 2000) {
+            $errors['description'] = "Description cannot exceed 2000 characters";
+        }
+
+        $today = date('Y-m-d');
+        if (empty($startDate) || $startDate < $today) {
+            $errors['startDate'] = "Start date cannot be in the past";
+        }
+        
+        if (empty($endDate) || $endDate < $startDate) {
+            $errors['endDate'] = "End date cannot be before start date";
+        }
+
+        if (empty($time)) {
+            $errors['time'] = "Time is required";
+        }
+        
+        if (empty($duration) || $duration < 1 || $duration > 24) {
+            $errors['duration'] = "Duration must be between 1 and 24 hours";
+        }
+        
+        if (empty($day) || $day < 1 || $day > 60) {
+            $errors['day'] = "Number of days must be between 1 and 60";
+        }
+
+        if (empty($location) || strlen($location) < 2) {
+            $errors['location'] = "Location must be at least 2 characters long";
+        }
+        
+        if (empty($country) || strlen($country) < 2) {
+            $errors['country'] = "Please enter a valid country name";
+        }
+        
+        if (empty($maxPax) || $maxPax < 20) {
+            $errors['maxPax'] = "Maximum participants must be at least 20";
+        } elseif ($maxPax > 10000) {
+            $errors['maxPax'] = "Maximum participants cannot exceed 10,000";
+        }
+
+        if (empty($mode)) {
+            $errors['mode'] = "Please select an event mode";
+        }
+
+        if (empty($type)) {
+            $errors['type'] = "Please select a valid event type";
+        }
+
+        // Handle file upload
+        $bannerFilePath = null;
+        if (isset($_FILES['banner']) && $_FILES['banner']['error'] !== UPLOAD_ERR_NO_FILE) {
+            if ($_FILES['banner']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = '../../uploads/eventBanner/';
                 
-                if (move_uploaded_file($_FILES['banner']['tmp_name'], $targetPath)) {
-                    $bannerFilePath = $targetPath;
+                if (!file_exists($uploadDir)) {
+                    if (!mkdir($uploadDir, 0755, true)) {
+                        $errors['banner'] = "Failed to create upload directory";
+                    }
+                }
+                
+                $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+                
+                $fileType = $_FILES['banner']['type'];
+                $fileName = $_FILES['banner']['name'];
+                $fileSize = $_FILES['banner']['size'];
+                $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                
+                if (!in_array($fileExtension, $allowedExtensions)) {
+                    $errors['banner'] = "Only JPG, JPEG, PNG, and GIF files are allowed";
+                } elseif (!in_array($fileType, $allowedTypes)) {
+                    $errors['banner'] = "Invalid file type. Please upload a valid image file";
+                } elseif ($fileSize > 5 * 1024 * 1024) {
+                    $errors['banner'] = "File size must be less than 5MB";
+                } elseif (!getimagesize($_FILES['banner']['tmp_name'])) {
+                    $errors['banner'] = "File is not a valid image";
                 } else {
-                    $errors['banner'] = "Failed to upload file. Please try again.";
+                    $uniqueFileName = 'event_' . time() . '_' . uniqid() . '.' . $fileExtension;
+                    $targetPath = $uploadDir . $uniqueFileName;
+                    
+                    if (move_uploaded_file($_FILES['banner']['tmp_name'], $targetPath)) {
+                        $bannerFilePath = $targetPath;
+                    } else {
+                        $errors['banner'] = "Failed to upload file. Please try again.";
+                    }
+                }
+            } else {
+                $uploadErrors = [
+                    UPLOAD_ERR_INI_SIZE => 'File size too large. Maximum size is 5MB.',
+                    UPLOAD_ERR_FORM_SIZE => 'File size too large.',
+                    UPLOAD_ERR_PARTIAL => 'File was only partially uploaded.',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Server configuration error.',
+                    UPLOAD_ERR_CANT_WRITE => 'Failed to save file.',
+                    UPLOAD_ERR_EXTENSION => 'File upload stopped by extension.'
+                ];
+                $errors['banner'] = $uploadErrors[$_FILES['banner']['error']] ?? 'File upload error occurred';
+            }
+        }
+        
+        // insert into database if no errors
+        if (empty($errors)) {
+            $sql = "INSERT INTO tblevents (
+                    userID, title, duration, day, startDate, endDate, time, timeZone, location, country, description, mode, type, status, maxPax, datePosted, bannerFilePath
+                    ) VALUES (
+                        $userID, '$title', $duration, $day, '$startDate', '$endDate', '$time', '$timeZone', '$location', '$country', '$description', '$mode', '$type', '$status', $maxPax, NOW(), " . ($bannerFilePath ? "'$bannerFilePath'" : 'NULL') . "
+                    )";
+
+            if (mysqli_query($connection, $sql)) {
+                $eventID = mysqli_insert_id($connection);
+                $success_message = "Event created successfully!";
+                
+                // clear form
+                $formData = [];
+            } else {
+                $errors['database'] = "Error creating event: " . mysqli_error($connection);
+                $hasError = true;
+                // delete uploaded file if insert failed
+                if ($bannerFilePath && file_exists($bannerFilePath)) {
+                    unlink($bannerFilePath);
                 }
             }
         } else {
-            $uploadErrors = [
-                UPLOAD_ERR_INI_SIZE => 'File size too large. Maximum size is 5MB.',
-                UPLOAD_ERR_FORM_SIZE => 'File size too large.',
-                UPLOAD_ERR_PARTIAL => 'File was only partially uploaded.',
-                UPLOAD_ERR_NO_TMP_DIR => 'Server configuration error.',
-                UPLOAD_ERR_CANT_WRITE => 'Failed to save file.',
-                UPLOAD_ERR_EXTENSION => 'File upload stopped by extension.'
-            ];
-            $errors['banner'] = $uploadErrors[$_FILES['banner']['error']] ?? 'File upload error occurred';
+            $hasError = true;
         }
     }
-    
-    // Insert into database if no errors
-    if (empty($errors)) {
-        if ($bannerFilePath === null) {
-            $query = "INSERT INTO tblevents (userID, title, duration, day, startDate, endDate, time, timeZone, location, country, description, mode, type, status, maxPax, datePosted) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-            
-            $stmt = $connection->prepare($query);
-            
-            if ($stmt) {
-                $stmt->bind_param("isiissssssssssi", 
-                    $userID, $title, $duration, $day, $startDate, $endDate, 
-                    $time, $timeZone, $location, $country, $description, 
-                    $mode, $type, $status, $maxPax
-                );
-            }
-        } else {
-            $query = "INSERT INTO tblevents (userID, title, duration, day, startDate, endDate, time, timeZone, location, country, description, mode, type, status, maxPax, datePosted, bannerFilePath) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
-            
-            $stmt = $connection->prepare($query);
-            
-            if ($stmt) {
-                $stmt->bind_param("isiissssssssssis", 
-                    $userID, $title, $duration, $day, $startDate, $endDate, 
-                    $time, $timeZone, $location, $country, $description, 
-                    $mode, $type, $status, $maxPax, $bannerFilePath
-                );
-            }
-        }
-        
-        if ($stmt && $stmt->execute()) {
-            $eventID = $stmt->insert_id;
-            $_SESSION['success_message'] = "Event created successfully!";
-            header("Location: createEvent.php");
-            exit();
-        } else {
-            $errors['database'] = "Error creating event. Please try again.";
-            if ($bannerFilePath && file_exists($bannerFilePath)) {
-                unlink($bannerFilePath);
-            }
-        }
-        
-        if ($stmt) {
-            $stmt->close();
-        }
-    }
-    
-    if (!empty($errors)) {
-        $hasError = true;
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -642,110 +625,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <header>
         <!-- Logo + Name -->
         <section class="c-logo-section">
-            <a href="../../pages/<?php echo $isAdmin ? 'adminPages/adminIndex.php' : 'MemberPages/memberIndex.php'; ?>" class="c-logo-link">
+            <a href="../../pages/MemberPages/memberIndex.php" class="c-logo-link">
                 <img src="../../assets/images/Logo.png" alt="Logo" class="c-logo">
                 <div class="c-text">ReLeaf</div>
             </a>
         </section>
 
+        <!-- Menu Links -->
+
         <!-- Menu Links Mobile -->
         <nav class="c-navbar-side">
             <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
-            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn" id="menuBtn">
+            <img src="../../assets/images/icon-menu.svg" alt="icon-menu" onclick="showMenu()" class="c-icon-btn"
+                id="menuBtn">
             <div id="sidebarNav" class="c-navbar-side-menu">
-                
-                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()" class="close-btn">
+
+                <img src="../../assets/images/icon-menu-close.svg" alt="icon-menu-close" onclick="hideMenu()"
+                    class="close-btn">
                 <div class="c-navbar-side-items">
                     <section class="c-navbar-side-more">
                         <button id="themeToggle1">
                             <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
                         </button>
 
-                        <?php if ($isAdmin): ?>
-                            <!-- Admin Navigation Icons -->
-                            <a href="../../pages/adminPages/aProfile.php">
-                                <img src="../../assets/images/profile-light.svg" alt="Profile">
+                        <div class="c-chatbox" id="chatboxMobile">
+                            <a href="../../pages/MemberPages/mChat.php">
+                                <img src="../../assets/images/chat-light.svg" alt="Chatbox">
                             </a>
-                        <?php else: ?>
-                            <!-- Member Navigation Icons -->
-                            <div class="c-chatbox" id="chatboxMobile">
-                                <a href="../../pages/MemberPages/mChat.php">
-                                    <img src="../../assets/images/chat-light.svg" alt="Chatbox">
-                                </a>
-                                <?php if ($unread_count > 0): ?>
-                                    <span class="c-notification-badge" id="chatBadgeMobile"></span>
-                                <?php endif; ?>
-                            </div>
-                            <a href="../../pages/MemberPages/mSetting.php">
-                                <img src="../../assets/images/setting-light.svg" alt="Settings">
-                            </a>
-                        <?php endif; ?>
+                            <?php if ($unread_count > 0): ?>
+                                <span class="c-notification-badge" id="chatBadgeMobile"></span>
+                            <?php endif; ?>
+                        </div>
+
+                        <a href="../../pages/MemberPages/mSetting.php">
+                            <img src="../../assets/images/setting-light.svg" alt="Settings">
+                        </a>
                     </section>
 
-                    <?php if ($isAdmin): ?>
-                        <!-- Admin Menu Items -->
-                        <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
-                        <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
-                    <?php else: ?>
-                        <!-- Member Menu Items -->
-                        <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                        <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-                        <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                        <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                        <a href="../../pages/CommonPages/aboutUs.php">About</a>
-                    <?php endif; ?>
+                    <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+                    <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+                    <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+                    <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+                    <a href="../../pages/CommonPages/aboutUs.php">About</a>
                 </div>
             </div>
+
         </nav>
 
         <!-- Menu Links Desktop + Tablet -->
         <nav class="c-navbar-desktop">
-            <?php if ($isAdmin): ?>
-                <!-- Admin Desktop Menu -->
-                <a href="../../pages/adminPages/adminIndex.php">Dashboard</a>
-                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a>
-                <a href="../../pages/adminPages/aHelpTicket.php">Help</a>
-            <?php else: ?>
-                <!-- Member Desktop Menu -->
-                <a href="../../pages/MemberPages/memberIndex.php">Home</a>
-                <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
-                <a href="../../pages/CommonPages/mainEvent.php">Event</a>
-                <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
-                <a href="../../pages/CommonPages/aboutUs.php">About</a>
-            <?php endif; ?>
+            <a href="../../pages/MemberPages/memberIndex.php">Home</a>
+            <a href="../../pages/CommonPages/mainBlog.php">Blog</a>
+            <a href="../../pages/CommonPages/mainEvent.php">Event</a>
+            <a href="../../pages/CommonPages/mainTrade.php">Trade</a>
+            <a href="../../pages/CommonPages/aboutUs.php">About</a>
         </nav>
-
         <section class="c-navbar-more">
             <input type="text" placeholder="Search..." id="searchBar" class="search-bar">
+            
             <button id="themeToggle2">
                 <img src="../../assets/images/light-mode-icon.svg" alt="Light Mode Icon">
             </button>
-
-            <?php if ($isAdmin): ?>
-                <!-- Admin Navbar More -->
-                <a href="../../pages/adminPages/aProfile.php">
-                    <img src="../../assets/images/profile-light.svg" alt="Profile" id="profileImg">
-                </a>
-            <?php else: ?>
-                <!-- Member Navbar More -->
-                <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
-                    <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
-                    <?php if ($unread_count > 0): ?>
-                        <span class="c-notification-badge" id="chatBadgeDesktop"></span>
-                    <?php endif; ?>
-
-                </a>
-                <a href="../../pages/MemberPages/mSetting.php">
-                    <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
-                </a>
-            <?php endif; ?>
+            <a href="../../pages/MemberPages/mChat.php" class="c-chatbox" id="chatboxDesktop">
+                <img src="../../assets/images/chat-light.svg" alt="Chatbox" id="chatImg">
+                <?php if ($unread_count > 0): ?>
+                    <span class="c-notification-badge" id="chatBadgeDesktop"></span>
+                <?php endif; ?>
+            </a>
+            <a href="../../pages/MemberPages/mSetting.php">
+                <img src="../../assets/images/setting-light.svg" alt="Settings" id="settingImg">
+            </a>
         </section>
     </header>
     <hr>
@@ -759,14 +708,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php endif; ?>
 
-            <?php if (isset($_SESSION['success_message'])): ?>
+            <?php if ($success_message): ?>
                 <div class="success-message">
-                    <?php echo htmlspecialchars($_SESSION['success_message']); ?>
+                    <?php echo htmlspecialchars($success_message); ?>
                 </div>
-                <?php unset($_SESSION['success_message']); ?>
             <?php endif; ?>
 
-            <a href="mainEvent.php" class="back-button">← Back to Events</a>
+            <a href="../../pages/CommonPages/mainEvent.php" class="back-button">← Back to Events</a>
             
             <form class="form-container" method="POST" enctype="multipart/form-data" id="createEventForm">
                 <div class="form-header">
@@ -871,23 +819,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <select class="c-input c-input-select" id="registerCountry" name="country" required>
                             <option value="" disabled <?php echo empty($formData['country']) ? 'selected' : ''; ?>>Select your Country</option>
                             <?php 
-                            $query = "SELECT country FROM tblusers WHERE userID = ?";
-                            $stmt = $connection->prepare($query);
-                            $stmt->bind_param("i", $userID);
-                            $stmt->execute();
-                            $stmt->bind_result($userCountry);
-                            $stmt->fetch();
-                            $stmt->close();
+                                $query = "SELECT country FROM tblusers WHERE userID = $userID";
+                                $result = mysqli_query($connection, $query);
 
-                            foreach ($countries as $country) {
-                                $selected = '';
-                                if (!empty($formData['country'])) {
-                                    $selected = ($formData['country'] == $country) ? 'selected' : '';
-                                } elseif ($userCountry == $country) {
-                                    $selected = 'selected';
+                                $userCountry = '';
+                                if ($result && mysqli_num_rows($result) > 0) {
+                                    $row = mysqli_fetch_assoc($result);
+                                    $userCountry = $row['country'];
                                 }
-                                echo "<option value=\"$country\" $selected>$country</option>";
-                            }
+
+                                foreach ($countries as $country) {
+                                    $selected = '';
+                                    if (!empty($formData['country'])) {
+                                        $selected = ($formData['country'] == $country) ? 'selected' : '';
+                                    } elseif ($userCountry == $country) {
+                                        $selected = 'selected';
+                                    }
+                                    echo "<option value=\"$country\" $selected>$country</option>";
+                                }
                             ?>
                         </select>
                         <?php if (isset($errors['country'])): ?>
@@ -968,7 +917,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="results" id="results"></div>
     </section>
 
-    <?php if (!$isAdmin): ?>
     <!-- Footer (Member Only) -->
     <hr>
     <footer>
@@ -1009,7 +957,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </section>
     </footer>
-    <?php endif; ?>
 
     <script>
         const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;

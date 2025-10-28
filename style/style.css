@@ -664,67 +664,6 @@ c.btn-small:hover {
   padding: 0.75rem;
 }
 
-.c-chatlist-name {
-  font-weight: bold;
-}
-
-.c-chatlist-time {
-  font-size: 0.875rem;
-  color: var(--Gray);
-}
-
-.c-chatlist-badge {
-  background-color: var(--MainGreen);
-  color: var(--White);
-  border-radius: 50%;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
-}
-
-.c-chatlist-preview {
-  color: var(--Gray);
-  font-size: 0.875rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.c-message-sent {
-  background-color: var(--LightGreen);
-  align-self: flex-end;
-  border-radius: 10px;
-  padding: 0.5rem 1rem;
-  margin: 0.25rem 0;
-  max-width: 60%;
-}
-
-.c-message-recv {
-  background-color: var(--White);
-  align-self: flex-start;
-  border-radius: 10px;
-  padding: 0.5rem 1rem;
-  margin: 0.25rem 0;
-  max-width: 60%;
-}
-
-.c-message-time {
-  font-size: 0.75rem;
-  color: var(--Gray);
-  text-align: right;
-}
-
-.c-message-send {
-  background-color: var(--MainGreen);
-  color: var(--text-color);
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* BREAKPOINTS FOR RESPONSIVENESS */
 
 /* Mobile (e.g., ~320px - 576px) -> default

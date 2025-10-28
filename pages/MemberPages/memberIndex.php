@@ -1,111 +1,123 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    session_start();
+    include("../../php/dbConn.php");
+    include("../../php/sessionCheck.php");
 
-// Initialize variables
-$showWelcomePopup = false;
-$userName = '';
-$userData = [];
-$initials = '';
-$blogsPosted = 0;
-$tradesCompleted = 0;
-$eventsJoined = 0;
-$leaderboard = [];
-$userRank = 0;
+    // Initialize variables
+    $showWelcomePopup = false;
+    $userName = '';
+    $userData = [];
+    $initials = '';
+    $blogsPosted = 0;
+    $tradesCompleted = 0;
+    $userPoint = 0;
+    $eventsJoined = 0;
+    $leaderboard = [];
+    $userRank = 0;
 
-// Check for welcome popup
-if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
-    $showWelcomePopup = true;
-    $userName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : $_SESSION['username'];
-    unset($_SESSION['login_success']);
-}
+    // Check for welcome popup
+    if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
+        $showWelcomePopup = true;
+        $userName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : $_SESSION['username'];
+        unset($_SESSION['login_success']);
+    }
 
-// Fetch user data
-$userID = $_SESSION['userID'];
-$query = "SELECT fullName, username, bio, point, tradesCompleted, country FROM tblusers WHERE userID = ?";
+    // Get user initials for avatar
+    function getInitials($name)
+    {
+        $words = explode(' ', trim($name));
+        if (count($words) >= 2) {
+            return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+        }
+        return strtoupper(substr($words[0], 0, 2));
+    }
+    
+    // Fetch user data
+    $query = "SELECT fullName, username, bio, point, tradesCompleted, country 
+            FROM tblusers 
+            WHERE userID = '$userID'";
+    $result = mysqli_query($connection, $query);
 
-if ($stmt = $connection->prepare($query)) {
-    $stmt->bind_param("i", $userID);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $userData = mysqli_fetch_assoc($result);
 
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        $userData = $result->fetch_assoc();
+        $initials = getInitials($userData['fullName']);
+        $tradesCompleted = $userData['tradesCompleted'] ?? 0;
+        $userPoint = $userData['point'] ?? 0;
 
-        if ($userData) {
-            // Get user initials
-            function getInitials($name)
-            {
-                $words = explode(' ', trim($name));
-                if (count($words) >= 2) {
-                    return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
-                }
-                return strtoupper(substr($words[0], 0, 2));
-            }
+        // Get events joined count
+        $eventsJoinedQuery = "SELECT COUNT(*) AS eventsJoined
+                            FROM tblregistration r
+                            INNER JOIN tblevents e ON r.eventID = e.eventID
+                            WHERE r.userID = '$userID'
+                            AND r.status = 'active'
+                            AND e.status != 'cancelled'";
+        $eventsJoinedResult = mysqli_query($connection, $eventsJoinedQuery);
+        if ($eventsJoinedResult) {
+            $eventsJoinedData = mysqli_fetch_assoc($eventsJoinedResult);
+            $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
+        }
 
-            $initials = getInitials($userData['fullName']);
-            $tradesCompleted = $userData['tradesCompleted'] ?? 0;
-
-            // Get events joined count
-            $eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
-                                FROM tblregistration r 
-                                INNER JOIN tblevents e ON r.eventID = e.eventID 
-                                WHERE r.userID = ? 
-                                AND r.status = 'active' 
-                                AND e.status != 'cancelled'";
-
-            if ($eventsJoinedStmt = $connection->prepare($eventsJoinedQuery)) {
-                $eventsJoinedStmt->bind_param("i", $userID);
-                if ($eventsJoinedStmt->execute()) {
-                    $eventsJoinedResult = $eventsJoinedStmt->get_result();
-                    $eventsJoinedData = $eventsJoinedResult->fetch_assoc();
-                    $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
-                }
-                $eventsJoinedStmt->close();
-            }
-
-            $blogsPostedQuery = "SELECT COUNT(*) as blogsPosted FROM tblblog WHERE userID = ?";
-
-            if ($blogStmt = $connection->prepare($blogsPostedQuery)) {
-                $blogStmt->bind_param("i", $userID);
-                if ($blogStmt->execute()) {
-                    $blogResult = $blogStmt->get_result();
-                    $blogData = $blogResult->fetch_assoc();
-                    $blogsPosted = $blogData['blogsPosted'] ?? 0;
-                }
-                $blogStmt->close();
-            }
+        // Get blogs posted count
+        $blogsPostedQuery = "SELECT COUNT(*) AS blogsPosted FROM tblblog WHERE userID = '$userID'";
+        $blogResult = mysqli_query($connection, $blogsPostedQuery);
+        if ($blogResult) {
+            $blogData = mysqli_fetch_assoc($blogResult);
+            $blogsPosted = $blogData['blogsPosted'] ?? 0;
         }
     }
-    $stmt->close();
-}
 
-// Get leaderboard data
-$leaderboardQuery = "SELECT userID, fullName, username, point FROM tblusers WHERE userType = 'member' ORDER BY point DESC LIMIT 5";
-if ($leaderboardResult = $connection->query($leaderboardQuery)) {
-    $rank = 1;
-    while ($row = $leaderboardResult->fetch_assoc()) {
-        $leaderboard[] = $row;
-        if ($row['userID'] == $userID) {
-            $userRank = $rank;
+    // Get leaderboard data
+    $leaderboardQuery = "SELECT userID, fullName, username, point 
+                        FROM tblusers 
+                        WHERE userType = 'member' 
+                        ORDER BY point DESC 
+                        LIMIT 5";
+    $leaderboardResult = mysqli_query($connection, $leaderboardQuery);
+
+    if ($leaderboardResult) {
+        $rank = 1;
+        while ($row = mysqli_fetch_assoc($leaderboardResult)) {
+            $leaderboard[] = $row;
+            if ($row['userID'] == $userID) {
+                $userRank = $rank;
+            }
+            $rank++;
         }
-        $rank++;
     }
-}
-
-// If user is not in top 5, get their rank
-if ($userRank == 0 && isset($userData['point'])) {
-    $rankQuery = "SELECT COUNT(*) + 1 as rank FROM tblusers WHERE point > ? AND userType = 'member'";
-    if ($rankStmt = $connection->prepare($rankQuery)) {
-        $rankStmt->bind_param("i", $userData['point']);
-        if ($rankStmt->execute()) {
-            $rankResult = $rankStmt->get_result();
-            $rankData = $rankResult->fetch_assoc();
+    // if user not in top 5
+    if ($userRank == 0 && isset($userData['point'])) {
+        $rankQuery = "SELECT COUNT(*) + 1 AS rank 
+                    FROM tblusers 
+                    WHERE point > '$userPoint' 
+                    AND userType = 'member'";
+        $rankResult = mysqli_query($connection, $rankQuery);
+        if ($rankResult) {
+            $rankData = mysqli_fetch_assoc($rankResult);
             $userRank = $rankData['rank'] ?? 0;
         }
-        $rankStmt->close();
     }
-}
+
+    // Helper function to format relative dates
+    function formatRelativeDate($dateString)
+    {
+        $date = new DateTime($dateString);
+        $now = new DateTime();
+        $interval = date_diff($date, $now);
+        $days = $interval->days;
+
+        if ($date > $now) {
+            if ($days == 0) return 'Today';
+            elseif ($days == 1) return 'Tomorrow';
+            elseif ($days < 7) return 'In ' . $days . ' days';
+        } else {
+            if ($days == 0) return 'Today';
+            elseif ($days == 1) return 'Yesterday';
+            elseif ($days < 7) return $days . ' days ago';
+        }
+
+        return $date->format('n/j/Y');
+    }
 ?>
 
 <!DOCTYPE html>
@@ -623,8 +635,12 @@ if ($userRank == 0 && isset($userData['point'])) {
             .profile-bio-wrapper {
                 width: 100%;
                 max-width: 100%;
-                text-align: center;
+                justify-content: center;
                 padding: 0 1rem;
+            }
+
+            .profile-bio {
+                text-align: center;
             }
 
             .stats-bar {
@@ -691,7 +707,7 @@ if ($userRank == 0 && isset($userData['point'])) {
 </head>
 
 <body>
-    <?php if ($showWelcomePopup): ?>
+    <?php if ($showWelcomePopup) { ?>
         <!-- Welcome Popup -->
         <div class="welcome-overlay" id="welcomeOverlay">
             <div class="welcome-popup">
@@ -734,7 +750,7 @@ if ($userRank == 0 && isset($userData['point'])) {
                 }
             });
         </script>
-    <?php endif; ?>
+    <?php } ?>
 
     <div id="cover" class="" onclick="hideMenu()"></div>
 
@@ -859,7 +875,7 @@ if ($userRank == 0 && isset($userData['point'])) {
                     <span class="stat-label">Events Joined</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-value"><?php echo number_format($userData['point']); ?></span>
+                    <span class="stat-value"><?php echo number_format($userPoint); ?></span>
                     <span class="stat-label">Points</span>
                 </div>
             </div>
@@ -868,10 +884,13 @@ if ($userRank == 0 && isset($userData['point'])) {
             <section class="leaderboard">
                 <h2 class="leaderboard-title">Leaderboard</h2>
                 <ul class="leaderboard-list">
-                    <?php foreach ($leaderboard as $index => $user): ?>
+                    <?php
+                        for ($i = 0; $i < count($leaderboard); $i++) {
+                            $user = $leaderboard[$i];
+                    ?>
                         <a href="../../pages/CommonPages/viewProfile.php?userID=<?php echo $user['userID']; ?>" class="leaderboard-link">
                             <li class="leaderboard-item <?php echo ($user['userID'] == $userID) ? 'current-user' : ''; ?>">
-                                <span class="rank-number"><?php echo $index + 1; ?></span>
+                                <span class="rank-number"><?php echo $i + 1; ?></span>
                                 <div class="user-avatar-small">
                                     <?php echo htmlspecialchars(getInitials($user['fullName'])); ?>
                                 </div>
@@ -882,9 +901,9 @@ if ($userRank == 0 && isset($userData['point'])) {
                                 <span class="user-points"><?php echo number_format($user['point']); ?> Points</span>
                             </li>
                         </a>
-                    <?php endforeach; ?>
+                    <?php } ?>
 
-                    <?php if ($userRank > 5): ?>
+                    <?php if ($userRank > 5) { ?>
                         <a href="../../pages/CommonPages/viewProfile.php?userID=<?php echo $userID; ?>" class="leaderboard-link">
                             <li class="leaderboard-item current-user" style="margin-top: 1rem; border-top: 2px solid var(--MainGreen);">
                                 <span class="rank-number"><?php echo $userRank; ?></span>
@@ -898,40 +917,29 @@ if ($userRank == 0 && isset($userData['point'])) {
                                 <span class="user-points"><?php echo number_format($userData['point']); ?> Points</span>
                             </li>
                         </a>
-                    <?php endif; ?>
+                    <?php } ?>
                 </ul>
             </section>
 
             <section class="tradelisting">
                 <h2 class="tradelisting-title">Your Trade Listings</h2>
-
                 <?php
-                $userID = $_SESSION['userID'];
+                    $query = "SELECT * FROM tbltrade_listings WHERE userID = $userID AND status = 'active' ORDER BY dateListed DESC";
+                    $result = mysqli_query($connection, $query);
 
-                $query = "SELECT * FROM tbltrade_listings WHERE userID = ? AND status = 'active' ORDER BY dateListed DESC";
-                $stmt = $connection->prepare($query);
-                $stmt->bind_param("i", $userID);
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                if ($result->num_rows > 0) {
-                    while ($row = $result->fetch_assoc()) {
-                        // Determine card type based on category
-                        $cardClass = 'item-special';
-                        if ($row["category"] == 'Plants') {
-                            $cardClass = 'plant-special';
-                        } elseif ($row["category"] == 'Seeds & Saplings') {
-                            $cardClass = 'plant-special';
-                        } elseif ($row["category"] == 'Garden Decor') {
+                    if (mysqli_num_rows($result) > 0) {
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            // Determine card type based on category
                             $cardClass = 'item-special';
-                        }
+                            if ($row["category"] == 'Plants' || $row["category"] == 'Seeds & Saplings') {
+                                $cardClass = 'plant-special';
+                            } elseif ($row["category"] == 'Garden Decor') {
+                                $cardClass = 'item-special';
+                            }
 
-                        // Format date
-                        $formattedDate = formatRelativeDate($row["dateListed"]);
+                            // Format date
+                            $formattedDate = formatRelativeDate($row["dateListed"]);
 
-                        // Get user initials for avatar
-                        $userInitials = getUserInitials($row["userID"]);
-                        $userFullname = getUserFullname($row["userID"]);
                 ?>
                         <div class="listings-grid">
                             <div class="listing-card">
@@ -952,15 +960,15 @@ if ($userRank == 0 && isset($userData['point'])) {
                                     <div class="listing-details">
                                         <span class="detail-badge"><?php echo htmlspecialchars($row['itemCondition']); ?></span>
                                         <span class="detail-badge"><?php echo htmlspecialchars($row['category']); ?></span>
-                                        <?php if (!empty($row['species'])): ?>
+                                        <?php if (!empty($row['species'])) { ?>
                                             <span class="detail-badge"><?php echo htmlspecialchars($row['species']); ?></span>
-                                        <?php endif; ?>
-                                        <?php if (!empty($row['growthStage'])): ?>
+                                        <?php } ?>
+                                        <?php if (!empty($row['growthStage'])) { ?>
                                             <span class="detail-badge"><?php echo htmlspecialchars($row['growthStage']); ?></span>
-                                        <?php endif; ?>
-                                        <?php if (!empty($row['brand'])): ?>
+                                        <?php } ?>
+                                        <?php if (!empty($row['brand'])) { ?>
                                             <span class="detail-badge"><?php echo htmlspecialchars($row['brand']); ?></span>
-                                        <?php endif; ?>
+                                        <?php } ?>
                                     </div>
 
                                     <div class="listing-meta">
@@ -968,9 +976,9 @@ if ($userRank == 0 && isset($userData['point'])) {
                                             Created on
                                         </div>
                                         <div class="listing-date c-text">
-                                            <?php if (!empty($row['dateListed'])): ?>
+                                            <?php if (!empty($row['dateListed'])) { ?>
                                                 <?php echo htmlspecialchars($row['dateListed']); ?>
-                                            <?php endif; ?>
+                                            <?php } ?>
                                         </div>
                                     </div>
                                 </div>
@@ -987,65 +995,6 @@ if ($userRank == 0 && isset($userData['point'])) {
                 <?php } ?>
 
             </section>
-
-            <?php
-            // Helper function to format relative dates
-            function formatRelativeDate($dateString)
-            {
-                $date = new DateTime($dateString);
-                $now = new DateTime();
-                $interval = $date->diff($now);
-
-                if ($interval->days == 0) {
-                    return 'Today';
-                } elseif ($interval->days == 1) {
-                    return 'Yesterday';
-                } elseif ($interval->days < 7) {
-                    return $interval->days . ' days ago';
-                } else {
-                    return $date->format('n/j/Y');
-                }
-            }
-
-            // Helper function to get user initials
-            function getUserInitials($userID)
-            {
-                global $connection;
-                $query = "SELECT fullname FROM tblusers WHERE userID = ?";
-                $stmt = $connection->prepare($query);
-                $stmt->bind_param("i", $userID);
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                if ($result->num_rows > 0) {
-                    $user = $result->fetch_assoc();
-                    $names = explode(' ', $user['fullname']);
-                    $initials = '';
-                    foreach ($names as $name) {
-                        $initials .= strtoupper(substr($name, 0, 1));
-                    }
-                    return substr($initials, 0, 2);
-                }
-                return 'UU'; // Unknown User
-            }
-
-            // Helper function to get user fullname
-            function getUserFullname($userID)
-            {
-                global $connection;
-                $query = "SELECT fullname FROM tblusers WHERE userID = ?";
-                $stmt = $connection->prepare($query);
-                $stmt->bind_param("i", $userID);
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                if ($result->num_rows > 0) {
-                    $user = $result->fetch_assoc();
-                    return $user['fullname'];
-                }
-                return 'Unknown User';
-            }
-            ?>
 
             <a href="../../pages/MemberPages/mQuiz.php" class="floating-btn" title="Take a Quiz">
                 <img src="../../assets/images/quiz-icon-dark.svg" alt="Quiz">

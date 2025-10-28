@@ -1,181 +1,227 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    session_start();
+    include("../../php/dbConn.php");
+    include("../../php/sessionCheck.php");
 
-// Initialize variables
-$showWelcomePopup = false;
-$userName = '';
-$userData = [];
-$initials = '';
+    // Initialize variables for welcome message
+    $showWelcomePopup = false;
+    $welcomeUserName = '';
 
-// Check for welcome popup
-if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
-    $showWelcomePopup = true;
-    $userName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : $_SESSION['username'];
-    unset($_SESSION['login_success']);
-}
+    // Check for welcome popup
+    if (isset($_SESSION['login_success']) && $_SESSION['login_success'] === true) {
+        $showWelcomePopup = true;
+        $welcomeUserName = isset($_SESSION['fullName']) ? $_SESSION['fullName'] : $_SESSION['username'];
+        unset($_SESSION['login_success']);
+    }
 
-// Fetch user data
-$userID = $_SESSION['userID'];
-$query = "SELECT fullName, username, bio, point, tradesCompleted, country FROM tblusers WHERE userID = ?";
+    // Fetch user data for admin profile
+    $userID = $_SESSION['userID'];
+    $sql = "SELECT fullName, username, bio, country FROM tblusers WHERE userID = $userID";
 
-if ($stmt = $connection->prepare($query)) {
-    $stmt->bind_param("i", $userID);
+    $initials = '';
+    function getInitials($name) {
+        $words = explode(' ', trim($name));
+        if (count($words) >= 2) {
+            return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+        }
+        return strtoupper(substr($words[0], 0, 2));
+    }
+    $fullName = '';
+    $username = '';
+    $bio = '';
+    $country = '';
     
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        $userData = $result->fetch_assoc();
-        
+    $result = mysqli_query($connection, $sql);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $userData = mysqli_fetch_assoc($result);
         if ($userData) {
-            function getInitials($name) {
-                $words = explode(' ', trim($name));
-                if (count($words) >= 2) {
-                    return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
-                }
-                return strtoupper(substr($words[0], 0, 2));
-            }
-            
             $initials = getInitials($userData['fullName']);
+            $fullName = $userData['fullName'] ?? '';
+            $username = $userData['username'] ?? '';
+            $bio = $userData['bio'] ?? '';
+            $country = $userData['country'] ?? '';
+        } 
+    } else {
+        // critical error
+        die("Error loading user profile: " . mysqli_error($connection));
+    }
+
+    // Fetch dashboard statistics
+    $stats = [
+        'totalUsers' => 0,
+        'activeUsers' => 0,
+        'todaySignups' => 0,
+        'topCountry' => 'N/A',
+        'topCountryPercentage' => 0,
+        'totalEvents' => 0,
+        'ongoingEvents' => 0,
+        'totalBlogs' => 0,
+        'tradesCompleted' => 0,
+        'activeListings' => 0,
+        'totalTickets' => 0,
+        'openTickets' => 0,
+        'solvedTickets' => 0,
+        'commonIssue' => 'N/A',
+        'commonIssuePercentage' => 0
+    ];
+
+    // User statistics
+    $sql = "SELECT COUNT(*) as total FROM tblusers WHERE userType = 'member'";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['totalUsers'] = $row['total'];
+    } else {
+        error_log("DB Error - Total users query: " . mysqli_error($connection));
+    }
+
+    // Active users (logged in within last 30 days)
+    $sql = "SELECT COUNT(*) as active FROM tblusers WHERE userType = 'member' AND lastLogin >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['activeUsers'] = $row['active'];
+    } else {
+        error_log("DB Error - Active users query: " . mysqli_error($connection));
+    }
+
+    // Today's signups (using createdAt field)
+    $sql = "SELECT COUNT(*) as today FROM tblusers WHERE userType = 'member' AND DATE(createdAt) = CURDATE()";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['todaySignups'] = $row['today'];
+    } else {
+        error_log("DB Error - Today's signups query: " . mysqli_error($connection));
+    }
+
+    // Top country among all users
+    $sql = "SELECT country, COUNT(*) as count FROM tblusers WHERE userType = 'member' AND lastLogin >= DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY country ORDER BY count DESC LIMIT 1";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['topCountry'] = $row['country'];
+        $stats['topCountryPercentage'] = ($stats['totalUsers'] > 0) ? round(($row['count'] / $stats['totalUsers']) * 100) : 0;
+    } else {
+        error_log("DB Error - Top country query: " . mysqli_error($connection));
+    }
+
+    // Weekly signups users data (last 7 days)
+    $weeklySignups = [];
+    for ($i = 6; $i >= 0; $i--) {
+        $date = date('Y-m-d', strtotime("-$i days"));
+        $sql = "SELECT COUNT(*) as count FROM tblusers WHERE userType = 'member' AND DATE(createdAt) = '$date'";
+        $result = mysqli_query($connection, $sql);
+        if ($result) {
+            $row = mysqli_fetch_assoc($result);
+            $weeklySignups[$date] = $row['count'] ?? 0;
+        } else {
+            error_log("DB Error - Weekly signups users query: " . mysqli_error($connection));
         }
     }
-    $stmt->close();
-}
 
-// Fetch dashboard statistics
-$stats = [
-    'totalUsers' => 0,
-    'activeUsers' => 0,
-    'inactiveUsers' => 0,
-    'todaySignups' => 0,
-    'topCountry' => 'N/A',
-    'topCountryPercentage' => 0,
-    'totalEvents' => 0,
-    'ongoingEvents' => 0,
-    'totalBlogs' => 0,
-    'tradesCompleted' => 0,
-    'activeListings' => 0,
-    'totalTickets' => 0,
-    'openTickets' => 0,
-    'solvedTickets' => 0,
-    'commonIssue' => 'N/A',
-    'commonIssuePercentage' => 0
-];
+    // Event statistics
+    // update event status first
+    $autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
+    if (!mysqli_query($connection, $autoCloseQuery)) {
+        error_log("DB Error - Auto-close query failed: " . mysqli_error($connection));
+    }
 
-// User statistics
-$query = "SELECT COUNT(*) as total FROM tblusers WHERE userType = 'member'";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['totalUsers'] = $row['total'];
-}
+    $sql = "SELECT COUNT(*) as total FROM tblevents";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['totalEvents'] = $row['total'];
+    } else {
+        error_log("DB Error - Total events query: " . mysqli_error($connection));
+    }
 
-// Active users (logged in within last 30 days)
-$query = "SELECT COUNT(*) as active FROM tblusers WHERE userType = 'member' AND lastLogin >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['activeUsers'] = $row['active'];
-    $stats['inactiveUsers'] = $stats['totalUsers'] - $stats['activeUsers'];
-}
+    $sql = "SELECT COUNT(*) as ongoing FROM tblevents WHERE status = 'open'";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['ongoingEvents'] = $row['ongoing'];
+    } else {
+        error_log("DB Error - Ongoing events query: " . mysqli_error($connection));
+    }
 
-// Today's signups (using createdAt field)
-$query = "SELECT COUNT(*) as today FROM tblusers WHERE userType = 'member' AND DATE(createdAt) = CURDATE()";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['todaySignups'] = $row['today'];
-} else {
-    $stats['todaySignups'] = 0;
-}
+    // Blog statistics
+    $sql = "SELECT COUNT(*) as total FROM tblblog";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['totalBlogs'] = $row['total'];
+    } else {
+        error_log("DB Error - Total blogs query: " . mysqli_error($connection));
+    }
 
-// Top country among all users
-$query = "SELECT country, COUNT(*) as count FROM tblusers WHERE userType = 'member' AND lastLogin >= DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY country ORDER BY count DESC LIMIT 1";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['topCountry'] = $row['country'];
-    $stats['topCountryPercentage'] = ($stats['totalUsers'] > 0) ? round(($row['count'] / $stats['totalUsers']) * 100) : 0;
-} else {
-    $stats['topCountry'] = 'N/A';
-    $stats['topCountryPercentage'] = 0;
-}
+    // Trade statistics 
+    $sql = "SELECT SUM(tradesCompleted) AS totalTrades FROM tblusers WHERE userType = 'member'";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['tradesCompleted'] = ($row['totalTrades'] ?? 0) / 2;
+    } else {
+        error_log("DB Error - Total trades query: " . mysqli_error($connection));
+    }
 
-// Weekly active users data (last 7 days)
-$weeklySignups = [];
-for ($i = 6; $i >= 0; $i--) {
-    $date = date('Y-m-d', strtotime("-$i days"));
-    $query = "SELECT COUNT(*) as count FROM tblusers WHERE userType = 'member' AND DATE(lastLogin) = '$date'";
-    $result = $connection->query($query);
-    $row = $result->fetch_assoc();
-    $weeklySignups[$date] = $row['count'] ?? 0;
-}
+    // Active trade listings
+    $sql = "SELECT COUNT(*) as activeListings FROM tbltrade_listings WHERE status = 'active'";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['activeListings'] = $row['activeListings'] ?? 0;
+    } else {
+        error_log("DB Error - Active listings query: " . mysqli_error($connection));
+    }
 
-// Event statistics
-$query = "SELECT COUNT(*) as total FROM tblevents";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['totalEvents'] = $row['total'];
-}
+    // Ticket statistics
+    $sql = "SELECT COUNT(*) as total FROM tbltickets";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['totalTickets'] = $row['total'];
+    } else {
+        error_log("DB Error - Total tickets query: " . mysqli_error($connection));
+    }
 
-$query = "SELECT COUNT(*) as ongoing FROM tblevents WHERE status = 'open' AND endDate >= CURDATE()";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['ongoingEvents'] = $row['ongoing'];
-}
+    $sql = "SELECT COUNT(*) as openTickets FROM tbltickets WHERE status = 'open'";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['openTickets'] = $row['openTickets'];
+    } else {
+        error_log("DB Error - Open tickets query: " . mysqli_error($connection));
+    }
 
-// Blog statistics
-$query = "SELECT COUNT(*) as total FROM tblblog";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['totalBlogs'] = $row['total'];
-}
+    $sql = "SELECT COUNT(*) as solvedTickets FROM tbltickets WHERE status = 'solved'";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $stats['solvedTickets'] = $row['solvedTickets'];
+    } else {
+        error_log("DB Error - Solved tickets query: " . mysqli_error($connection));
+    }
 
-// Trade statistics 
-$query = "SELECT SUM(tradesCompleted) AS totalTrades FROM tblusers WHERE userType = 'member'";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['tradesCompleted'] = ($row['totalTrades'] ?? 0) / 2;
-}
-
-// Active trade listings
-$query = "SELECT COUNT(*) as activeListings FROM tbltrade_listings WHERE status = 'active'";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['activeListings'] = $row['activeListings'] ?? 0;
-}
-
-// Ticket statistics
-$query = "SELECT COUNT(*) as total FROM tbltickets";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['totalTickets'] = $row['total'];
-}
-
-$query = "SELECT COUNT(*) as openTickets FROM tbltickets WHERE status = 'open'";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['openTickets'] = $row['openTickets'];
-}
-
-$query = "SELECT COUNT(*) as solvedTickets FROM tbltickets WHERE status = 'solved'";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $stats['solvedTickets'] = $row['solvedTickets'];
-}
-
-// Most common ticket category
-$query = "SELECT category, COUNT(*) as count FROM tbltickets GROUP BY category ORDER BY count DESC LIMIT 1";
-$result = $connection->query($query);
-if ($row = $result->fetch_assoc()) {
-    $categoryNames = [
-        'technical' => 'Technical',
-        'account' => 'Account',
-        'billing' => 'Billing',
-        'feature' => 'Feature Request',
-        'bug' => 'Bug Report',
-        'general' => 'General',
-        'other' => 'Other'
-    ];
-    $stats['commonIssue'] = $categoryNames[$row['category']] ?? ucfirst($row['category']);
-    $stats['commonIssuePercentage'] = ($stats['totalTickets'] > 0) ? round(($row['count'] / $stats['totalTickets']) * 100) : 0;
-}
+    // Most common ticket category
+    $sql = "SELECT category, COUNT(*) as count FROM tbltickets GROUP BY category ORDER BY count DESC LIMIT 1";
+    $result = mysqli_query($connection, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $categoryNames = [
+            'technical' => 'Technical',
+            'account' => 'Account',
+            'billing' => 'Billing',
+            'feature' => 'Feature Request',
+            'bug' => 'Bug Report',
+            'general' => 'General',
+            'other' => 'Other'
+        ];
+        $stats['commonIssue'] = $categoryNames[$row['category']] ?? ucfirst($row['category']);
+        $stats['commonIssuePercentage'] = ($stats['totalTickets'] > 0) ? round(($row['count'] / $stats['totalTickets']) * 100) : 0;
+    } else {
+        error_log("DB Error - Common tickets query: " . mysqli_error($connection));
+    }
 ?>
 
 <!DOCTYPE html>
@@ -556,49 +602,51 @@ if ($row = $result->fetch_assoc()) {
     </style>
 </head>
 <body>
-    <?php if ($showWelcomePopup): ?>
-    <!-- Welcome Popup -->
-    <div class="welcome-overlay" id="welcomeOverlay">
-        <div class="welcome-popup">
-            <h2 class="welcome-title">Welcome Back!</h2>
-            <p class="welcome-message">
-                Hello, <span class="welcome-username"><?php echo htmlspecialchars($userName); ?></span><br>
-                Great to see you again! 🌱
-            </p>
-            <button class="welcome-close-btn" onclick="closeWelcomePopup()">
-                Get Started
-            </button>
+    <?php if ($showWelcomePopup) { ?>
+        <!-- Welcome Popup -->
+        <div class="welcome-overlay" id="welcomeOverlay">
+            <div class="welcome-popup">
+                <h2 class="welcome-title">Welcome Back!</h2>
+                <p class="welcome-message">
+                    Hello, <span class="welcome-username">
+                        <?php echo htmlspecialchars($welcomeUserName); ?>
+                    </span>
+                    <br>
+                    Great to see you again! 🌱
+                </p>
+                <button class="welcome-close-btn" onclick="closeWelcomePopup()">
+                    Get Started
+                </button>
+            </div>
         </div>
-    </div>
+        <script>
+            window.addEventListener('DOMContentLoaded', function() {
+                const welcomeOverlay = document.getElementById('welcomeOverlay');
+                if (welcomeOverlay) {
+                    setTimeout(() => {
+                        welcomeOverlay.classList.add('show');
+                    }, 100);
+                }
+            });
 
-    <script>
-        window.addEventListener('DOMContentLoaded', function() {
-            const welcomeOverlay = document.getElementById('welcomeOverlay');
-            if (welcomeOverlay) {
-                setTimeout(() => {
-                    welcomeOverlay.classList.add('show');
-                }, 100);
+            function closeWelcomePopup() {
+                const welcomeOverlay = document.getElementById('welcomeOverlay');
+                if (welcomeOverlay) {
+                    welcomeOverlay.classList.remove('show');
+                    setTimeout(() => {
+                        welcomeOverlay.style.display = 'none';
+                    }, 300);
+                }
             }
-        });
 
-        function closeWelcomePopup() {
-            const welcomeOverlay = document.getElementById('welcomeOverlay');
-            if (welcomeOverlay) {
-                welcomeOverlay.classList.remove('show');
-                setTimeout(() => {
-                    welcomeOverlay.style.display = 'none';
-                }, 300);
-            }
-        }
-
-        document.addEventListener('click', function(e) {
-            const welcomeOverlay = document.getElementById('welcomeOverlay');
-            if (e.target === welcomeOverlay) {
-                closeWelcomePopup();
-            }
-        });
-    </script>
-    <?php endif; ?>
+            document.addEventListener('click', function(e) {
+                const welcomeOverlay = document.getElementById('welcomeOverlay');
+                if (e.target === welcomeOverlay) {
+                    closeWelcomePopup();
+                }
+            });
+        </script>
+    <?php } ?>
 
     <div id="cover" class="" onclick="hideMenu()"></div>
     
@@ -665,20 +713,20 @@ if ($row = $result->fetch_assoc()) {
                     <div class="profile-info">
                         <div class="avatar-circle"><?php echo htmlspecialchars($initials); ?></div>
                         <div class="profile-details">
-                            <h1 class="profile-name"><?php echo htmlspecialchars($userData['fullName']); ?></h1>
+                            <h1 class="profile-name"><?php echo htmlspecialchars($fullName); ?></h1>
                             <div class="username-country-wrapper">
                                 <div class="profile-username-wrapper">
-                                    <p class="profile-username">@<?php echo htmlspecialchars($userData['username']); ?></p>
+                                    <p class="profile-username">@<?php echo htmlspecialchars($username); ?></p>
                                 </div>
                                 <div class="profile-country-wrapper">
                                     <img src="../../assets/images/location-icon-light.svg" alt="Location">
-                                    <p class="profile-country"><?php echo htmlspecialchars($userData['country']); ?></p>
+                                    <p class="profile-country"><?php echo htmlspecialchars($country); ?></p>
                                 </div>
                             </div>
                             <p class="profile-bio">
                                 <?php 
                                 echo $userData['bio'] 
-                                    ? htmlspecialchars($userData['bio']) 
+                                    ? htmlspecialchars($bio) 
                                     : '<span style="color: var(--Gray);">This admin has yet to set their bio</span>';
                                 ?>
                             </p>
@@ -799,7 +847,7 @@ if ($row = $result->fetch_assoc()) {
                 <!-- Chart Card -->
                 <div class="chart-card">
                     <div class="card-header">
-                        <h4 class="card-title">Weekly Active Users</h4>
+                        <h4 class="card-title">Weekly Signups</h4>
                     </div>
                     <div class="chart-container">
                         <canvas id="signupsChart" 

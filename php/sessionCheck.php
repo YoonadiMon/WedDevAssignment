@@ -185,7 +185,6 @@ $userID = $_SESSION['userID'];
 $username = $_SESSION['username'] ?? '';
 $fullName = $_SESSION['fullName'] ?? '';
 $email = $_SESSION['email'] ?? '';
-$point = $_SESSION['point'] ?? 0;
 
 // Get unread message count for the current user (if not admin)
 $unread_count = 0;

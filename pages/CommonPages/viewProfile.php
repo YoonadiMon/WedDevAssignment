@@ -1,102 +1,90 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
-include("../../php/errorPopUp.php");
+    session_start();
+    include("../../php/dbConn.php");
+    include("../../php/sessionCheck.php");
+    include("../../php/errorPopUp.php");
 
-$indexUrl = $isAdmin ? '../../pages/adminPages/adminIndex.php' : '../../pages/MemberPages/memberIndex.php';
+    $indexUrl = $isAdmin ? '../../pages/adminPages/adminIndex.php' : '../../pages/MemberPages/memberIndex.php';
 
-// Initialize variables
-$currentUserID = $_SESSION['userID'];
-$profileUserID = isset($_GET['userID']) ? intval($_GET['userID']) : 0;
-$hasError = false;
-$userData = [];
-$initials = '';
-$blogsPosted = 0;
-$tradesCompleted = 0;
-$eventsJoined = 0;
-$profileUserIsAdmin = false;
+    // Initialize variables
+    $currentUserID = $_SESSION['userID'];
+    $profileUserID = isset($_GET['userID']) ? intval($_GET['userID']) : 0;
+    $hasError = false;
+    $userData = [];
+    $initials = '';
+    $blogsPosted = 0;
+    $tradesCompleted = 0;
+    $eventsJoined = 0;
+    $profileUserIsAdmin = false;
 
-// Get previous page for redirect
-$previousPage = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $indexUrl;
+    // Get previous page for redirect
+    $previousPage = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $indexUrl;
 
-// Validate user ID first
-if ($profileUserID <= 0) {
-    showErrorPopup("Invalid user profile requested.", $previousPage);
-} else {
-    $isViewingOwnProfile = ($profileUserID == $currentUserID);
-    if ($isViewingOwnProfile) {
-        header("Location: " . $indexUrl);
-        exit();
-    }
-    // Fetch profile user data with proper error handling
-    $query = "SELECT fullName, username, bio, point, tradesCompleted, country, userType FROM tblusers WHERE userID = ?";
-
-    if ($stmt = $connection->prepare($query)) {
-        $stmt->bind_param("i", $profileUserID);
-
-        if ($stmt->execute()) {
-            $result = $stmt->get_result();
-
-            if ($result->num_rows === 0) {
-                showErrorPopup("User profile not found.", $previousPage);
-            } else {
-                $userData = $result->fetch_assoc();
-                $profileUserIsAdmin = ($userData['userType'] === 'admin');
-
-                // Get user initials
-                function getInitials($name)
-                {
-                    $words = explode(' ', trim($name));
-                    if (count($words) >= 2) {
-                        return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
-                    }
-                    return strtoupper(substr($words[0], 0, 2));
-                }
-
-                $initials = getInitials($userData['fullName']);
-                $tradesCompleted = $userData['tradesCompleted'] ?? 0;
-
-                // Only get events joined count for members (non-admin profile users)
-                if (!$profileUserIsAdmin) {
-                    $eventsJoinedQuery = "SELECT COUNT(*) as eventsJoined 
-                                        FROM tblregistration r 
-                                        INNER JOIN tblevents e ON r.eventID = e.eventID 
-                                        WHERE r.userID = ? 
-                                        AND r.status = 'active' 
-                                        AND e.status != 'cancelled'";
-
-                    if ($eventsJoinedStmt = $connection->prepare($eventsJoinedQuery)) {
-                        $eventsJoinedStmt->bind_param("i", $profileUserID);
-                        if ($eventsJoinedStmt->execute()) {
-                            $eventsJoinedResult = $eventsJoinedStmt->get_result();
-                            $eventsJoinedData = $eventsJoinedResult->fetch_assoc();
-                            $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
-                        }
-                        $eventsJoinedStmt->close();
-                    }
-
-                    $blogsPostedQuery = "SELECT COUNT(*) as blogsPosted FROM tblblog WHERE userID = ?";
-
-                    if ($blogStmt = $connection->prepare($blogsPostedQuery)) {
-                        $blogStmt->bind_param("i", $profileUserID);
-                        if ($blogStmt->execute()) {
-                            $blogResult = $blogStmt->get_result();
-                            $blogData = $blogResult->fetch_assoc();
-                            $blogsPosted = $blogData['blogsPosted'] ?? 0;
-                        }
-                        $blogStmt->close();
-                    }
-                }
-            }
-            $stmt->close();
-        } else {
-            showErrorPopup("Database error: Unable to fetch user data.", $previousPage);
-        }
+    // Validate user ID first
+    if ($profileUserID <= 0) {
+        showErrorPopup("Invalid user profile requested.", $previousPage);
     } else {
-        showErrorPopup("Database error: " . $connection->error, $previousPage);
+        $isViewingOwnProfile = ($profileUserID == $currentUserID);
+        if ($isViewingOwnProfile) {
+            header("Location: " . $indexUrl);
+            exit();
+        }
+        // Fetch profile user data
+        $query = "SELECT fullName, username, bio, point, tradesCompleted, country, userType 
+                FROM tblusers 
+                WHERE userID = $profileUserID";
+        $result = mysqli_query($connection, $query);
+
+        if (!$result) {
+            error_log("Database error: " . mysqli_error($connection));
+            showErrorPopup("Connection issue. Try again later.", $previousPage);
+            exit();
+        }
+        if (mysqli_num_rows($result) === 0) {
+            showErrorPopup("User profile not found.", $previousPage);
+            exit();
+        }
+
+        $userData = mysqli_fetch_assoc($result);
+        $profileUserIsAdmin = ($userData['userType'] === 'admin');
+
+        // Get initials for avatar
+        function getInitials($name) {
+            $words = explode(' ', trim($name));
+            if (count($words) >= 2) {
+                return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+            }
+            return strtoupper(substr($words[0], 0, 2));
+        }
+        $initials = getInitials($userData['fullName']);
+        $tradesCompleted = $userData['tradesCompleted'] ?? 0; // admin always 0
+        $point = $userData['point'] ?? 0; // admin always 0
+
+        if (!$profileUserIsAdmin) {
+            // Count events joined
+            $eventsJoinedQuery = "
+                SELECT COUNT(*) as eventsJoined 
+                FROM tblregistration r 
+                INNER JOIN tblevents e ON r.eventID = e.eventID 
+                WHERE r.userID = $profileUserID 
+                AND r.status = 'active' 
+                AND e.status != 'cancelled'";
+
+            $eventsJoinedResult = mysqli_query($connection, $eventsJoinedQuery);
+            if ($eventsJoinedResult) {
+                $eventsJoinedData = mysqli_fetch_assoc($eventsJoinedResult);
+                $eventsJoined = $eventsJoinedData['eventsJoined'] ?? 0;
+            }
+
+            // Count blogs posted
+            $blogsPostedQuery = "SELECT COUNT(*) as blogsPosted FROM tblblog WHERE userID = $profileUserID";
+            $blogResult = mysqli_query($connection, $blogsPostedQuery);
+            if ($blogResult) {
+                $blogData = mysqli_fetch_assoc($blogResult);
+                $blogsPosted = $blogData['blogsPosted'] ?? 0;
+            }
+        }
     }
-}
 ?>
 
 <!DOCTYPE html>
@@ -499,7 +487,7 @@ if ($profileUserID <= 0) {
                         <span class="stat-label">Events Joined</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value"><?php echo number_format($userData['point']); ?></span>
+                        <span class="stat-value"><?php echo number_format($point); ?></span>
                         <span class="stat-label">Points</span>
                     </div>
                 </div>
@@ -549,7 +537,7 @@ if ($profileUserID <= 0) {
                     <b>Helps</b><br>
                     <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                     <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                    <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                    <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
                 </div>
                 <div>
                     <b>Community</b><br>

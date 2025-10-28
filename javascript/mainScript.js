@@ -22,10 +22,10 @@ if (themeToggleLi) {
 const chatboxMobile = document.getElementById('chatboxMobile');
 const chatboxDesktop = document.getElementById('chatboxDesktop');
 
-if (!isAdmin && (chatboxMobile || chatboxDesktop)) {
-    // Get the unread count from PHP
-    let unread = unreadCount || 0;
+// Get the unread count from PHP
+let unread = unreadCount || 0;
 
+if (!isAdmin && (chatboxMobile || chatboxDesktop)) {
     const badges = [
         document.getElementById("chatBadgeDesktop"),
         document.getElementById("chatBadgeMobile")

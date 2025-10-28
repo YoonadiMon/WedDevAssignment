@@ -8,7 +8,7 @@ $query = isset($_GET['query']) ? trim($_GET['query']) : '';
 $type = isset($_GET['type']) ? trim($_GET['type']) : 'all';
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $perPage = 10;
-$offset = ($page - 1) * $perPage;
+$offset = ($page - 1) * $perPage; // to show search results page by page
 
 // avatar
 function getInitials($name) {
@@ -62,39 +62,31 @@ $searchQuery = "%$query%";
 try {
     // Search User Profiles
     if ($type === 'all' || $type === 'profiles') {
-        // Get count
+        // Count
         $countSql = "SELECT COUNT(*) as total FROM tblusers 
-                     WHERE (username LIKE ? OR fullName LIKE ?)
-                     AND userType = 'member'";
-        $stmt = mysqli_prepare($connection, $countSql);
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ss", $searchQuery, $searchQuery);
-            mysqli_stmt_execute($stmt);
-            $countResult = mysqli_stmt_get_result($stmt);
+                    WHERE (username LIKE '$searchQuery' OR fullName LIKE '$searchQuery') 
+                    AND userType = 'member'";
+        $countResult = mysqli_query($connection, $countSql);
+        if ($countResult) {
             $counts['profiles'] = mysqli_fetch_assoc($countResult)['total'];
-            mysqli_stmt_close($stmt);
         }
 
-        // Get results with pagination
+        // Results
         if ($counts['profiles'] > 0) {
             $sql = "SELECT userID, fullName, username, bio, userType, country 
                     FROM tblusers 
-                    WHERE (username LIKE ? OR fullName LIKE ?)
+                    WHERE (username LIKE '$searchQuery' OR fullName LIKE '$searchQuery') 
                     AND userType = 'member'
                     ORDER BY fullName ASC
-                    LIMIT ? OFFSET ?";
+                    LIMIT $perPage OFFSET $offset";
             
-            $stmt = mysqli_prepare($connection, $sql);
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "ssii", $searchQuery, $searchQuery, $perPage, $offset);
-                mysqli_stmt_execute($stmt);
-                $result = mysqli_stmt_get_result($stmt);
-                
+            $result = mysqli_query($connection, $sql);
+            if ($result) {
                 while ($row = mysqli_fetch_assoc($result)) {
                     $initials = getInitials($row['fullName']);
                     $bio = truncateText($row['bio'], 120);
                     
-                        $results['profiles'][] = [
+                    $results['profiles'][] = [
                         'id' => $row['userID'],
                         'type' => 'profile',
                         'title' => $row['fullName'],
@@ -105,7 +97,6 @@ try {
                         'userType' => $row['userType']
                     ];
                 }
-                mysqli_stmt_close($stmt);
             }
         }
     }
@@ -114,30 +105,23 @@ try {
     if ($type === 'all' || $type === 'blogs') {
         // Get count
         $countSql = "SELECT COUNT(*) as total FROM tblblog b 
-                     WHERE (b.title LIKE ? OR b.excerpt LIKE ? OR b.category LIKE ?)";
-        $stmt = mysqli_prepare($connection, $countSql);
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "sss", $searchQuery, $searchQuery, $searchQuery);
-            mysqli_stmt_execute($stmt);
-            $countResult = mysqli_stmt_get_result($stmt);
+                     WHERE (b.title LIKE '$searchQuery' OR b.excerpt LIKE '$searchQuery' OR b.category LIKE '$searchQuery')";
+        $countResult = mysqli_query($connection, $countSql);
+        if ($countResult) {
             $counts['blogs'] = mysqli_fetch_assoc($countResult)['total'];
-            mysqli_stmt_close($stmt);
         }
 
+        // Results
         if ($counts['blogs'] > 0) {
             $sql = "SELECT b.blogID, b.title, b.excerpt, b.category, b.date, u.username, u.fullName
                     FROM tblblog b 
                     JOIN tblusers u ON b.userID = u.userID
-                    WHERE (b.title LIKE ? OR b.excerpt LIKE ? OR b.category LIKE ?)
+                    WHERE (b.title LIKE '$searchQuery' OR b.excerpt LIKE '$searchQuery' OR b.category LIKE '$searchQuery')
                     ORDER BY b.date DESC
-                    LIMIT ? OFFSET ?";
+                    LIMIT $perPage OFFSET $offset";
             
-            $stmt = mysqli_prepare($connection, $sql);
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "sssii", $searchQuery, $searchQuery, $searchQuery, $perPage, $offset);
-                mysqli_stmt_execute($stmt);
-                $result = mysqli_stmt_get_result($stmt);
-                
+            $result = mysqli_query($connection, $sql);
+            if ($result) {
                 while ($row = mysqli_fetch_assoc($result)) {
                     $excerpt = truncateText($row['excerpt'] ?? '');
                     $results['blogs'][] = [
@@ -150,7 +134,6 @@ try {
                         'date' => date('M d, Y', strtotime($row['date']))
                     ];
                 }
-                mysqli_stmt_close($stmt);
             }
         }
     }
@@ -159,30 +142,24 @@ try {
     if ($type === 'all' || $type === 'events') {
         // Get count
         $countSql = "SELECT COUNT(*) as total FROM tblevents e 
-                     WHERE (e.title LIKE ? OR e.description LIKE ? OR e.location LIKE ? OR e.country LIKE ?)";
-        $stmt = mysqli_prepare($connection, $countSql);
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ssss", $searchQuery, $searchQuery, $searchQuery, $searchQuery);
-            mysqli_stmt_execute($stmt);
-            $countResult = mysqli_stmt_get_result($stmt);
+                     WHERE (e.title LIKE '$searchQuery' OR e.description 
+                     LIKE '$searchQuery' OR e.location LIKE '$searchQuery' OR e.country LIKE '$searchQuery')";
+        $countResult = mysqli_query($connection, $countSql);
+        if ($countResult) {
             $counts['events'] = mysqli_fetch_assoc($countResult)['total'];
-            mysqli_stmt_close($stmt);
         }
 
+        // Results
         if ($counts['events'] > 0) {
             $sql = "SELECT e.eventID, e.title, e.description, e.location, e.country, e.startDate, e.type, u.username, u.fullName
                     FROM tblevents e 
                     JOIN tblusers u ON e.userID = u.userID
-                    WHERE (e.title LIKE ? OR e.description LIKE ? OR e.location LIKE ? OR e.country LIKE ?)
+                    WHERE (e.title LIKE '$searchQuery' OR e.description LIKE '$searchQuery' OR e.location LIKE '$searchQuery' OR e.country LIKE '$searchQuery')
                     ORDER BY e.startDate ASC
-                    LIMIT ? OFFSET ?";
+                    LIMIT $perPage OFFSET $offset";
             
-            $stmt = mysqli_prepare($connection, $sql);
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "ssssii", $searchQuery, $searchQuery, $searchQuery, $searchQuery, $perPage, $offset);
-                mysqli_stmt_execute($stmt);
-                $result = mysqli_stmt_get_result($stmt);
-                
+            $result = mysqli_query($connection, $sql);
+            if ($result) {
                 while ($row = mysqli_fetch_assoc($result)) {
                     $description = truncateText($row['description'] ?? '');
                     $results['events'][] = [
@@ -196,7 +173,6 @@ try {
                         'date' => date('M d, Y', strtotime($row['startDate']))
                     ];
                 }
-                mysqli_stmt_close($stmt);
             }
         }
     }
@@ -205,32 +181,25 @@ try {
     if ($type === 'all' || $type === 'trades') {
         // Get count
         $countSql = "SELECT COUNT(*) as total FROM tbltrade_listings t 
-                     WHERE (t.title LIKE ? OR t.description LIKE ? OR t.tags LIKE ?)
+                     WHERE (t.title LIKE '$searchQuery' OR t.description LIKE '$searchQuery' OR t.tags LIKE '$searchQuery')
                      AND t.status = 'active'";
-        $stmt = mysqli_prepare($connection, $countSql);
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "sss", $searchQuery, $searchQuery, $searchQuery);
-            mysqli_stmt_execute($stmt);
-            $countResult = mysqli_stmt_get_result($stmt);
+        $countResult = mysqli_query($connection, $countSql);
+        if ($countResult) {
             $counts['trades'] = mysqli_fetch_assoc($countResult)['total'];
-            mysqli_stmt_close($stmt);
         }
 
+        // Results
         if ($counts['trades'] > 0) {
             $sql = "SELECT t.listingID, t.title, t.description, t.category, t.dateListed, t.status, u.username, u.fullName
                     FROM tbltrade_listings t 
                     JOIN tblusers u ON t.userID = u.userID
-                    WHERE (t.title LIKE ? OR t.description LIKE ? OR t.tags LIKE ?)
+                    WHERE (t.title LIKE '$searchQuery' OR t.description LIKE '$searchQuery' OR t.tags LIKE '$searchQuery')
                     AND t.status = 'active'
                     ORDER BY t.dateListed DESC
-                    LIMIT ? OFFSET ?";
+                    LIMIT $perPage OFFSET $offset";
             
-            $stmt = mysqli_prepare($connection, $sql);
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "sssii", $searchQuery, $searchQuery, $searchQuery, $perPage, $offset);
-                mysqli_stmt_execute($stmt);
-                $result = mysqli_stmt_get_result($stmt);
-                
+            $result = mysqli_query($connection, $sql);
+            if ($result) {
                 while ($row = mysqli_fetch_assoc($result)) {
                     $description = truncateText($row['description'] ?? '');
                     $results['trades'][] = [
@@ -244,7 +213,6 @@ try {
                         'date' => date('M d, Y', strtotime($row['dateListed']))
                     ];
                 }
-                mysqli_stmt_close($stmt);
             }
         }
     }

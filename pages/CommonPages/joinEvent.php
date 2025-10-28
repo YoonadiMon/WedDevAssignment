@@ -1,94 +1,76 @@
 <?php
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    include("../../php/dbConn.php");
+    include("../../php/sessionCheck.php");
 
-$eventID = isset($_GET['id']) ? intval($_GET['id']) : 0;
+    $eventID = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-if ($eventID <= 0) {
-    header("Location: mainEvent.php");
-    exit();
-}
-
-// Initialize variables
-$event = [];
-$isRegistered = false;
-$isClosed = false;
-$isHost = false;
-$isFull = false;
-$attendeeCount = 0;
-$registrationMessage = '';
-$registrationSuccess = false;
-
-$eventQuery = "SELECT e.*, u.fullName AS hostName, u.email AS hostEmail 
-               FROM tblevents e
-               JOIN tblusers u ON e.userID = u.userID
-               WHERE e.eventID = ?";
-               
-if ($eventStmt = $connection->prepare($eventQuery)) {
-    $eventStmt->bind_param("i", $eventID);
-    $eventStmt->execute();
-    $eventResult = $eventStmt->get_result();
-    
-    if ($eventResult->num_rows == 0) {
+    if ($eventID <= 0) {
         header("Location: mainEvent.php");
         exit();
     }
-    
-    $event = $eventResult->fetch_assoc();
-    $eventStmt->close();
-} else {
-    header("Location: mainEvent.php");
-    exit();
-}
 
-$eventBanner = $event['bannerFilePath'];
-
-// Check if user is already registered
-if (!$isAdmin) {
-    $checkQuery = "SELECT * FROM tblregistration 
-                   WHERE eventID = ? AND userID = ? AND status = 'active'";
-    if ($checkStmt = $connection->prepare($checkQuery)) {
-        $checkStmt->bind_param("ii", $eventID, $userID);
-        $checkStmt->execute();
-        $checkResult = $checkStmt->get_result();
-        $isRegistered = $checkResult->num_rows > 0;
-        $checkStmt->close();
+    // update event status first
+    $autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
+    if (!mysqli_query($connection, $autoCloseQuery)) {
+        error_log("Auto-close query failed: " . mysqli_error($connection));
     }
-}
 
-$isClosed = ($event['status'] == 'closed');
-$isHost = ($event['userID'] == $userID);
+    // Initialize variables
+    $event = [];
+    $isRegistered = false;
+    $isClosed = false;
+    $isHost = false;
+    $isFull = false;
+    $attendeeCount = 0;
+    $registrationMessage = '';
+    $registrationSuccess = false;
 
-// Count total attendees
-$countQuery = "SELECT COUNT(*) as total FROM tblregistration 
-               WHERE eventID = ? AND status = 'active'";
-if ($countStmt = $connection->prepare($countQuery)) {
-    $countStmt->bind_param("i", $eventID);
-    $countStmt->execute();
-    $countResult = $countStmt->get_result();
-    $countData = $countResult->fetch_assoc();
-    $attendeeCount = $countData['total'] ?? 0;
-    $countStmt->close();
-}
+    $eventQuery = "SELECT e.*, u.fullName AS hostName, u.email AS hostEmail 
+                FROM tblevents e
+                JOIN tblusers u ON e.userID = u.userID
+                WHERE e.eventID = $eventID";
+                
+    $result = mysqli_query($connection, $eventQuery);
 
-$isFull = ($event['maxPax'] <= $attendeeCount);
-if ($isFull) {
-    $updateQuery = "UPDATE tblevents SET status = 'closed' WHERE eventID = ? AND userID = ?";
-    if ($updateStmt = $connection->prepare($updateQuery)) {
-        $updateStmt->bind_param("ii", $eventID, $userID);
-        $updateStmt->execute();
-        $updateStmt->close();
+    if (!$result || mysqli_num_rows($result) == 0) {
+        header("Location: mainEvent.php");
+        exit();
     }
-}
+    $event = mysqli_fetch_assoc($result);
+    $eventBanner = $event['bannerFilePath'];
 
-// Handle registration
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register']) && !$isAdmin && !$isHost && !$isClosed) {
-    if (!$isRegistered) {
-        $insertQuery = "INSERT INTO tblregistration (eventID, userID, datetimeRegistered, status) 
-                        VALUES (?, ?, NOW(), 'active')";
-        if ($insertStmt = $connection->prepare($insertQuery)) {
-            $insertStmt->bind_param("ii", $eventID, $userID);
-            if ($insertStmt->execute()) {
+    // Check if user is already registered
+    if (!$isAdmin) {
+        $checkQuery = "SELECT * FROM tblregistration 
+                    WHERE eventID = $eventID AND userID = $userID AND status = 'active'";
+        $checkResult = mysqli_query($connection, $checkQuery);
+        $isRegistered = ($checkResult && mysqli_num_rows($checkResult) > 0);
+    }
+
+    $isClosed = ($event['status'] == 'closed');
+    $isHost = ($event['userID'] == $userID);
+
+    // Count total attendees
+    $countQuery = "SELECT COUNT(*) as total FROM tblregistration 
+                WHERE eventID = $eventID AND status = 'active'";
+    $countResult = mysqli_query($connection, $countQuery);
+    if ($countResult) {
+        $countData = mysqli_fetch_assoc($countResult);
+        $attendeeCount = $countData['total'] ?? 0;
+    }
+
+    $isFull = ($event['maxPax'] <= $attendeeCount);
+    if ($isFull) {
+        $updateQuery = "UPDATE tblevents SET status = 'closed' WHERE eventID = $eventID";
+        mysqli_query($connection, $updateQuery);
+    }
+
+    // Handle registration
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register']) && !$isAdmin && !$isHost && !$isClosed) {
+        if (!$isRegistered) {
+            $insertQuery = "INSERT INTO tblregistration (eventID, userID, datetimeRegistered, status) 
+                            VALUES ($eventID, $userID, NOW(), 'active')";
+                if (mysqli_query($connection, $insertQuery)) {
                 $registrationSuccess = true;
                 $isRegistered = true;
                 $attendeeCount++;
@@ -96,38 +78,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register']) && !$isAdm
             } else {
                 $registrationMessage = 'Registration failed. Please try again.';
             }
-            $insertStmt->close();
         } else {
-            $registrationMessage = 'Registration failed. Please try again.';
+            $registrationMessage = 'You are already registered for this event.';
         }
-    } else {
-        $registrationMessage = 'You are already registered for this event.';
     }
-}
 
-// Format date/time
-$startDate = date('M d, Y', strtotime($event['startDate']));
-$endDate = date('M d, Y', strtotime($event['endDate']));
-$time = date('g:i A', strtotime($event['time']));
+    // Format date/time
+    $startDate = date('M d, Y', strtotime($event['startDate']));
+    $endDate = date('M d, Y', strtotime($event['endDate']));
+    $time = date('g:i A', strtotime($event['time']));
 
-// Calculate event duration for display
-$durationText = $event['duration'] . ' hour' . ($event['duration'] > 1 ? 's' : '');
-$daysText = $event['day'] . ' day' . ($event['day'] > 1 ? 's' : '');
+    // Calculate event duration for display
+    $durationText = $event['duration'] . ' hour' . ($event['duration'] > 1 ? 's' : '');
+    $daysText = $event['day'] . ' day' . ($event['day'] > 1 ? 's' : '');
 
-// Get host avatar initial
-$hostInitial = strtoupper(substr($event['hostName'], 0, 1));
+    // Get host avatar initial
+    $hostInitial = strtoupper(substr($event['hostName'], 0, 1));
 
-// Get user info for modal
-$userQuery = "SELECT fullName, email FROM tblusers WHERE userID = ?";
-if ($userStmt = $connection->prepare($userQuery)) {
-    $userStmt->bind_param("i", $userID);
-    $userStmt->execute();
-    $userResult = $userStmt->get_result();
-    $userInfo = $userResult->fetch_assoc();
-    $userStmt->close();
-} else {
-    $userInfo = ['fullName' => 'User', 'email' => ''];
-}
+    // Get user info for modal
+    $userQuery = "SELECT fullName, email FROM tblusers WHERE userID = $userID";
+    $userResult = mysqli_query($connection, $userQuery);
+    if ($userResult && mysqli_num_rows($userResult) > 0) {
+        $userInfo = mysqli_fetch_assoc($userResult);
+    } else {
+        $userInfo = ['fullName' => 'User', 'email' => ''];
+    }
 ?>
 
 <!DOCTYPE html>
@@ -872,12 +847,12 @@ if ($userStmt = $connection->prepare($userQuery)) {
                         <br><br>
                         <h3>Capacity</h3>
                         <p class="event-description">
-                            --> <?php echo $event['maxPax']; ?> maximum participants
+                            <?php echo $event['maxPax']; ?> maximum participants
                         </p>
                         <br><br>
                         <h3>Event Mode</h3>
                         <p class="event-description">
-                            --> <?php echo ucfirst($event['mode']); ?> Event
+                            <?php echo ucfirst($event['mode']); ?> Event
                         </p>
                     </div>
                 </div>
@@ -1040,7 +1015,7 @@ if ($userStmt = $connection->prepare($userQuery)) {
                 <b>Helps</b><br>
                 <a href="../../pages/CommonPages/aboutUs.php">Contact</a><br>
                 <a href="../../pages/CommonPages/mainFAQ.php">FAQs</a><br>
-                <a href="../../pages/MemberPages/mSetting.php">Settings</a>
+                <a href="../../pages/MemberPages/mContactSupport.php">Helps and Support</a>
             </div>
             <div>
                 <b>Community</b><br>

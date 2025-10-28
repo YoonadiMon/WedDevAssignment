@@ -1,120 +1,112 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    session_start();
+    include("../../php/dbConn.php");
+    include("../../php/sessionCheck.php");
 
-// Check if user is admin
-if ($_SESSION['userType'] !== 'admin') {
-    header("Location: ../../pages/memberPages/memberIndex.php");
-    exit();
-}
-
-$autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
-$connection->query($autoCloseQuery);
-
-// Handle event deletion
-if (isset($_POST['delete_event'])) {
-    $eventIDToDelete = $_POST['event_id'];
-    
-    $connection->begin_transaction();
-    
-    try {
-        // Get event banner path before deletion
-        $bannerQuery = "SELECT bannerFilePath FROM tblevents WHERE eventID = ?";
-        $bannerStmt = $connection->prepare($bannerQuery);
-        $bannerStmt->bind_param("i", $eventIDToDelete);
-        $bannerStmt->execute();
-        $bannerResult = $bannerStmt->get_result();
-        $eventData = $bannerResult->fetch_assoc();
-        $bannerStmt->close();
-        
-        // Delete banner file if exists
-        if (!empty($eventData['bannerFilePath']) && file_exists($eventData['bannerFilePath'])) {
-            if (!unlink($eventData['bannerFilePath'])) {
-                error_log("Failed to delete event banner: " . $eventData['bannerFilePath']);
-            }
-        }
-        
-        $deletionOperations = [
-            "DELETE FROM tblregistration WHERE eventID = ?",
-            "DELETE FROM tblevents WHERE eventID = ?"
-        ];
-        
-        foreach ($deletionOperations as $sql) {
-            $stmt = $connection->prepare($sql);
-            if (!$stmt) {
-                throw new Exception("Failed to prepare statement: " . $connection->error);
-            }
-            
-            $stmt->bind_param("i", $eventIDToDelete);
-            $result = $stmt->execute();
-            
-            if (!$result) {
-                throw new Exception("Failed to execute deletion: " . $stmt->error);
-            }
-            $stmt->close();
-        }
-        
-        $connection->commit();
-        $_SESSION['success'] = "Event and all associated data deleted successfully!";
-        
-    } catch (Exception $e) {
-        $connection->rollback();
-        $_SESSION['error'] = "Error deleting event: " . $e->getMessage();
-        error_log("Event deletion error for eventID $eventIDToDelete: " . $e->getMessage());
+    // Check if user is admin
+    if ($_SESSION['userType'] !== 'admin') {
+        header("Location: ../../pages/memberPages/memberIndex.php");
+        exit();
     }
-    
-    header("Location: aManageEvent.php");
-    exit();
-}
 
-// Remove Participant
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'removeParticipant') {
-    $eventID = intval($_POST['eventID']);
-    $participantUserID = intval($_POST['userID']);
-    
-    $removeSql = "UPDATE tblregistration SET status = 'cancelled' WHERE eventID = ? AND userID = ?";
-    $stmt2 = $connection->prepare($removeSql);
-    $stmt2->bind_param("ii", $eventID, $participantUserID);
-    
-    if ($stmt2->execute()) {
-        if ($stmt2->affected_rows > 0) {
-            $_SESSION['success'] = "Participant removed successfully.";
+    // update event status first
+    $autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
+    if (!mysqli_query($connection, $autoCloseQuery)) {
+        error_log("Auto-close query failed: " . mysqli_error($connection));
+    }
+
+    // Handle event deletion
+    if (isset($_POST['delete_event'])) {
+        $eventIDToDelete = $_POST['event_id'];
+        // start transaction
+        // to ensure all database operations succeed or fail together
+        mysqli_autocommit($connection, false);
+        $errorMessage = "";
+        
+        try {
+            // get event banner path
+            $bannerQuery = "SELECT bannerFilePath FROM tblevents WHERE eventID = $eventIDToDelete";
+            $bannerResult = mysqli_query($connection, $bannerQuery);
+
+            if ($bannerResult && mysqli_num_rows($bannerResult) > 0) {
+                $eventData = mysqli_fetch_assoc($bannerResult);
+                // delete banner file if exists
+                if (!empty($eventData['bannerFilePath']) && file_exists($eventData['bannerFilePath'])) {
+                    if (!unlink($eventData['bannerFilePath'])) {
+                        error_log("Failed to delete event banner: " . $eventData['bannerFilePath']);
+                    }
+                }
+            }
+
+            $deletionOperations = [
+                "DELETE FROM tblregistration WHERE eventID = $eventIDToDelete",
+                "DELETE FROM tblevents WHERE eventID = $eventIDToDelete" 
+            ];
+            
+            foreach ($deletionOperations as $sql) {
+                $result = mysqli_query($connection, $sql);
+                if (!$result) {
+                    throw new Exception("Failed to execute deletion: " . mysqli_error($connection));
+                }
+            }
+            // save all changes to database
+            mysqli_commit($connection);
+            $_SESSION['success'] = "Event and all associated data deleted successfully!";
+        } catch (Exception $e) {
+            // undo all delete if any unsucessful operation
+            mysqli_rollback($connection);
+            // show error message
+            $errorMessage = $e->getMessage();
+            $_SESSION['error'] = "Error deleting event: " . $errorMessage;
+            error_log("Event deletion error for eventID $eventIDToDelete: " . $errorMessage);
+        }
+        // back to default
+        mysqli_autocommit($connection, true);
+        // check database connection
+        if (!mysqli_ping($connection)) {
+            $_SESSION['error'] = "Database connection lost during deletion. Please check if event was deleted.";
+        }
+        header("Location: aManageEvent.php");
+        exit();
+    }
+
+    // Remove Participant
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'removeParticipant') {
+        $eventID = intval($_POST['eventID']);
+        $participantUserID = intval($_POST['userID']);
+        
+        $removeSql = "UPDATE tblregistration SET status = 'cancelled' WHERE eventID = $eventID AND userID = $participantUserID";
+        $result = mysqli_query($connection, $removeSql);
+        
+        if ($result) {
+            if (mysqli_affected_rows($connection) > 0) {
+                $_SESSION['success'] = "Participant removed successfully.";
+            } else {
+                $_SESSION['error'] = "Participant not found or already removed.";
+            }
         } else {
-            $_SESSION['error'] = "Participant not found or already removed.";
+            $_SESSION['error'] = "Failed to remove participant. Please try again.";
         }
-    } else {
-        $_SESSION['error'] = "Failed to remove participant. Please try again.";
+        header("Location: aManageEvent.php");
+        exit();
     }
+
+    // for searching
+    $searchHosted = $_GET['searchHosted'] ?? '';
+    $searchHostedData = "%$searchHosted%";
+    // fetch events
+    $eventsSql = "
+        SELECT e.*, u.fullName as hostName, u.username as hostUsername
+        FROM tblevents e
+        JOIN tblusers u ON e.userID = u.userID
+        WHERE e.title LIKE '$searchHostedData'
+        ORDER BY e.startDate DESC
+    ";
     
-    $stmt2->close();
-    header("Location: aManageEvent.php");
-    exit();
-}
-
-// Fetch All Events
-$searchHost = $_GET['searchHosted'] ?? '';
-$allEventsSql = "
-    SELECT e.*, u.fullName as hostName, u.username as hostUsername
-    FROM tblevents e
-    JOIN tblusers u ON e.userID = u.userID
-    WHERE e.title LIKE ?
-    ORDER BY e.startDate DESC
-";
-
-$stmt_all = $connection->prepare($allEventsSql);
-if ($stmt_all === false) {
-    die("Error preparing events query: " . $connection->error);
-}
-
-$searchHostParam = "%$searchHost%";
-$stmt_all->bind_param("s", $searchHostParam);
-
-if (!$stmt_all->execute()) {
-    die("Error executing events query: " . $stmt_all->error);
-}
-
-$allEvents = $stmt_all->get_result();
+    $events = mysqli_query($connection, $eventsSql);
+    if (!$events) {
+        die("Error executing events query: " . mysqli_error($connection));
+    }
 ?>
 
 <!DOCTYPE html>
@@ -583,19 +575,19 @@ $allEvents = $stmt_all->get_result();
             <form method="GET" class="event-search-form">
                 <input type="text" name="searchHosted" class="c-input event-search-input"
                     placeholder="Search events by title..." 
-                    value="<?php echo htmlspecialchars($searchHost); ?>">
+                    value="<?php echo htmlspecialchars($searchHosted); ?>">
                 <button type="submit" class="event-search-btn">Search</button>
             </form>
 
             <div class="event-list">
-                <?php if ($allEvents->num_rows === 0): ?>
+                <?php if (mysqli_num_rows($events) === 0) { ?>
                     <div class="empty-state">
                         <div class="empty-state-icon">🎯</div>
                         <h3>No events found</h3>
                         <p>No events match your search criteria.</p>
                     </div>
-                <?php else: ?>
-                    <?php while ($event = $allEvents->fetch_assoc()): ?>
+                <?php } else { ?>
+                    <?php while ($event = mysqli_fetch_assoc($events)) { ?>
                         <div class="hosted-event-item">
                             <button class="hosted-event-header">
                                 <span>
@@ -617,15 +609,12 @@ $allEvents = $stmt_all->get_result();
                                         SELECT u.userID, u.fullName, u.email
                                         FROM tblregistration r
                                         JOIN tblusers u ON r.userID = u.userID
-                                        WHERE r.eventID = ? AND r.status = 'active'
+                                        WHERE r.eventID = {$event['eventID']} AND r.status = 'active'
                                         ORDER BY u.fullName ASC
                                     ";
-                                    $stmt3 = $connection->prepare($participantsSql);
-                                    if ($stmt3) {
-                                         $stmt3->bind_param("i", $event['eventID']);
-                                        $stmt3->execute();
-                                        $participants = $stmt3->get_result();
-                                        $participantCount = $participants->num_rows;
+                                    $participants = mysqli_query($connection, $participantsSql);
+                                    if ($participants) {
+                                        $participantCount = mysqli_num_rows($participants);
                                     }
                                 ?>
 
@@ -643,7 +632,7 @@ $allEvents = $stmt_all->get_result();
                                     </form>
                                 </div>
 
-                                <?php if ($participantCount > 0): ?>
+                                <?php if ($participantCount > 0) { ?>
                                     <span class="participant-count">
                                         Total Participants: <strong><?php echo $participantCount; ?></strong>
                                     </span>
@@ -659,7 +648,7 @@ $allEvents = $stmt_all->get_result();
                                             </tr>
                                         </thead>
                                         <tbody>
-                                        <?php while ($participant = $participants->fetch_assoc()): ?>
+                                        <?php while ($participant = mysqli_fetch_assoc($participants)) { ?>
                                             <tr>
                                                 <td><?php echo htmlspecialchars($participant['fullName']); ?></td>
                                                 <td><?php echo htmlspecialchars($participant['email']); ?></td>
@@ -681,18 +670,18 @@ $allEvents = $stmt_all->get_result();
                                                     </div>
                                                 </td>
                                             </tr>
-                                        <?php endwhile; ?>
+                                        <?php } ?>
                                         </tbody>
                                     </table>
-                                <?php else: ?>
+                                <?php } else { ?>
                                     <div class="empty-state">
                                         <p>No participants registered yet</p>
                                     </div>
-                                <?php endif; ?>
+                                <?php } ?>
                             </div>
                         </div>
-                    <?php endwhile; ?>
-                <?php endif; ?>
+                    <?php } ?>
+                <?php } ?>
             </div>
         </section>
     </main>

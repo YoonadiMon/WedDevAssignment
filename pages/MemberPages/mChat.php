@@ -18,154 +18,111 @@ function getInitials($name) {
     return strtoupper(substr($words[0], 0, 2));
 }
 
-// render trade request message
-function renderTradeRequest($requestID, $connection, $currentUserID) {
+// get trade request data for inline rendering
+function getTradeRequestData($requestID, $connection, $currentUserID) {
     $query = "SELECT tr.*, 
-                     tl.title, tl.category, tl.imageUrl, tl.status as listing_status,
-                     sender.username as sender_name,
-                     receiver.username as receiver_name
+                     tl.title, tl.category, tl.imageUrl, tl.status as listingStatus,
+                     sender.username as senderName, sender.fullName as senderFullName,
+                     receiver.username as receiverName
               FROM tbltrade_requests tr
               LEFT JOIN tbltrade_listings tl ON tr.listingID = tl.listingID
               LEFT JOIN tblusers sender ON tr.senderID = sender.userID
               LEFT JOIN tblusers receiver ON tr.receiverID = receiver.userID
-              WHERE tr.requestID = ?";
+              WHERE tr.requestID = '$requestID'";
     
-    $stmt = mysqli_prepare($connection, $query);
-    mysqli_stmt_bind_param($stmt, "i", $requestID);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+    $result = mysqli_query($connection, $query);
     $data = mysqli_fetch_assoc($result);
     
-    if (!$data) return '';
+    if (!$data) return null;
     
     $isSender = $data['senderID'] == $currentUserID;
     $isExpired = strtotime($data['expiresAt']) < time();
     $status = $data['status'];
     
-    // Check if sender, receiver, or listing is deleted
-    $senderDeleted = ($data['senderID'] === null || $data['sender_name'] === null);
-    $receiverDeleted = ($data['receiverID'] === null || $data['receiver_name'] === null);
+    // check if sender, receiver, or listing is deleted
+    $senderDeleted = ($data['senderID'] === null || $data['senderName'] === null);
+    $receiverDeleted = ($data['receiverID'] === null || $data['receiverName'] === null);
     $listingDeleted = ($data['listingID'] === null || $data['title'] === null);
-    $isListingInactive = ($data['listing_status'] !== 'active');
+    $isListingInactive = ($data['listingStatus'] !== 'active');
     
-    // Determine if request should be marked as cancelled due to deletions
+    // determine if request should be marked as cancelled due to deletions
     $isCancelledDueToDeletion = ($senderDeleted || $receiverDeleted || $listingDeleted);
     
-    // Prepare display data
-    $senderDisplay = $senderDeleted ? '[Deleted User]' : htmlspecialchars($data['sender_name']);
+    // display data
+    $senderDisplay = $senderDeleted ? '[Deleted User]' : htmlspecialchars($data['senderName']);
     $requestTypeText = ($data['requestType'] === 'offer') ? 'offered' : 'requested';
     $imageUrl = $data['imageUrl'] ?: '../../assets/images/placeholder-image.jpg';
     
-    mysqli_stmt_close($stmt);
-    
-    // Build HTML string
-    $html = '<div class="trade-request-container">';
-    $html .= '<div class="trade-request-header">';
-    $html .= '<strong>' . $senderDisplay . '</strong> ' . $requestTypeText . ' this item:';
-    $html .= '</div>';
-    
-    // Listing Preview
-    if ($listingDeleted) {
-        $html .= '<div class="trade-request-preview deleted-listing">';
-        $html .= '<img src="../../assets/images/placeholder-image.jpg" alt="Deleted Listing">';
-        $html .= '<div class="trade-request-info">';
-        $html .= '<h4>[Listing Deleted]</h4>';
-        $html .= '<p class="trade-category">This listing is no longer available</p>';
-        $html .= '</div>';
-        $html .= '</div>';
-    } else {
-        $html .= '<div class="trade-request-preview">';
-        $html .= '<img src="' . htmlspecialchars($imageUrl) . '" alt="' . htmlspecialchars($data['title']) . '" onerror="this.src=\'../../assets/images/placeholder-image.jpg\'">';
-        $html .= '<div class="trade-request-info">';
-        $html .= '<h4>' . htmlspecialchars($data['title']) . '</h4>';
-        $html .= '<p class="trade-category">' . htmlspecialchars($data['category']) . '</p>';
-        $html .= '</div>';
-        $html .= '</div>';
-    }
-    
-    // Action Buttons
-    $html .= '<div class="trade-request-actions">';
-    
-    if ($isCancelledDueToDeletion) {
-        $html .= '<button class="trade-btn-disabled" disabled>This offer/request is cancelled</button>';
-    } elseif ($status === 'accepted') {
-        $html .= '<button class="trade-btn-disabled" disabled>Accepted</button>';
-    } elseif ($status === 'declined') {
-        $html .= '<button class="trade-btn-disabled" disabled>Declined</button>';
-    } elseif ($status === 'cancelled') {
-        $html .= '<button class="trade-btn-disabled" disabled>Cancelled</button>';
-    } elseif ($isExpired) {
-        $html .= '<button class="trade-btn-disabled" disabled>Expired</button>';
-    } elseif ($isListingInactive) {
-        $html .= '<button class="trade-btn-disabled" disabled>Unavailable</button>';
-    } elseif ($isSender) {
-        $html .= '<button class="trade-btn-cancel" onclick="respondTradeRequest(' . $requestID . ', \'cancel\')">Cancel</button>';
-    } else {
-        $html .= '<button class="trade-btn-accept" onclick="respondTradeRequest(' . $requestID . ', \'accept\')">Accept</button>';
-        $html .= '<button class="trade-btn-decline" onclick="respondTradeRequest(' . $requestID . ', \'decline\')">Decline</button>';
-    }
-    
-    $html .= '</div>';
-    
-    // Note for pending requests
-    if ($status === 'pending' && !$isCancelledDueToDeletion) {
-        $html .= '<p class="trade-request-note">* Offer/request will expire after 30 days</p>';
-    }
-    
-    $html .= '</div>';
-    
-    return $html;
+    return [
+        'isSender' => $isSender,
+        'isExpired' => $isExpired,
+        'status' => $status,
+        'senderDeleted' => $senderDeleted,
+        'receiverDeleted' => $receiverDeleted,
+        'listingDeleted' => $listingDeleted,
+        'isListingInactive' => $isListingInactive,
+        'isCancelledDueToDeletion' => $isCancelledDueToDeletion,
+        'senderDisplay' => $senderDisplay,
+        'requestTypeText' => $requestTypeText,
+        'imageUrl' => $imageUrl,
+        'title' => $data['title'],
+        'category' => $data['category'],
+        'senderFullName' => $data['senderFullName'] ?? 'Deleted User'
+    ];
 }
 
 // Initialize variables
-$conversation_id = isset($_GET['conversation_id']) ? (int)$_GET['conversation_id'] : 0;
-$start_chat_with_userID = isset($_GET['start_chat_with']) ? (int)$_GET['start_chat_with'] : 0;
-$temporary_chat_mode = false;
+$conversationID = isset($_GET['conversationID']) ? (int)$_GET['conversationID'] : 0;
+$startChatWithUserID = isset($_GET['start_chat_with']) ? (int)$_GET['start_chat_with'] : 0;
+$temporaryChat = false;
 $messages = [];
-$other_user = null;
+$otherUser = null;
 
 if (isset($_POST['send_message'])) {
-    $message_text = mysqli_real_escape_string($connection, $_POST['message']);
-    $receiver_id = (int)$_POST['receiver_id'];
+    $messageText = $_POST['message'];
+    $receiverID = $_POST['receiverID'];
     
-    if (!empty($message_text)) {
-        // Check if we're in temporary chat mode (no conversation_id yet)
-        $current_conversation_id = isset($_POST['conversation_id']) ? (int)$_POST['conversation_id'] : 0;
+    if (!empty($messageText)) {
+        // check if we're in temporary chat mode (no conversationID yet)
+        $currentConversationID = isset($_POST['conversationID']) ? $_POST['conversationID'] : 0;
         
-        if ($current_conversation_id == 0 && $receiver_id > 0) {
-            $create_conv_query = "INSERT INTO tblconversations (user1ID, user2ID, lastMessageTime) 
-                                 VALUES ('$userID', '$receiver_id', NOW())";
+        if ($currentConversationID == 0 && $receiverID > 0) {
+            $createConvQuery = "INSERT INTO tblconversations (user1ID, user2ID, lastMessageTime) 
+                                 VALUES ('$userID', '$receiverID', NOW())";
             
-            if (mysqli_query($connection, $create_conv_query)) {
-                $conversation_id = mysqli_insert_id($connection);
+            if (mysqli_query($connection, $createConvQuery)) {
+                $conversationID = mysqli_insert_id($connection);
                 
-                $insert_query = "INSERT INTO tblmessages (conversationID, senderID, receiverID, messageText) 
-                                VALUES ('$conversation_id', '$userID', '$receiver_id', '$message_text')";
+                $insertQuery = "INSERT INTO tblmessages (conversationID, senderID, receiverID, messageText) 
+                                VALUES ('$conversationID', '$userID', '$receiverID', '$messageText')";
                 
-                if (mysqli_query($connection, $insert_query)) {
-                    $update_conv = "UPDATE tblconversations SET lastMessageTime = NOW() WHERE conversationID = '$conversation_id'";
-                    mysqli_query($connection, $update_conv);
+                if (mysqli_query($connection, $insertQuery)) {
+                    $updateConv = "UPDATE tblconversations SET lastMessageTime = NOW() WHERE conversationID = '$conversationID'";
+                    mysqli_query($connection, $updateConv);
                     
-                    header("Location: mChat.php?conversation_id=$conversation_id");
+                    header("Location: mChat.php?conversationID=$conversationID");
                     exit();
                 } else {
-                    $_SESSION['error'] = "Error sending message: " . mysqli_error($connection);
+                    error_log("Error sending message: " . mysqli_error($connection));
+                    $_SESSION['error'] = "Error sending message";
                 }
             } else {
-                $_SESSION['error'] = "Error creating conversation: " . mysqli_error($connection);
+                error_log("Error creating conversation: " . mysqli_error($connection));
+                $_SESSION['error'] = "Error creating conversation";
             }
-        } elseif ($current_conversation_id > 0) {
-            $insert_query = "INSERT INTO tblmessages (conversationID, senderID, receiverID, messageText) 
-                            VALUES ('$current_conversation_id', '$userID', '$receiver_id', '$message_text')";
+        } elseif ($currentConversationID > 0) {
+            $insertQuery = "INSERT INTO tblmessages (conversationID, senderID, receiverID, messageText) 
+                            VALUES ('$currentConversationID', '$userID', '$receiverID', '$messageText')";
             
-            if (mysqli_query($connection, $insert_query)) {
-                $update_conv = "UPDATE tblconversations SET lastMessageTime = NOW() WHERE conversationID = '$current_conversation_id'";
-                mysqli_query($connection, $update_conv);
+            if (mysqli_query($connection, $insertQuery)) {
+                $updateConv = "UPDATE tblconversations SET lastMessageTime = NOW() WHERE conversationID = '$currentConversationID'";
+                mysqli_query($connection, $updateConv);
                 
-                header("Location: mChat.php?conversation_id=$current_conversation_id");
+                header("Location: mChat.php?conversationID=$currentConversationID");
                 exit();
             } else {
-                $_SESSION['error'] = "Error sending message: " . mysqli_error($connection);
+                error_log("Error sending message: " . mysqli_error($connection));
+                $_SESSION['error'] = "Error sending message";
             }
         }
     } else {
@@ -173,46 +130,46 @@ if (isset($_POST['send_message'])) {
     }
     
     // Redirect back to current view
-    if ($current_conversation_id > 0) {
-        header("Location: mChat.php?conversation_id=$current_conversation_id");
-    } elseif ($receiver_id > 0) {
-        header("Location: mChat.php?start_chat_with=$receiver_id");
+    if ($currentConversationID > 0) {
+        header("Location: mChat.php?conversationID=$currentConversationID");
+    } elseif ($receiverID > 0) {
+        header("Location: mChat.php?start_chat_with=$receiverID");
     } else {
         header("Location: mChat.php");
     }
     exit();
 }
 
-if ($start_chat_with_userID > 0 && $conversation_id == 0) {
-    $check_conv_query = "SELECT conversationID FROM tblconversations 
-                        WHERE (user1ID = '$userID' AND user2ID = '$start_chat_with_userID')
-                        OR (user1ID = '$start_chat_with_userID' AND user2ID = '$userID')
-                        LIMIT 1";
+// check if convo exist or new convo
+if ($startChatWithUserID > 0 && $conversationID == 0) {
+    $checkQuery = "SELECT conversationID FROM tblconversations 
+                    WHERE (user1ID = '$userID' AND user2ID = '$startChatWithUserID')
+                    OR (user1ID = '$startChatWithUserID' AND user2ID = '$userID')
+                    LIMIT 1";
     
-    $check_result = mysqli_query($connection, $check_conv_query);
+    $checkResult = mysqli_query($connection, $checkQuery);
     
-    if ($check_result && mysqli_num_rows($check_result) > 0) {
-        // Conversation exists, get the ID
-        $existing_conv = mysqli_fetch_assoc($check_result);
-        $conversation_id = $existing_conv['conversationID'];
+    if ($checkResult && mysqli_num_rows($checkResult) > 0) {
+        // if convo exists, get the ID
+        $existingConv = mysqli_fetch_assoc($checkResult);
+        $conversationID = $existingConv['conversationID'];
         
-        // Redirect to the existing conversation
-        header("Location: mChat.php?conversation_id=$conversation_id");
+        // redirect to the existing conversation
+        header("Location: mChat.php?conversationID=$conversationID");
         exit();
     } else {
-        // Set up temporary chat mode
-        $temporary_chat_mode = true;
+        // temporary chat mode
+        $temporaryChat = true;
         
-        // Get the other user's details for the temporary chat
-        $other_user_query = "SELECT userID, username, fullName FROM tblusers WHERE userID = '$start_chat_with_userID'";
-        $other_user_result = mysqli_query($connection, $other_user_query);
+        $otherUserQuery = "SELECT userID, username, fullName FROM tblusers WHERE userID = '$startChatWithUserID'";
+        $otherUserResult = mysqli_query($connection, $otherUserQuery);
         
-        if ($other_user_result && mysqli_num_rows($other_user_result) > 0) {
-            $other_user_data = mysqli_fetch_assoc($other_user_result);
-            $other_user = [
-                'id' => $other_user_data['userID'],
-                'name' => $other_user_data['username'],
-                'fullName' => $other_user_data['fullName']
+        if ($otherUserResult && mysqli_num_rows($otherUserResult) > 0) {
+            $otherUserData = mysqli_fetch_assoc($otherUserResult);
+            $otherUser = [
+                'id' => $otherUserData['userID'],
+                'name' => $otherUserData['username'],
+                'fullName' => $otherUserData['fullName']
             ];
         } else {
             $_SESSION['error'] = "User not found.";
@@ -222,94 +179,99 @@ if ($start_chat_with_userID > 0 && $conversation_id == 0) {
     }
 }
 
-// If conversation selected, fetch messages
-if ($conversation_id > 0) {
-    // Get conversation details
-    $conv_query = "SELECT c.*, 
-                   u1.username as user1_name, u1.fullName as user1_fullName, 
-                   u2.username as user2_name, u2.fullName as user2_fullName
+// if conversation selected, fetch messages
+if ($conversationID > 0) {
+    // conversation details
+    $convQuery = "SELECT c.*, 
+                   u1.username as user1Name, u1.fullName as user1FullName, 
+                   u2.username as user2Name, u2.fullName as user2FullName
                    FROM tblconversations c
                    LEFT JOIN tblusers u1 ON c.user1ID = u1.userID
                    LEFT JOIN tblusers u2 ON c.user2ID = u2.userID
-                   WHERE c.conversationID = '$conversation_id' 
+                   WHERE c.conversationID = '$conversationID' 
                    AND (c.user1ID = '$userID' OR c.user2ID = '$userID')";
     
-    $conv_result = mysqli_query($connection, $conv_query);
+    $convResult = mysqli_query($connection, $convQuery);
     
-    if ($conv_result && mysqli_num_rows($conv_result) > 0) {
-        $conv = mysqli_fetch_assoc($conv_result);
+    if ($convResult && mysqli_num_rows($convResult) > 0) {
+        $conv = mysqli_fetch_assoc($convResult);
         
         // Determine other user
         if ($conv['user1ID'] == $userID) {
-            $other_user = [
+            $otherUser = [
                 'id' => $conv['user2ID'],
-                'name' => $conv['user2_name'] ?: 'Deleted User',
-                'fullName' => $conv['user2_fullName'] ?: 'Deleted User'
+                'name' => $conv['user2Name'] ?: 'Deleted User',
+                'fullName' => $conv['user2FullName'] ?: 'Deleted User'
             ];
         } else {
-            $other_user = [
+            $otherUser = [
                 'id' => $conv['user1ID'],
-                'name' => $conv['user1_name'] ?: 'Deleted User',
-                'fullName' => $conv['user1_fullName'] ?: 'Deleted User'
+                'name' => $conv['user1Name'] ?: 'Deleted User',
+                'fullName' => $conv['user1FullName'] ?: 'Deleted User'
             ];
         }
         
-        // Fetch messages
-        $messages_query = "SELECT m.*, 
+        $messagesQuery = "SELECT m.*, 
                           COALESCE(u.username, 'Deleted User') as username, 
                           COALESCE(u.fullName, 'Deleted User') as fullName
                           FROM tblmessages m
                           LEFT JOIN tblusers u ON m.senderID = u.userID
-                          WHERE m.conversationID = '$conversation_id'
+                          WHERE m.conversationID = '$conversationID'
                           ORDER BY m.sentAt ASC";
         
-        $messages_result = mysqli_query($connection, $messages_query);
+        $messagesResult = mysqli_query($connection, $messagesQuery);
         
-        if ($messages_result) {
-            while ($row = mysqli_fetch_assoc($messages_result)) {
+        if ($messagesResult) {
+            while ($row = mysqli_fetch_assoc($messagesResult)) {
                 $messages[] = $row;
             }
         }
         
         // Mark messages as read
-        $mark_read = "UPDATE tblmessages SET isRead = TRUE 
-                     WHERE conversationID = '$conversation_id' 
+        $markRead = "UPDATE tblmessages SET isRead = TRUE 
+                     WHERE conversationID = '$conversationID' 
                      AND receiverID = '$userID' 
                      AND isRead = FALSE";
-        mysqli_query($connection, $mark_read);
+        mysqli_query($connection, $markRead);
     }
 }
 
 // Fetch all conversations for the current user
-$conversations_query = "SELECT c.*, 
-                       u1.username as user1_name, u1.fullName as user1_fullName,
-                       u2.username as user2_name, u2.fullName as user2_fullName,
+$conversationsQuery = "SELECT c.*, 
+                       u1.username as user1Name, u1.fullName as user1FullName,
+                       u2.username as user2Name, u2.fullName as user2FullName,
                        (SELECT COUNT(*) FROM tblmessages WHERE conversationID = c.conversationID 
-                        AND receiverID = '$userID' AND isRead = FALSE) as unread_count,
+                        AND receiverID = '$userID' AND isRead = FALSE) as unreadCount,
                        (SELECT messageText FROM tblmessages WHERE conversationID = c.conversationID 
-                        ORDER BY sentAt DESC LIMIT 1) as last_message
+                        ORDER BY sentAt DESC LIMIT 1) as lastMessage
                        FROM tblconversations c
                        LEFT JOIN tblusers u1 ON c.user1ID = u1.userID
                        LEFT JOIN tblusers u2 ON c.user2ID = u2.userID
                        WHERE c.user1ID = '$userID' OR c.user2ID = '$userID'
                        ORDER BY c.lastMessageTime DESC";
-$conversations_result = mysqli_query($connection, $conversations_query);
+$conversationsResult = mysqli_query($connection, $conversationsQuery);
 
 $conversations = [];
-if ($conversations_result) {
-    while ($row = mysqli_fetch_assoc($conversations_result)) {
+if ($conversationsResult) {
+    while ($row = mysqli_fetch_assoc($conversationsResult)) {
         // Determine the other user in conversation
         if ($row['user1ID'] == $userID) {
-            $row['other_userID'] = $row['user2ID'];
-            $row['other_username'] = $row['user2_name'] ?: 'Deleted User';
-            $row['other_user_fullName'] = $row['user2_fullName'] ?: 'Deleted User';
+            $row['otherUserID'] = $row['user2ID'];
+            $row['otherUsername'] = $row['user2Name'] ?: 'Deleted User';
+            $row['otherUserFullName'] = $row['user2FullName'] ?: 'Deleted User';
         } else {
-            $row['other_userID'] = $row['user1ID'];
-            $row['other_username'] = $row['user1_name'] ?: 'Deleted User';
-            $row['other_user_fullName'] = $row['user1_fullName'] ?: 'Deleted User';
+            $row['otherUserID'] = $row['user1ID'];
+            $row['otherUsername'] = $row['user1Name'] ?: 'Deleted User';
+            $row['otherUserFullName'] = $row['user1FullName'] ?: 'Deleted User';
         }
         $conversations[] = $row;
     }
+}
+
+// Calculate unread count for JavaScript
+$unreadCount = 0;
+foreach ($conversations as $conv) {
+    $unreadCount += $conv['unreadCount'];
 }
 ?>
 
@@ -326,6 +288,11 @@ if ($conversations_result) {
 
     <title>Chat - ReLeaf</title>
     <link rel="icon" type="image/png" href="../../assets/images/Logo.png">
+
+    <style>
+        /* to debug */
+        
+    </style>
 </head>
 
 <body>
@@ -441,17 +408,17 @@ if ($conversations_result) {
                             </div>
                         <?php else: ?>
                             <?php foreach ($conversations as $conv): ?>
-                                <li class="<?php echo $conv['conversationID'] == $conversation_id ? 'active' : ''; ?>">
-                                    <a href="mChat.php?conversation_id=<?php echo $conv['conversationID']; ?>">
+                                <li class="<?php echo $conv['conversationID'] == $conversationID ? 'active' : ''; ?>">
+                                    <a href="mChat.php?conversationID=<?php echo $conv['conversationID']; ?>">
                                         <div>
                                             <span class="content-message-avatar avatar-initials">
-                                                <?php echo getInitials($conv['other_user_fullName']); ?>
+                                                <?php echo getInitials($conv['otherUserFullName']); ?>
                                             </span>
                                             <span class="content-message-info">
-                                                <span class="content-message-name"><?php echo htmlspecialchars($conv['other_username']); ?></span>
+                                                <span class="content-message-name"><?php echo htmlspecialchars($conv['otherUsername']); ?></span>
                                                 <span class="content-message-text">
                                                     <?php 
-                                                    $lastMessage = $conv['last_message'] ?? 'No messages yet';
+                                                    $lastMessage = $conv['lastMessage'] ?? 'No messages yet';
                                                     if (strpos($lastMessage, 'TRADE_REQUEST:') === 0) {
                                                         echo 'Trade request sent';
                                                     } else {
@@ -466,8 +433,8 @@ if ($conversations_result) {
                                                     echo date('g:i A', strtotime($conv['lastMessageTime']));
                                                     ?>
                                                 </span>
-                                                <?php if ($conv['unread_count'] > 0): ?>
-                                                    <span class="content-message-unread"><?php echo $conv['unread_count']; ?></span>
+                                                <?php if ($conv['unreadCount'] > 0): ?>
+                                                    <span class="content-message-unread"><?php echo $conv['unreadCount']; ?></span>
                                                 <?php endif; ?>
                                             </span>
                                         </div>
@@ -480,7 +447,7 @@ if ($conversations_result) {
             </div>
 
             <!-- Default/No Conversation Selected -->
-            <?php if (!$conversation_id && !$temporary_chat_mode): ?>
+            <?php if (!$conversationID && !$temporaryChat): ?>
                 <div class="conversation conversation-default active">
                     <p>Select a chat to start messaging!</p>
                     <small>Choose a conversation from the sidebar or start a new one</small>
@@ -494,11 +461,11 @@ if ($conversations_result) {
                         </button>
                         <div class="conversation-user">
                             <div class="conversation-user-avatar avatar-initials">
-                                <?php echo getInitials($other_user['fullName']); ?>
+                                <?php echo getInitials($otherUser['fullName']); ?>
                             </div>
                             <div>
-                                <div class="conversation-user-name"><?php echo htmlspecialchars($other_user['name']); ?></div>
-                                <?php if ($temporary_chat_mode): ?>
+                                <div class="conversation-user-name"><?php echo htmlspecialchars($otherUser['name']); ?></div>
+                                <?php if ($temporaryChat): ?>
                                     <small style="color: var(--MainGreen); font-size: 0.8rem;">New conversation</small>
                                 <?php endif; ?>
                             </div>
@@ -506,6 +473,8 @@ if ($conversations_result) {
                     </div>
 
                     <!-- Alert Messages -->
+
+                    <!-- PHP error handling: database/connection issues -->
                     <?php if (isset($_SESSION['error'])): ?>
                         <div class="alert alert-error">
                             <?php 
@@ -524,54 +493,126 @@ if ($conversations_result) {
                         </div>
                     <?php endif; ?>
 
+                    <!-- JS Error handling: logic issues -->
+                    <div class="alert alert-error" id="jsAlertError" style="display: none;"></div>
+                    <div class="alert alert-success" id="jsAlertSuccess" style="display: none;"></div>
+
+                    <!-- Main Chatbox -->
                     <div class="conversation-main" id="conversationMain">
                         <ul class="conversation-wrapper">
                             <?php if (empty($messages)): ?>
-                                <div class="coversation-divider"><span>Start Conversation</span></div>
+                                <div class="conversation-divider"><span>Start Conversation</span></div>
                                 <div class="empty-conversation">
                                     <i class="ri-chat-1-line"></i>
                                     <p>No messages yet</p>
-                                    <small>Send a message to start the conversation</small>
+                                    <small>Trading only works after conversation is started</small>
                                 </div>
                             <?php else: ?>
                                 <?php 
-                                $last_date = '';
+                                $lastDate = '';
                                 foreach ($messages as $msg): 
-                                    $msg_date = date('Y-m-d', strtotime($msg['sentAt']));
-                                    $is_me = $msg['senderID'] == $userID;
+                                    $msgDate = date('Y-m-d', strtotime($msg['sentAt']));
+                                    $isMe = $msg['senderID'] == $userID;
                                     
-                                    if ($last_date != $msg_date) {
-                                        $last_date = $msg_date;
-                                        $display_date = date('F j, Y', strtotime($msg['sentAt']));
-                                        echo '<div class="coversation-divider"><span>' . $display_date . '</span></div>';
+                                    if ($lastDate != $msgDate) {
+                                        $lastDate = $msgDate;
+                                        $displayDate = date('F j, Y', strtotime($msg['sentAt']));
+                                        echo '<div class="conversation-divider"><span>' . $displayDate . '</span></div>';
                                     }
                                     
-                                    // Check if message is a trade request
+                                    // identify the msg type is text or trade request
                                     if (strpos($msg['messageText'], 'TRADE_REQUEST:') === 0) {
                                         $requestID = (int)str_replace('TRADE_REQUEST:', '', $msg['messageText']);
-                                        echo '<li class="conversation-item ' . ($is_me ? 'me' : '') . '">';
-                                        echo '<div class="conversation-item-side">';
-                                        echo '<div class="conversation-item-avatar avatar-initials">';
-                                        echo getInitials($msg['fullName']);
-                                        echo '</div>';
-                                        echo '</div>';
-                                        echo '<div class="conversation-item-content">';
-                                        echo '<div class="conversation-item-wrapper">';
-                                        echo '<div class="conversation-item-box" style="max-width: 100%;">';
-                                        echo renderTradeRequest($requestID, $connection, $userID);
-                                        echo '<div class="conversation-item-time">';
-                                        echo date('g:i A', strtotime($msg['sentAt']));
-                                        if ($is_me && $msg['isRead']) {
-                                            echo '<span style="margin-left: 4px;">✓✓</span>';
-                                        }
-                                        echo '</div>';
-                                        echo '</div>';
-                                        echo '</div>';
-                                        echo '</div>';
-                                        echo '</li>';
+                                        $requestData = getTradeRequestData($requestID, $connection, $userID);
+                                        ?>
+                                        <li class="conversation-item <?php echo $isMe ? 'me' : ''; ?>">
+                                            <div class="conversation-item-side">
+                                                <div class="conversation-item-avatar avatar-initials">
+                                                    <?php echo getInitials($msg['fullName']); ?>
+                                                </div>
+                                            </div>
+                                            <div class="conversation-item-content">
+                                                <div class="conversation-item-wrapper">
+                                                    <div class="conversation-item-box" style="max-width: 100%;">
+                                                        <!-- Trade request -->
+                                                        <div class="trade-request-container">
+                                                            <div class="trade-request-header">
+                                                                <strong><?php echo $requestData['senderDisplay']; ?></strong> 
+                                                                <?php echo $requestData['requestTypeText']; ?> this item:
+                                                            </div>
+                                                            
+                                                            <!-- Listing preview -->
+                                                            <?php if ($requestData['listingDeleted']): ?>
+                                                                <div class="trade-request-preview deleted-listing">
+                                                                    <img src="../../assets/images/placeholder-image.jpg" alt="Deleted Listing">
+                                                                    <div class="trade-request-info">
+                                                                        <h4>[Listing Deleted]</h4>
+                                                                        <p class="trade-category">This listing is no longer available</p>
+                                                                    </div>
+                                                                </div>
+                                                            <?php else: ?>
+                                                                <div class="trade-request-preview">
+                                                                    <img src="<?php echo htmlspecialchars($requestData['imageUrl']); ?>" 
+                                                                         alt="<?php echo htmlspecialchars($requestData['title']); ?>"
+                                                                         onerror="this.src='../../assets/images/placeholder-image.jpg'">
+                                                                    <div class="trade-request-info">
+                                                                        <h4><?php echo htmlspecialchars($requestData['title']); ?></h4>
+                                                                        <p class="trade-category"><?php echo htmlspecialchars($requestData['category']); ?></p>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endif; ?>
+                                                            
+                                                            <!-- Action buttons -->
+                                                            <div class="trade-request-actions">
+                                                                <?php if ($requestData['isCancelledDueToDeletion']): ?>
+                                                                    <button class="trade-btn-disabled" disabled>This offer/request is cancelled</button>
+                                                                <?php elseif ($requestData['status'] === 'accepted'): ?>
+                                                                    <button class="trade-btn-disabled" disabled>Accepted</button>
+                                                                <?php elseif ($requestData['status'] === 'declined'): ?>
+                                                                    <button class="trade-btn-disabled" disabled>Declined</button>
+                                                                <?php elseif ($requestData['status'] === 'cancelled'): ?>
+                                                                    <button class="trade-btn-disabled" disabled>Cancelled</button>
+                                                                <?php elseif ($requestData['isExpired']): ?>
+                                                                    <button class="trade-btn-disabled" disabled>Expired</button>
+                                                                <?php elseif ($requestData['isListingInactive']): ?>
+                                                                    <button class="trade-btn-disabled" disabled>Unavailable</button>
+                                                                <?php elseif ($requestData['isSender']): ?>
+                                                                    <button class="trade-btn-cancel" 
+                                                                            onclick="respondTradeRequest(<?php echo $requestID; ?>, 'cancel')">
+                                                                        Cancel
+                                                                    </button>
+                                                                <?php else: ?>
+                                                                    <button class="trade-btn-accept" 
+                                                                            onclick="respondTradeRequest(<?php echo $requestID; ?>, 'accept')">
+                                                                        Accept
+                                                                    </button>
+                                                                    <button class="trade-btn-decline" 
+                                                                            onclick="respondTradeRequest(<?php echo $requestID; ?>, 'decline')">
+                                                                        Decline
+                                                                    </button>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                            
+                                                            <!-- for pending requests -->
+                                                            <?php if ($requestData['status'] === 'pending' && !$requestData['isCancelledDueToDeletion']): ?>
+                                                                <p class="trade-request-note">* Offer/request will expire after 30 days</p>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        
+                                                        <div class="conversation-item-time">
+                                                            <?php echo date('g:i A', strtotime($msg['sentAt'])); ?>
+                                                            <?php if ($isMe && $msg['isRead']): ?>
+                                                                <span style="margin-left: 4px;">✓✓</span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <?php
                                     } else {
                                 ?>
-                                    <li class="conversation-item <?php echo $is_me ? 'me' : ''; ?>">
+                                    <li class="conversation-item <?php echo $isMe ? 'me' : ''; ?>">
                                         <div class="conversation-item-side">
                                             <div class="conversation-item-avatar avatar-initials">
                                                 <?php echo getInitials($msg['fullName']); ?>
@@ -584,7 +625,7 @@ if ($conversations_result) {
                                                         <p><?php echo nl2br(htmlspecialchars($msg['messageText'])); ?></p>
                                                         <div class="conversation-item-time">
                                                             <?php echo date('g:i A', strtotime($msg['sentAt'])); ?>
-                                                            <?php if ($is_me && $msg['isRead']): ?>
+                                                            <?php if ($isMe && $msg['isRead']): ?>
                                                                 <span style="margin-left: 4px;">✓✓</span>
                                                             <?php endif; ?>
                                                         </div>
@@ -601,15 +642,15 @@ if ($conversations_result) {
                         </ul>
                     </div>
                                                                 
-                    <?php if ($conversation_id > 0 || $temporary_chat_mode): ?>
+                    <?php if ($conversationID > 0 || $temporaryChat): ?>
                         <div class="conversation-form">
                             <button type="button" class="trade-form-button" onclick="openTradeModal()" title="Trade">
                                 <span class="trade-icon"></span>
                             </button>
                             
                             <form method="POST" id="messageForm">
-                                <input type="hidden" name="receiver_id" value="<?php echo $other_user['id']; ?>">
-                                <input type="hidden" name="conversation_id" value="<?php echo $conversation_id; ?>">
+                                <input type="hidden" name="receiverID" value="<?php echo $otherUser['id']; ?>">
+                                <input type="hidden" name="conversationID" value="<?php echo $conversationID; ?>">
                                 
                                 <div class="conversation-form-group">
                                     <textarea class="conversation-form-input" 
@@ -632,10 +673,10 @@ if ($conversations_result) {
 
     <script>
         const isAdmin = false;
-        const unreadCount = <?php echo $unread_count; ?>;
+        const unreadCount = <?php echo $unreadCount; ?>;
 
-        const currentConversationID = <?php echo $conversation_id ?: 0; ?>;
-        const otherUserID = <?php echo $other_user['id'] ?? 0; ?>;
+        const currentConversationID = <?php echo $conversationID ?: 0; ?>;
+        const otherUserID = <?php echo $otherUser['id'] ?? 0; ?>;
         let currentListings = [];
 
         // Trade Modal Functions
@@ -693,7 +734,7 @@ if ($conversations_result) {
         async function fetchListings(type) {
             try {
                 const formData = new FormData();
-                formData.append('action', 'get_listings');
+                formData.append('action', 'getListings');
                 formData.append('targetUserID', otherUserID);
                 formData.append('requestType', type);
                 
@@ -708,19 +749,21 @@ if ($conversations_result) {
                     currentListings = data.listings;
                     populateListingSelect(type, data.listings);
                 } else {
+                    closeTradeModal();
                     showAlert('Error loading listings', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
+                closeTradeModal();
                 showAlert('Error loading listings', 'error');
             }
         }
 
         function populateListingSelect(type, listings) {
-            const selectId = type === 'request' ? 'requestListingSelect' : 'offerListingSelect';
-            const messageId = type === 'request' ? 'noListingsMessageRequest' : 'noListingsMessageOffer';
-            const select = document.getElementById(selectId);
-            const messageDiv = document.getElementById(messageId);
+            const selectID = type === 'request' ? 'requestListingSelect' : 'offerListingSelect';
+            const messageID = type === 'request' ? 'noListingsMessageRequest' : 'noListingsMessageOffer';
+            const select = document.getElementById(selectID);
+            const messageDiv = document.getElementById(messageID);
             
             select.innerHTML = '<option value="">Select a listing...</option>';
             
@@ -773,24 +816,24 @@ if ($conversations_result) {
         }
 
         function previewListing(type) {
-            const selectId = type === 'request' ? 'requestListingSelect' : 'offerListingSelect';
-            const previewId = type === 'request' ? 'requestPreview' : 'offerPreview';
-            const btnId = type === 'request' ? 'requestSendBtn' : 'offerSendBtn';
+            const selectID = type === 'request' ? 'requestListingSelect' : 'offerListingSelect';
+            const previewID = type === 'request' ? 'requestPreview' : 'offerPreview';
+            const btnID = type === 'request' ? 'requestSendBtn' : 'offerSendBtn';
             
-            const select = document.getElementById(selectId);
-            const preview = document.getElementById(previewId);
-            const btn = document.getElementById(btnId);
+            const select = document.getElementById(selectID);
+            const preview = document.getElementById(previewID);
+            const btn = document.getElementById(btnID);
             
             if (select.value) {
                 const option = select.options[select.selectedIndex];
                 
-                const imageId = type === 'request' ? 'requestPreviewImage' : 'offerPreviewImage';
-                const titleId = type === 'request' ? 'requestPreviewTitle' : 'offerPreviewTitle';
-                const categoryId = type === 'request' ? 'requestPreviewCategory' : 'offerPreviewCategory';
+                const imageID = type === 'request' ? 'requestPreviewImage' : 'offerPreviewImage';
+                const titleID = type === 'request' ? 'requestPreviewTitle' : 'offerPreviewTitle';
+                const categoryID = type === 'request' ? 'requestPreviewCategory' : 'offerPreviewCategory';
                 
-                document.getElementById(imageId).src = option.dataset.image;
-                document.getElementById(titleId).textContent = option.dataset.fullTitle;
-                document.getElementById(categoryId).textContent = 'Category: ' + option.dataset.category;
+                document.getElementById(imageID).src = option.dataset.image;
+                document.getElementById(titleID).textContent = option.dataset.fullTitle;
+                document.getElementById(categoryID).textContent = 'Category: ' + option.dataset.category;
                 
                 preview.classList.add('active');
                 btn.disabled = false;
@@ -801,22 +844,24 @@ if ($conversations_result) {
         }
 
         async function sendTradeRequest(type) {
-            const selectId = type === 'request' ? 'requestListingSelect' : 'offerListingSelect';
-            const listingID = document.getElementById(selectId).value;
+            const selectID = type === 'request' ? 'requestListingSelect' : 'offerListingSelect';
+            const listingID = document.getElementById(selectID).value;
             
             if (!listingID) {
+                closeTradeModal();
                 showAlert('Please select a listing', 'error');
                 return;
             }
             
             if (currentConversationID === 0) {
+                closeTradeModal();
                 showAlert('Please send a message first to start the conversation', 'error');
                 return;
             }
             
             try {
                 const formData = new FormData();
-                formData.append('action', 'send_request');
+                formData.append('action', 'sendRequest');
                 formData.append('conversationID', currentConversationID);
                 formData.append('receiverID', otherUserID);
                 formData.append('listingID', listingID);
@@ -853,7 +898,7 @@ if ($conversations_result) {
             
             try {
                 const formData = new FormData();
-                formData.append('action', 'respond_request');
+                formData.append('action', 'respondRequest');
                 formData.append('requestID', requestID);
                 formData.append('response', response);
                 
@@ -881,22 +926,32 @@ if ($conversations_result) {
         }
 
         function showAlert(message, type) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.textContent = message;
+            // Hide alert containers first
+            const jsErrorAlert = document.getElementById('jsAlertError');
+            const jsSuccessAlert = document.getElementById('jsAlertSuccess');
             
-            const conversationTop = document.querySelector('.conversation-top');
-            if (conversationTop) {
-                conversationTop.insertAdjacentElement('afterend', alertDiv);
+            if (type === 'error') {
+                alertDiv = jsErrorAlert;
+            } else if (type === 'success') {
+                alertDiv = jsSuccessAlert;
+            }
+            
+            // If JS alert container exists, use it
+            if (alertDiv) {
+                alertDiv.textContent = message;
+                alertDiv.style.display = 'block';
+                alertDiv.style.opacity = '1';
+                alertDiv.style.transform = 'translateY(0)';
                 
+                // Auto-hide after 3 seconds
                 setTimeout(() => {
                     alertDiv.style.opacity = '0';
                     alertDiv.style.transform = 'translateY(-10px)';
                     setTimeout(() => {
-                        alertDiv.remove();
+                        alertDiv.style.display = 'none';
                     }, 300);
                 }, 3000);
-            }
+            } 
         }
 
         // Close modal when clicking outside
@@ -943,10 +998,10 @@ if ($conversations_result) {
             });
 
             const urlParams = new URLSearchParams(window.location.search);
-            const conversationId = urlParams.get('conversation_id');
+            const conversationID = urlParams.get('conversationID');
             const startChatWith = urlParams.get('start_chat_with');
             
-            if (window.innerWidth <= 768 && (conversationId || startChatWith)) {
+            if (window.innerWidth <= 768 && (conversationID || startChatWith)) {
                 document.querySelector('.content-sidebar').style.display = 'none';
             }
 
@@ -969,7 +1024,7 @@ if ($conversations_result) {
                 sessionStorage.removeItem('shouldShowConversation');
                 setTimeout(() => {
                     const currentUrlParams = new URLSearchParams(window.location.search);
-                    if (!currentUrlParams.has('conversation_id') && !currentUrlParams.has('start_chat_with')) {
+                    if (!currentUrlParams.has('conversationID') && !currentUrlParams.has('start_chat_with')) {
                         showConversationList();
                     }
                 }, 100);
@@ -1013,4 +1068,4 @@ if ($conversations_result) {
 </body>
 </html>
 
-<?php mysqli_close($connection); ?>
+<?php mysqli_close($connection); ?> 

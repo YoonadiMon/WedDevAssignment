@@ -1,226 +1,181 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    session_start();
+    include("../../php/dbConn.php");
+    include("../../php/sessionCheck.php");
 
-// Check if user is admin
-if ($_SESSION['userType'] !== 'admin') {
-    header("Location: ../../pages/memberPages/memberIndex.php");
-    exit();
-}
+    // Check if user is admin
+    if ($_SESSION['userType'] !== 'admin') {
+        header("Location: ../../pages/memberPages/memberIndex.php");
+        exit();
+    }
 
-// Handle user deletion
-// Handle user deletion
-if (isset($_POST['delete_user'])) {
-    $userIDToDelete = $_POST['user_id'];
-    
-    // Prevent admin from deleting themselves
-    if ($userIDToDelete == $_SESSION['userID']) {
-        $error = "You cannot delete your own account!";
-    } else {
-        // Start transaction
-        $connection->begin_transaction();
-        
+    // Handle user deletion
+    if (isset($_POST['delete_user'])) {
+        $userIDToDelete = $_POST['user_id'];
+        // start transaction
+        // to ensure all database operations succeed or fail together
+        mysqli_autocommit($connection, false);
+            
         $deleteSuccess = true;
         $errorMessage = "";
-        
+            
         try {
-            // Delete event banner files
-            $eventsQuery = "SELECT eventID, bannerFilePath FROM tblevents WHERE userID = ? AND bannerFilePath IS NOT NULL";
-            $eventsStmt = $connection->prepare($eventsQuery);
-            $eventsStmt->bind_param("i", $userIDToDelete);
-            $eventsStmt->execute();
-            $eventsResult = $eventsStmt->get_result();
+            // delete event banner files uploaded by user
+            $eventsQuery = "SELECT eventID, bannerFilePath FROM tblevents WHERE userID = $userIDToDelete AND bannerFilePath IS NOT NULL";
+            $eventsResult = mysqli_query($connection, $eventsQuery);
             
             $deletedFiles = [];
-            while ($event = $eventsResult->fetch_assoc()) {
-                if (!empty($event['bannerFilePath']) && file_exists($event['bannerFilePath'])) {
-                    if (unlink($event['bannerFilePath'])) {
-                        $deletedFiles[] = $event['bannerFilePath'];
-                    } else {
-                        error_log("Failed to delete event banner: " . $event['bannerFilePath']);
+            if ($eventsResult && mysqli_num_rows($eventsResult) > 0) {
+                while ($event = mysqli_fetch_assoc($eventsResult)) {
+                    if (!empty($event['bannerFilePath']) && file_exists($event['bannerFilePath'])) {
+                        if (unlink($event['bannerFilePath'])) {
+                            $deletedFiles[] = $event['bannerFilePath'];
+                        } else {
+                            error_log("Failed to delete event banner: " . $event['bannerFilePath']);
+                        }
                     }
                 }
             }
-            $eventsStmt->close();
+            // delete trade listing images uploaded by user
+            $tradeImagesQuery = "SELECT listingID, imageUrl FROM tbltrade_listings WHERE userID = $userIDToDelete AND imageUrl IS NOT NULL";
+            $tradeImagesResult = mysqli_query($connection, $tradeImagesQuery);
             
+            if ($tradeImagesResult && mysqli_num_rows($tradeImagesResult) > 0) {
+                while ($trade = mysqli_fetch_assoc($tradeImagesResult)) {
+                    if (!empty($trade['imageUrl']) && file_exists($trade['imageUrl'])) {
+                        if (unlink($trade['imageUrl'])) {
+                            $deletedFiles[] = $trade['imageUrl'];
+                        } else {
+                            error_log("Failed to delete trade listing image: " . $trade['imageUrl']);
+                        }
+                    }
+                }
+            }
+
+            // Delete everything by this user
             $deletionOperations = [
                 // ticket responses
-                "DELETE FROM tblticket_responses WHERE responderId = ?",
+                "DELETE FROM tblticket_responses WHERE responderId = $userIDToDelete",
                 
                 // ticket attachments  
-                "DELETE FROM tblticket_attachments WHERE uploadedBy = ?",
+                "DELETE FROM tblticket_attachments WHERE uploadedBy = $userIDToDelete",
                 
                 // tickets
-                "DELETE FROM tbltickets WHERE userID = ?",
+                "DELETE FROM tbltickets WHERE userID = $userIDToDelete",
                 
                 // trade listings
-                "DELETE FROM tbltrade_listings WHERE userID = ?",
+                "DELETE FROM tbltrade_listings WHERE userID = $userIDToDelete",
                 
                 // event registrations
-                "DELETE FROM tblregistration WHERE userID = ?",
+                "DELETE FROM tblregistration WHERE userID = $userIDToDelete",
                 
                 // events created by user 
-                "DELETE FROM tblevents WHERE userID = ?",
+                "DELETE FROM tblevents WHERE userID = $userIDToDelete",
                 
                 // blog tags associations
                 "DELETE tblblogtag FROM tblblogtag 
-                 INNER JOIN tblblog ON tblblogtag.blogID = tblblog.blogID 
-                 WHERE tblblog.userID = ?",
+                INNER JOIN tblblog ON tblblogtag.blogID = tblblog.blogID 
+                WHERE tblblog.userID = $userIDToDelete",
                 
                 // blogs
-                "DELETE FROM tblblog WHERE userID = ?",
+                "DELETE FROM tblblog WHERE userID = $userIDToDelete",
                 
                 // quiz progress
-                "DELETE FROM tbluser_quiz_progress WHERE userID = ?",
+                "DELETE FROM tbluser_quiz_progress WHERE userID = $userIDToDelete",
                 
                 // delete the user
-                "DELETE FROM tblusers WHERE userID = ? AND userType = 'member'"
+                "DELETE FROM tblusers WHERE userID = $userIDToDelete AND userType = 'member'"
             ];
             
-            // Execute each deletion operation
+            // run each deletion operation one by one
             foreach ($deletionOperations as $sql) {
-                $stmt = $connection->prepare($sql);
-                if (!$stmt) {
-                    throw new Exception("Failed to prepare statement: " . $connection->error);
+                $result = mysqli_query($connection, $sql);
+                if (!$result) { // error
+                    throw new Exception("Failed to execute deletion: " . mysqli_error($connection));
                 }
-                
-                $stmt->bind_param("i", $userIDToDelete);
-                $result = $stmt->execute();
-                
-                if (!$result) {
-                    throw new Exception("Failed to execute deletion: " . $stmt->error);
-                }
-                $stmt->close();
             }
             
-            // Check if user was actually deleted
-            $checkStmt = $connection->prepare("SELECT COUNT(*) as count FROM tblusers WHERE userID = ?");
-            $checkStmt->bind_param("i", $userIDToDelete);
-            $checkStmt->execute();
-            $checkResult = $checkStmt->get_result();
-            $userStillExists = $checkResult->fetch_assoc()['count'] > 0;
-            $checkStmt->close();
-            
+            // to check if user was actually deleted
+            $checkQuery = "SELECT COUNT(*) as count FROM tblusers WHERE userID = $userIDToDelete";
+            $checkResult = mysqli_query($connection, $checkQuery);
+            if ($checkResult && mysqli_num_rows($checkResult) > 0) {
+                $checkData = mysqli_fetch_assoc($checkResult);
+                $userStillExists = $checkData['count'] > 0;
+            } else {
+                $userStillExists = true;
+            }
             if ($userStillExists) {
                 throw new Exception("User deletion failed - user still exists in database");
             }
             
-            // Commit transaction if all operations succeeded
-            $connection->commit();
+            // save all changes to database if delete success
+            mysqli_commit($connection);
             $success = "User and all associated data deleted successfully!";
             if (!empty($deletedFiles)) {
-                $success .= " Deleted " . count($deletedFiles) . " event banner files.";
+                // show if uploads is actually deleted
+                $success .= " Deleted " . count($deletedFiles) . "event banner and trade listing files.";
             }
             
         } catch (Exception $e) {
-            // Rollback transaction on any error
-            $connection->rollback();
+            // undo changes if there's any error
+            mysqli_rollback($connection);
             $error = "Error deleting user: " . $e->getMessage();
             $deleteSuccess = false;
             
             error_log("User deletion error for userID $userIDToDelete: " . $e->getMessage());
         }
         
-        // verify connection is still alive
-        if (!$connection->ping()) {
+        // back to default
+        mysqli_autocommit($connection, true);
+        // check database connection
+        if (!mysqli_ping($connection)) {
             $error = "Database connection lost during deletion. Please check if user was deleted.";
             $deleteSuccess = false;
         }
     }
-}
 
-// Fetch all users with search functionality
-$searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
-$users = [];
-$totalUsers = 0;
-try {
-    // Build the base query
+    $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
+    $users = [];
+    $totalUsers = 0;
+    // fetch all users
     $query = "SELECT userID, fullName, username, email, gender, country, userType, point, createdAt, lastLogin 
-              FROM tblusers 
-              WHERE userType = 'member'";
+            FROM tblusers 
+            WHERE userType = 'member'";
 
     if (!empty($searchTerm)) {
-        $query .= " AND (fullName LIKE ? OR username LIKE ? OR email LIKE ? OR country LIKE ?)";
+        $searchValue = "%$searchTerm%";
+        // if searching, add into query
+        $query .= " AND (fullName LIKE '$searchValue' OR username LIKE '$searchValue' 
+                    OR email LIKE '$searchValue' OR country LIKE '$searchValue')";
     }
-
+    // order by latest
     $query .= " ORDER BY createdAt DESC";
 
-    // Prepare statement
-    $stmt = $connection->prepare($query);
-    if (!$stmt) {
-        throw new Exception("Failed to prepare user query: " . $connection->error);
-    }
-
-    // Bind parameters if search term exists
-    if (!empty($searchTerm)) {
-        $searchParam = "%$searchTerm%";
-        $bindResult = $stmt->bind_param("ssss", $searchParam, $searchParam, $searchParam, $searchParam);
-        if (!$bindResult) {
-            throw new Exception("Failed to bind search parameters: " . $stmt->error);
+    // run query
+    $result = mysqli_query($connection, $query);
+    if ($result) {
+        $users = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $users[] = $row;
         }
+    } else {
+        error_log("User query failed: " . mysqli_error($connection));
+        $error = "Unable to load user data. Please try again.";
+        $users = [];
     }
-
-    // Execute query
-    $executeResult = $stmt->execute();
-    if (!$executeResult) {
-        throw new Exception("Failed to execute user query: " . $stmt->error);
-    }
-
-    // Get results
-    $result = $stmt->get_result();
-    if (!$result) {
-        throw new Exception("Failed to get result set: " . $stmt->error);
-    }
-
-    $users = $result->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
 
     // Get total user count
     $totalQuery = "SELECT COUNT(*) as total FROM tblusers WHERE userType = 'member'";
-    $totalStmt = $connection->prepare($totalQuery);
-    if (!$totalStmt) {
-        throw new Exception("Failed to prepare count query: " . $connection->error);
+    $totalResult = mysqli_query($connection, $totalQuery);
+    if ($totalResult && mysqli_num_rows($totalResult) > 0) {
+        $totalData = mysqli_fetch_assoc($totalResult);
+        $totalUsers = $totalData['total'] ?? 0;
+    } else {
+        $totalUsers = 0;
+        if (!$totalResult) {
+            error_log("Total users query failed: " . mysqli_error($connection));
+        }
     }
-
-    $executeResult = $totalStmt->execute();
-    if (!$executeResult) {
-        throw new Exception("Failed to execute count query: " . $totalStmt->error);
-    }
-
-    $totalResult = $totalStmt->get_result();
-    if (!$totalResult) {
-        throw new Exception("Failed to get count result: " . $totalStmt->error);
-    }
-
-    $totalData = $totalResult->fetch_assoc();
-    $totalUsers = $totalData['total'] ?? 0;
-    $totalStmt->close();
-
-} catch (Exception $e) {
-    error_log("Database query error: " . $e->getMessage());
-    
-    // Set default values on error
-    $users = [];
-    $totalUsers = 0;
-    
-    $error = "Unable to load user data. Please try again.";
-    
-    // Clean up any open statements
-    if (isset($stmt) && $stmt) {
-        $stmt->close();
-    }
-    if (isset($totalStmt) && $totalStmt) {
-        $totalStmt->close();
-    }
-}
-
-// Connection check
-if (!$connection->ping()) {
-    $error = "Database connection issue. Please refresh the page.";
-    $users = [];
-    $totalUsers = 0;
-}
 ?>
 
 <!DOCTYPE html>
@@ -666,13 +621,13 @@ if (!$connection->ping()) {
                 <p class="user-count">Total Users: <?php echo number_format($totalUsers); ?></p>
             </div>
 
-            <?php if (isset($success)): ?>
+            <?php if (isset($success)) { ?>
                 <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
-            <?php endif; ?>
+            <?php } ?>
 
-            <?php if (isset($error)): ?>
+            <?php if (isset($error)) { ?>
                 <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
-            <?php endif; ?>
+            <?php } ?>
 
             <div class="search-section">
                 <form method="GET" class="search-form">
@@ -680,14 +635,14 @@ if (!$connection->ping()) {
                         placeholder="Search by name, username, email, or country..." 
                         value="<?php echo htmlspecialchars($searchTerm); ?>" >
                     <button type="submit" class="search-btn">Search</button>
-                    <?php if (!empty($searchTerm)): ?>
+                    <?php if (!empty($searchTerm)) { ?>
                         <a href="../../pages/adminPages/aManageUser.php" class="clear-btn">Clear</a>
-                    <?php endif; ?>
+                    <?php } ?>
                 </form>
             </div>
 
             <div class="users-table-container">
-                <?php if (count($users) > 0): ?>
+                <?php if (count($users) > 0) { ?>
                     <table class="users-table">
                         <thead>
                             <tr>
@@ -738,18 +693,18 @@ if (!$connection->ping()) {
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                <?php else: ?>
+                <?php } else { ?>
                     <div class="empty-state">
                         <h3>No users found</h3>
                         <p>
-                            <?php if (!empty($searchTerm)): ?>
+                            <?php if (!empty($searchTerm)) { ?>
                                 No users match your search criteria. Try a different search term.
-                            <?php else: ?>
+                            <?php } else { ?>
                                 There are currently no users in the system.
-                            <?php endif; ?>
+                            <?php } ?>
                         </p>
                     </div>
-                <?php endif; ?>
+                <?php } ?>
             </div>
         </div>
     </main>

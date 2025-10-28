@@ -1,110 +1,90 @@
 <?php
-session_start();
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    session_start();
+    include("../../php/dbConn.php");
+    include("../../php/sessionCheck.php");
 
-// Initialize variables
-$filterMode = isset($_GET['mode']) ? (array)$_GET['mode'] : [];
-$filterType = isset($_GET['type']) ? (array)$_GET['type'] : [];
-$filterStatus = isset($_GET['status']) ? (array)$_GET['status'] : [];
-$sortBy = isset($_GET['sortBy']) ? $_GET['sortBy'] : 'newest';
-$searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
-$events = [];
-$eventCount = 0;
-
-// Auto-close expired events
-$autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
-if (!$connection->query($autoCloseQuery)) {
-    error_log("Auto-close events failed: " . $connection->error);
-}
-
-$query = "SELECT * FROM tblevents WHERE 1=1";
-$params = [];
-$types = "";
-
-// Apply search filter
-if (!empty($searchQuery)) {
-    $query .= " AND (title LIKE ? OR description LIKE ? OR location LIKE ?)";
-    $searchParam = "%{$searchQuery}%";
-    $params = array_merge($params, [$searchParam, $searchParam, $searchParam]);
-    $types .= "sss";
-}
-
-// Apply filters with validation
-$validModes = ['online', 'physical', 'hybrid'];
-$validTypes = ['clean-up', 'workshop', 'tree-planting', 'campaign', 'talk', 'seminar', 'competition', 'other'];
-$validStatuses = ['open', 'closed'];
-
-if (!empty($filterMode)) {
-    $filterMode = array_intersect($filterMode, $validModes);
-    if (!empty($filterMode)) {
-        $placeholders = implode(',', array_fill(0, count($filterMode), '?'));
-        $query .= " AND mode IN ($placeholders)";
-        $params = array_merge($params, $filterMode);
-        $types .= str_repeat('s', count($filterMode));
+    // update event status first
+    $autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
+    if (!mysqli_query($connection, $autoCloseQuery)) {
+        error_log("Auto-close query failed: " . mysqli_error($connection));
     }
-}
 
-if (!empty($filterType)) {
-    $filterType = array_intersect($filterType, $validTypes);
-    if (!empty($filterType)) {
-        $placeholders = implode(',', array_fill(0, count($filterType), '?'));
-        $query .= " AND type IN ($placeholders)";
-        $params = array_merge($params, $filterType);
-        $types .= str_repeat('s', count($filterType));
+    // initialize variables
+    $filterMode = isset($_GET['mode']) ? (array)$_GET['mode'] : [];
+    $filterType = isset($_GET['type']) ? (array)$_GET['type'] : [];
+    $filterStatus = isset($_GET['status']) ? (array)$_GET['status'] : [];
+    $sortBy = isset($_GET['sortBy']) ? $_GET['sortBy'] : 'newest';
+    $searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
+    $events = [];
+    $eventCount = 0;
+
+    // base query, 1=1 so combining queries is easier
+    $query = "SELECT * FROM tblevents WHERE 1=1";
+
+    // apply search filter
+    if (!empty($searchQuery)) {
+        $query .= " AND (title LIKE '%$searchQuery%' OR description LIKE '%$searchQuery%' OR location LIKE '%$searchQuery%')";
     }
-}
 
-if (!empty($filterStatus)) {
-    $filterStatus = array_intersect($filterStatus, $validStatuses);
-    if (!empty($filterStatus)) {
-        $placeholders = implode(',', array_fill(0, count($filterStatus), '?'));
-        $query .= " AND status IN ($placeholders)";
-        $params = array_merge($params, $filterStatus);
-        $types .= str_repeat('s', count($filterStatus));
-    }
-}
-
-// Apply sorting with validation
-$validSortOptions = ['newest', 'oldest', 'popular', 'date'];
-$sortBy = in_array($sortBy, $validSortOptions) ? $sortBy : 'newest';
-
-switch($sortBy) {
-    case 'oldest':
-        $query .= " ORDER BY eventID ASC";
-        break;
-    case 'popular':
-        $query .= " ORDER BY maxPax DESC";
-        break;
-    case 'date':
-        $query .= " ORDER BY startDate ASC";
-        break;
-    case 'newest':
-    default:
-        $query .= " ORDER BY eventID DESC";
-        break;
-}
-
-if ($stmt = $connection->prepare($query)) {
-    if (!empty($params)) {
-        $stmt->bind_param($types, ...$params);
-    }
+    // apply filters with validation
+    $validModes = ['online', 'physical', 'hybrid'];
+    $validTypes = ['clean-up', 'workshop', 'tree-planting', 'campaign', 'talk', 'seminar', 'competition', 'other'];
+    $validStatuses = ['open', 'closed'];
     
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        $events = $result->fetch_all(MYSQLI_ASSOC);
+    // add filter if any filter selected
+    if (!empty($filterMode)) {
+        $filterMode = array_intersect($filterMode, $validModes);
+        if (!empty($filterMode)) {
+            $modeList = "'" . implode("','", $filterMode) . "'";
+            $query .= " AND mode IN ($modeList)";
+        }
+    }
+    if (!empty($filterType)) {
+        $filterType = array_intersect($filterType, $validTypes);
+        if (!empty($filterType)) {
+            $typeList = "'" . implode("','", $filterType) . "'";
+            $query .= " AND type IN ($typeList)";
+        }
+    }
+    if (!empty($filterStatus)) {
+        $filterStatus = array_intersect($filterStatus, $validStatuses);
+        if (!empty($filterStatus)) {
+            $statusList = "'" . implode("','", $filterStatus) . "'";
+            $query .= " AND status IN ($statusList)";
+        }
+    }
+
+    // apply sorting with validation
+    $validSortOptions = ['newest', 'oldest', 'popular', 'date'];
+    $sortBy = in_array($sortBy, $validSortOptions) ? $sortBy : 'newest';
+
+    switch($sortBy) {
+        case 'oldest':
+            $query .= " ORDER BY eventID ASC";
+            break;
+        case 'popular':
+            $query .= " ORDER BY maxPax DESC";
+            break;
+        case 'date':
+            $query .= " ORDER BY startDate ASC";
+            break;
+        case 'newest':
+        default:
+            $query .= " ORDER BY eventID DESC";
+            break;
+    }
+
+    // run final query
+    $result = mysqli_query($connection, $query);
+    if ($result && mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $events[] = $row;
+        }
         $eventCount = count($events);
     } else {
-        error_log("Event query execution failed: " . $stmt->error);
         $events = [];
         $eventCount = 0;
     }
-    $stmt->close();
-} else {
-    error_log("Event query preparation failed: " . $connection->error);
-    $events = [];
-    $eventCount = 0;
-}
 ?>
 
 <!DOCTYPE html>
@@ -712,8 +692,8 @@ if ($stmt = $connection->prepare($query)) {
                 <a href="../../pages/adminPages/aManageEvent.php" class="c-btn c-btn-primary top-btn">Manage Events</a>
             <?php else: ?>
                 <div class="btn-left-group">
-                    <a href="../../pages/CommonPages/createEvent.php" class="c-btn c-btn-primary top-btn">Host an Event</a>
-                    <a href="../../pages/CommonPages/myEvents.php" class="c-btn c-btn-primary top-btn">My Events</a>
+                    <a href="../../pages/MemberPages/createEvent.php" class="c-btn c-btn-primary top-btn">Host an Event</a>
+                    <a href="../../pages/MemberPages/myEvents.php" class="c-btn c-btn-primary top-btn">My Events</a>
                 </div>                
             <?php endif; ?>
             <button class="c-btn c-btn-primary top-btn filter-toggle" onclick="toggleFilters()">Show Filters</button>

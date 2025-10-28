@@ -1,75 +1,77 @@
 <?php
-include("../../php/dbConn.php");
-include("../../php/sessionCheck.php");
+    include("../../php/dbConn.php");
+    include("../../php/sessionCheck.php");
 
+    // add / edit for admin
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+        header('Content-Type: application/json');
+        // verify this is admin
+        if (!$isAdmin) {
+            // display error
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+        $action = $_POST['action'];
+        // add FAQ
+        if ($action === 'add') {
+            $category = $_POST['category'];
+            $question = $_POST['question'];
+            $answer = $_POST['answer'];
+            
+            $sql = "INSERT INTO tblfaq (category, question, answer) VALUES ('$category', '$question', '$answer')";
+            $result = mysqli_query($connection, $sql);
+            // display result
+            echo json_encode(['success' => $result, 'message' => $result ? 'FAQ added successfully' : 'Failed to add FAQ']);
+            exit;
+        }
+        // edit FAQ
+        if ($action === 'update') {
+            $faqID = $_POST['faqID'];
+            $category = $_POST['category'];
+            $question = $_POST['question'];
+            $answer = $_POST['answer'];
+            
+            $sql = "UPDATE tblfaq SET category='$category', question='$question', answer='$answer' WHERE faqID=$faqID";
+            $result = mysqli_query($connection, $sql);
+            // display result
+            echo json_encode(['success' => $result, 'message' => $result ? 'FAQ updated successfully' : 'Failed to update FAQ']);
+            exit;
+        }
+        // delete FAQ
+        if ($action === 'delete') {
+            $faqID = $_POST['faqID'];
+            
+            $sql = "DELETE FROM tblfaq WHERE faqID=$faqID";
+            $result = mysqli_query($connection, $sql);
+            // display result
+            echo json_encode(['success' => $result, 'message' => $result ? 'FAQ deleted successfully' : 'Failed to delete FAQ']);
+            exit;
+        }
+        // when editing FAQ, u need to get data
+        if ($action === 'get') {
+            $faqID = $_POST['faqID'];
+            
+            $sql = "SELECT * FROM tblfaq WHERE faqID=$faqID";
+            $result = mysqli_query($connection, $sql);
+            $faq = mysqli_fetch_assoc($result);
+            // display result
+            echo json_encode(['success' => true, 'faq' => $faq]);
+            exit;
+        }
+    }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    header('Content-Type: application/json');
-    
-    if (!$isAdmin) {
-        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-        exit;
-    }
-    $action = $_POST['action'];
-    if ($action === 'add') {
-        $category = mysqli_real_escape_string($connection, $_POST['category']);
-        $question = mysqli_real_escape_string($connection, $_POST['question']);
-        $answer = mysqli_real_escape_string($connection, $_POST['answer']);
-        
-        $sql = "INSERT INTO tblfaq (category, question, answer) VALUES ('$category', '$question', '$answer')";
-        $result = mysqli_query($connection, $sql);
-        
-        echo json_encode(['success' => $result, 'message' => $result ? 'FAQ added successfully' : 'Failed to add FAQ']);
-        exit;
-    }
-    
-    if ($action === 'update') {
-        $faqID = intval($_POST['faqID']);
-        $category = mysqli_real_escape_string($connection, $_POST['category']);
-        $question = mysqli_real_escape_string($connection, $_POST['question']);
-        $answer = mysqli_real_escape_string($connection, $_POST['answer']);
-        
-        $sql = "UPDATE tblfaq SET category='$category', question='$question', answer='$answer' WHERE faqID=$faqID";
-        $result = mysqli_query($connection, $sql);
-        
-        echo json_encode(['success' => $result, 'message' => $result ? 'FAQ updated successfully' : 'Failed to update FAQ']);
-        exit;
-    }
-    
-    if ($action === 'delete') {
-        $faqID = intval($_POST['faqID']);
-        
-        $sql = "DELETE FROM tblfaq WHERE faqID=$faqID";
-        $result = mysqli_query($connection, $sql);
-        
-        echo json_encode(['success' => $result, 'message' => $result ? 'FAQ deleted successfully' : 'Failed to delete FAQ']);
-        exit;
-    }
-    
-    if ($action === 'get') {
-        $faqID = intval($_POST['faqID']);
-        
-        $sql = "SELECT * FROM tblfaq WHERE faqID=$faqID";
-        $result = mysqli_query($connection, $sql);
-        $faq = mysqli_fetch_assoc($result);
-        
-        echo json_encode(['success' => true, 'faq' => $faq]);
-        exit;
-    }
-}
+    // get all FAQ grouped by category
+    $sql = "SELECT * FROM tblfaq ORDER BY category, faqID";
+    $result = mysqli_query($connection, $sql);
 
-// Fetch all FAQs grouped by category
-$sql = "SELECT * FROM tblfaq ORDER BY category, faqID";
-$result = mysqli_query($connection, $sql);
-
-$faqsByCategory = [];
-while ($row = mysqli_fetch_assoc($result)) {
-    $category = $row['category'];
-    if (!isset($faqsByCategory[$category])) {
-        $faqsByCategory[$category] = [];
+    $faqsByCategory = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $category = $row['category'];
+        if (!isset($faqsByCategory[$category])) {
+            $faqsByCategory[$category] = [];
+        }
+        $faqsByCategory[$category][] = $row;
     }
-    $faqsByCategory[$category][] = $row;
-}
 ?>
 
 <!DOCTYPE html>
@@ -709,7 +711,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <?php foreach ($faqsByCategory as $category => $faqs): ?>
                 <div class="faq-category">
                     <h2 class="category-title"><?php echo htmlspecialchars($category); ?></h2>
-                    
+                    <!-- FAQ content -->
                     <?php foreach ($faqs as $faq): ?>
                     <div class="faq-item" data-faq-id="<?php echo $faq['faqID']; ?>">
                         <?php if ($isAdmin): ?>
@@ -731,13 +733,14 @@ while ($row = mysqli_fetch_assoc($result)) {
                 </div>
                 <?php endforeach; ?>
                 
+                <!-- Contact Support for members -->
                 <?php if (!$isAdmin): ?>         
-                <!-- Call to Action -->
-                <div class="faq-cta" id="faqCta">
-                    <h2>Still have questions?</h2>
-                    <p>Our team is here to help you get the most out of ReLeaf</p>
-                    <a href="../../pages/MemberPages/mContactSupport.php" class="c-btn c-btn-primary cta-button">Contact Support</a>
-                </div>
+                    <!-- Call to Action -->
+                    <div class="faq-cta" id="faqCta">
+                        <h2>Still have questions?</h2>
+                        <p>Our team is here to help you get the most out of ReLeaf</p>
+                        <a href="../../pages/MemberPages/mContactSupport.php" class="c-btn c-btn-primary cta-button">Contact Support</a>
+                    </div>
                 <?php endif; ?>
             </div>
 
@@ -876,210 +879,211 @@ while ($row = mysqli_fetch_assoc($result)) {
             });
         });
 
+        // only admins can add, edit, delete
         <?php if ($isAdmin): ?>
-        // Character counter functionality
-        const questionInput = document.getElementById('questionInput');
-        const answerInput = document.getElementById('answerInput');
-        const questionCount = document.getElementById('questionCount');
-        const answerCount = document.getElementById('answerCount');
+            // character counter functionality
+            const questionInput = document.getElementById('questionInput');
+            const answerInput = document.getElementById('answerInput');
+            const questionCount = document.getElementById('questionCount');
+            const answerCount = document.getElementById('answerCount');
 
-        if (questionInput && answerInput) {
-            questionInput.addEventListener('input', () => {
-                questionCount.textContent = questionInput.value.length;
-            });
+            if (questionInput && answerInput) {
+                questionInput.addEventListener('input', () => {
+                    questionCount.textContent = questionInput.value.length;
+                });
 
-            answerInput.addEventListener('input', () => {
-                answerCount.textContent = answerInput.value.length;
-            });
-        }
+                answerInput.addEventListener('input', () => {
+                    answerCount.textContent = answerInput.value.length;
+                });
+            }
 
-        // Admin Panel Functions
-        function toggleAdminPanel() {
-            const container = document.getElementById('faqContainer');
-            const panel = document.getElementById('adminPanel');
-            const header = document.getElementById('faqHeader');
-            const fab = document.getElementById('adminFab');
-            
-            if (!container || !panel) return;
-            
-            container.classList.toggle('admin-layout');
-            panel.classList.toggle('active');
-            
-            // Update FAB text
-            if (fab) {
+            // admin Panel Functions
+            function toggleAdminPanel() {
+                const container = document.getElementById('faqContainer');
+                const panel = document.getElementById('adminPanel');
+                const header = document.getElementById('faqHeader');
+                const fab = document.getElementById('adminFab');
+                
+                if (!container || !panel) return;
+                
+                container.classList.toggle('admin-layout');
+                panel.classList.toggle('active');
+                
+                // Update FAB text
+                if (fab) {
+                    if (panel.classList.contains('active')) {
+                        fab.innerHTML = '<img src="../../assets/images/icon-menu-close.svg" alt="close-icon">';
+                    } else {
+                        fab.innerHTML = '<img src="../../assets/images/edit-icon-light.svg" alt="edit-icon">';
+                    }
+                }
+                
+                // hide header when in edit mode
                 if (panel.classList.contains('active')) {
-                    fab.innerHTML = '<img src="../../assets/images/icon-menu-close.svg" alt="close-icon">';
+                    if (header) header.style.display = 'none';
+                    // Scroll panel into view on mobile
+                    if (window.innerWidth <= 1024) {
+                        setTimeout(() => {
+                            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 300);
+                    }
                 } else {
-                    fab.innerHTML = '<img src="../../assets/images/edit-icon-light.svg" alt="edit-icon">';
+                    if (header) header.style.display = 'block';
+                    resetForm();
                 }
             }
-            
-            // Hide header when in edit mode
-            if (panel.classList.contains('active')) {
-                if (header) header.style.display = 'none';
-                // Scroll panel into view on mobile
-                if (window.innerWidth <= 1024) {
-                    setTimeout(() => {
-                        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 300);
-                }
-            } else {
-                if (header) header.style.display = 'block';
-                resetForm();
-            }
-        }
 
-        function showAlert(message, type) {
-            const alertContainer = document.getElementById('alertContainer');
-            if (!alertContainer) return;
-            
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.textContent = message;
-            
-            alertContainer.innerHTML = '';
-            alertContainer.appendChild(alert);
-            
-            setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.remove();
-                }
-            }, 3000);
-        }
-
-        function resetForm() {
-            const form = document.getElementById('faqForm');
-            const panelTitle = document.getElementById('panelTitle');
-            const alertContainer = document.getElementById('alertContainer');
-            
-            if (form) form.reset();
-            if (document.getElementById('faqID')) document.getElementById('faqID').value = '';
-            if (panelTitle) panelTitle.textContent = 'Add New FAQ';
-            if (alertContainer) alertContainer.innerHTML = '';
-            if (questionCount) questionCount.textContent = '0';
-            if (answerCount) answerCount.textContent = '0';
-        }
-
-        async function saveFAQ() {
-            const faqID = document.getElementById('faqID')?.value || '';
-            const category = document.getElementById('categorySelect')?.value;
-            const question = document.getElementById('questionInput')?.value;
-            const answer = document.getElementById('answerInput')?.value;
-
-            if (!category || !question || !answer) {
-                showAlert('Please fill in all required fields', 'error');
-                return;
+            function showAlert(message, type) {
+                const alertContainer = document.getElementById('alertContainer');
+                if (!alertContainer) return;
+                
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type}`;
+                alert.textContent = message;
+                
+                alertContainer.innerHTML = '';
+                alertContainer.appendChild(alert);
+                
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 3000);
             }
 
-            const formData = new FormData();
-            formData.append('action', faqID ? 'update' : 'add');
-            formData.append('category', category);
-            formData.append('question', question);
-            formData.append('answer', answer);
-            if (faqID) formData.append('faqID', faqID);
-
-            try {
-                const response = await fetch(window.location.href, {
-                    method: 'POST',
-                    body: formData
-                });
+            function resetForm() {
+                const form = document.getElementById('faqForm');
+                const panelTitle = document.getElementById('panelTitle');
+                const alertContainer = document.getElementById('alertContainer');
                 
-                const result = await response.json();
-                
-                if (result.success) {
-                    showAlert(result.message, 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 3000);
-                } else {
-                    showAlert(result.message, 'error');
-                }
-            } catch (error) {
-                showAlert('An error occurred. Please try again.', 'error');
+                if (form) form.reset();
+                if (document.getElementById('faqID')) document.getElementById('faqID').value = '';
+                if (panelTitle) panelTitle.textContent = 'Add New FAQ';
+                if (alertContainer) alertContainer.innerHTML = '';
+                if (questionCount) questionCount.textContent = '0';
+                if (answerCount) answerCount.textContent = '0';
             }
-        }
 
-        async function editFAQ(faqID) {
-            const formData = new FormData();
-            formData.append('action', 'get');
-            formData.append('faqID', faqID);
+            async function saveFAQ() {
+                const faqID = document.getElementById('faqID')?.value || '';
+                const category = document.getElementById('categorySelect')?.value;
+                const question = document.getElementById('questionInput')?.value;
+                const answer = document.getElementById('answerInput')?.value;
 
-            try {
-                const response = await fetch(window.location.href, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (result.success && result.faq) {
-                    const faq = result.faq;
+                if (!category || !question || !answer) {
+                    showAlert('Please fill in all required fields', 'error');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('action', faqID ? 'update' : 'add');
+                formData.append('category', category);
+                formData.append('question', question);
+                formData.append('answer', answer);
+                if (faqID) formData.append('faqID', faqID);
+
+                try {
+                    const response = await fetch(window.location.href, {
+                        method: 'POST',
+                        body: formData
+                    });
                     
-                    // Show admin panel if not visible
-                    const container = document.getElementById('faqContainer');
-                    const panel = document.getElementById('adminPanel');
+                    const result = await response.json();
                     
-                    if (container && panel && !panel.classList.contains('active')) {
-                        container.classList.add('admin-layout');
-                        panel.classList.add('active');
+                    if (result.success) {
+                        showAlert(result.message, 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3000);
+                    } else {
+                        showAlert(result.message, 'error');
+                    }
+                } catch (error) {
+                    showAlert('An error occurred. Please try again.', 'error');
+                }
+            }
+
+            async function editFAQ(faqID) {
+                const formData = new FormData();
+                formData.append('action', 'get');
+                formData.append('faqID', faqID);
+
+                try {
+                    const response = await fetch(window.location.href, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success && result.faq) {
+                        const faq = result.faq;
                         
-                        // Update FAB
-                        const fab = document.getElementById('adminFab');
-                        if (fab) {
-                            fab.innerHTML = '<img src="../../assets/images/close-icon-light.svg" alt="close-icon">';
+                        // Show admin panel if not visible
+                        const container = document.getElementById('faqContainer');
+                        const panel = document.getElementById('adminPanel');
+                        
+                        if (container && panel && !panel.classList.contains('active')) {
+                            container.classList.add('admin-layout');
+                            panel.classList.add('active');
+                            
+                            // Update FAB
+                            const fab = document.getElementById('adminFab');
+                            if (fab) {
+                                fab.innerHTML = '<img src="../../assets/images/close-icon-light.svg" alt="close-icon">';
+                            }
+                        }
+                        
+                        // Populate form
+                        if (document.getElementById('faqID')) document.getElementById('faqID').value = faq.faqID;
+                        if (document.getElementById('categorySelect')) document.getElementById('categorySelect').value = faq.category;
+                        if (document.getElementById('questionInput')) document.getElementById('questionInput').value = faq.question;
+                        if (document.getElementById('answerInput')) document.getElementById('answerInput').value = faq.answer;
+                        if (document.getElementById('panelTitle')) document.getElementById('panelTitle').textContent = 'Edit FAQ';
+                        
+                        // Update character counters
+                        if (questionCount) questionCount.textContent = faq.question.length;
+                        if (answerCount) answerCount.textContent = faq.answer.length;
+                        
+                        // Scroll to panel
+                        if (panel) {
+                            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }
                     }
+                } catch (error) {
+                    showAlert('Failed to load FAQ details', 'error');
+                }
+            }
+
+            async function deleteFAQ(faqID) {
+                if (!confirm('Are you sure you want to delete this FAQ? This action cannot be undone.')) {
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('action', 'delete');
+                formData.append('faqID', faqID);
+
+                try {
+                    const response = await fetch(window.location.href, {
+                        method: 'POST',
+                        body: formData
+                    });
                     
-                    // Populate form
-                    if (document.getElementById('faqID')) document.getElementById('faqID').value = faq.faqID;
-                    if (document.getElementById('categorySelect')) document.getElementById('categorySelect').value = faq.category;
-                    if (document.getElementById('questionInput')) document.getElementById('questionInput').value = faq.question;
-                    if (document.getElementById('answerInput')) document.getElementById('answerInput').value = faq.answer;
-                    if (document.getElementById('panelTitle')) document.getElementById('panelTitle').textContent = 'Edit FAQ';
+                    const result = await response.json();
                     
-                    // Update character counters
-                    if (questionCount) questionCount.textContent = faq.question.length;
-                    if (answerCount) answerCount.textContent = faq.answer.length;
-                    
-                    // Scroll to panel
-                    if (panel) {
-                        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    if (result.success) {
+                        showAlert(result.message, 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert(result.message, 'error');
                     }
+                } catch (error) {
+                    showAlert('An error occurred. Please try again.', 'error');
                 }
-            } catch (error) {
-                showAlert('Failed to load FAQ details', 'error');
             }
-        }
-
-        async function deleteFAQ(faqID) {
-            if (!confirm('Are you sure you want to delete this FAQ? This action cannot be undone.')) {
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('action', 'delete');
-            formData.append('faqID', faqID);
-
-            try {
-                const response = await fetch(window.location.href, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showAlert(result.message, 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showAlert(result.message, 'error');
-                }
-            } catch (error) {
-                showAlert('An error occurred. Please try again.', 'error');
-            }
-        }
         <?php endif; ?>
     </script>
 </body>
