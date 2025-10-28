@@ -153,9 +153,9 @@
             $errors['description'] = "Description cannot exceed 2000 characters";
         }
 
-        $today = date('Y-m-d');
-        if (empty($startDate) || $startDate < $today) {
-            $errors['startDate'] = "Start date cannot be in the past";
+        $tomorrow = date('Y-m-d', strtotime('+1 day'));
+        if (empty($startDate) || $startDate < $tomorrow) {
+            $errors['startDate'] = "Start date must be tomorrow or later";
         }
         
         if (empty($endDate) || $endDate < $startDate) {
@@ -1105,14 +1105,12 @@
                 }
             });
 
-            // Set minimum date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDate').min = today;
-            
-            // Update end date min when start date changes
-            document.getElementById('startDate').addEventListener('change', function() {
-                document.getElementById('endDate').min = this.value;
-            });
+            // Set minimum date to tomorrow
+            const today = new Date(); // date object for current date
+            today.setDate(today.getDate() + 1); // date object for tomorrow
+            const tomorrow = today.toISOString().split('T')[0]; // convert to string
+            document.getElementById('startDate').min = tomorrow;
+            document.getElementById('endDate').min = tomorrow;
 
             // Auto-hide success message after 5 seconds
             const successMessage = document.querySelector('.success-message');

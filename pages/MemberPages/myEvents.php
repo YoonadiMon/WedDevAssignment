@@ -10,7 +10,7 @@
     }
 
     // update event status first
-    $autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate < CURDATE() AND status NOT IN ('cancelled', 'closed')";
+    $autoCloseQuery = "UPDATE tblevents SET status = 'closed' WHERE endDate <= CURDATE() AND status NOT IN ('cancelled', 'closed')";
     if (!mysqli_query($connection, $autoCloseQuery)) {
         error_log("Auto-close query failed: " . mysqli_error($connection));
     }
