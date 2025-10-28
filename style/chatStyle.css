@@ -746,6 +746,18 @@ body {
     height: 24px;
 }
 
+/* for deleted user chat history */
+.conversation-form.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.trade-form-button:disabled,
+.conversation-form-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
 .trade-form-button {
     width: 2.75rem;
     height: 2.75rem;

@@ -196,19 +196,21 @@ if ($conversationID > 0) {
     if ($convResult && mysqli_num_rows($convResult) > 0) {
         $conv = mysqli_fetch_assoc($convResult);
         
-        // Determine other user
+        // Determine other user and check if is deleted
         if ($conv['user1ID'] == $userID) {
             $otherUser = [
                 'id' => $conv['user2ID'],
                 'name' => $conv['user2Name'] ?: 'Deleted User',
                 'fullName' => $conv['user2FullName'] ?: 'Deleted User'
             ];
+            $isOtherUserDeleted = ($conv['user2Name'] === null);
         } else {
             $otherUser = [
                 'id' => $conv['user1ID'],
                 'name' => $conv['user1Name'] ?: 'Deleted User',
                 'fullName' => $conv['user1FullName'] ?: 'Deleted User'
             ];
+            $isOtherUserDeleted = ($conv['user1Name'] === null);
         }
         
         $messagesQuery = "SELECT m.*, 
@@ -643,8 +645,13 @@ foreach ($conversations as $conv) {
                     </div>
                                                                 
                     <?php if ($conversationID > 0 || $temporaryChat): ?>
-                        <div class="conversation-form">
-                            <button type="button" class="trade-form-button" onclick="openTradeModal()" title="Trade">
+                        <?php 
+                            // For temporary chat, user is not deleted since we just looked them up
+                            $isFormDisabled = ($conversationID > 0 && isset($isOtherUserDeleted) && $isOtherUserDeleted);
+                        ?>
+                        <div class="conversation-form <?php echo $isFormDisabled ? 'disabled' : ''; ?>">
+                            <button type="button" class="trade-form-button" onclick="openTradeModal()" title="Trade" 
+                                    <?php echo $isFormDisabled ? 'disabled' : ''; ?>>
                                 <span class="trade-icon"></span>
                             </button>
                             
@@ -656,11 +663,13 @@ foreach ($conversations as $conv) {
                                     <textarea class="conversation-form-input" 
                                             name="message" 
                                             rows="1" 
-                                            placeholder="Type your message..."
+                                            placeholder="<?php echo $isFormDisabled ? 'Cannot message deleted user' : 'Type your message...'; ?>"
+                                            <?php echo $isFormDisabled ? 'disabled' : ''; ?>
                                             required></textarea>
                                 </div>
                                 
-                                <button type="submit" name="send_message" class="conversation-form-button">
+                                <button type="submit" name="send_message" class="conversation-form-button"
+                                        <?php echo $isFormDisabled ? 'disabled' : ''; ?>>
                                     <img src="../../assets/images/send-icon.svg" alt="send"/>
                                 </button>
                             </form>
@@ -681,6 +690,12 @@ foreach ($conversations as $conv) {
 
         // Trade Modal Functions
         function openTradeModal() {
+            // Check if form is disabled (user deleted)
+            const conversationForm = document.querySelector('.conversation-form');
+            if (conversationForm && conversationForm.classList.contains('disabled')) {
+                showAlert('Cannot trade with deleted user', 'error');
+                return;
+            }
             document.getElementById('tradeModalOverlay').classList.add('active');
             showChoiceScreen();
         }
