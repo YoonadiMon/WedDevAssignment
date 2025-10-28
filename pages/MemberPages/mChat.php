@@ -564,15 +564,15 @@ foreach ($conversations as $conv) {
                                                             
                                                             <!-- Action buttons -->
                                                             <div class="trade-request-actions">
-                                                                <?php if ($requestData['isCancelledDueToDeletion']): ?>
-                                                                    <button class="trade-btn-disabled" disabled>This offer/request is cancelled</button>
-                                                                <?php elseif ($requestData['status'] === 'accepted'): ?>
+                                                                <?php if ($requestData['status'] === 'accepted'): ?>
                                                                     <button class="trade-btn-disabled" disabled>Accepted</button>
                                                                 <?php elseif ($requestData['status'] === 'declined'): ?>
                                                                     <button class="trade-btn-disabled" disabled>Declined</button>
                                                                 <?php elseif ($requestData['status'] === 'cancelled'): ?>
                                                                     <button class="trade-btn-disabled" disabled>Cancelled</button>
-                                                                <?php elseif ($requestData['isExpired']): ?>
+                                                                <?php elseif ($requestData['isCancelledDueToDeletion']): ?>
+                                                                    <button class="trade-btn-disabled" disabled>Deleted</button>
+                                                                <?php elseif ($requestData['isExpired']): ?> 
                                                                     <button class="trade-btn-disabled" disabled>Expired</button>
                                                                 <?php elseif ($requestData['isListingInactive']): ?>
                                                                     <button class="trade-btn-disabled" disabled>Unavailable</button>
