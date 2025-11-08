@@ -474,6 +474,7 @@
 
         <script>
             const isAdmin = false;
+            const unreadCount = <?php echo $unread_count; ?>;
             const quizData = <?php echo json_encode($quizQuestions); ?>;
             const userID = <?php echo $userID; ?>;
             const stageID = <?php echo $stageID; ?>;
