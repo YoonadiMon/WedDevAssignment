@@ -750,7 +750,10 @@
         </div>
     </div>
 
-    <script>const isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;</script>
+    <script>
+        const isAdmin = true;
+        const unreadCount = 0;
+    </script>
     <script src="../../javascript/mainScript.js"></script>
     <script>
         function showDeleteModal(userId, fullName, username) {

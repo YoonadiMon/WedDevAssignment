@@ -793,6 +793,7 @@
 
     <script>
         const isAdmin = true;
+        const unreadCount = 0;
     </script>
     <script src="../../javascript/mainScript.js"></script>
     <script src="../../javascript/aHelpTickets.js"></script>

@@ -640,7 +640,8 @@ mysqli_close($connection);
 
     <!-- Scripts -->
     <script>
-        const isAdmin = false;
+        const isAdmin = true;
+        const unreadCount = 0;
     </script>
     <script src="../../javascript/mainScript.js"></script>
     <script>
