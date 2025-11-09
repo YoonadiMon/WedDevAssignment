@@ -1030,7 +1030,7 @@
                             // Update FAB
                             const fab = document.getElementById('adminFab');
                             if (fab) {
-                                fab.innerHTML = '<img src="../../assets/images/close-icon-light.svg" alt="close-icon">';
+                                fab.innerHTML = '<img src="../../assets/images/icon-menu-close.svg" alt="close-icon">';
                             }
                         }
                         
