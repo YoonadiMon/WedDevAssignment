@@ -98,7 +98,7 @@ function updateThemeIcons(isDark) {
     if (toggleBtn1) {
         const img1 = toggleBtn1.querySelector('img');
         if (img1) {
-            img1.src = isDark ? '../../assets/images/dark-mode-icon-mobile.svg' : '../../assets/images/light-mode-icon.svg';
+            img1.src = isDark ? '../../assets/images/dark-mode-icon.svg' : '../../assets/images/light-mode-icon.svg';
             img1.alt = isDark ? 'Dark Mode Icon' : 'Light Mode Icon';
         }
     }

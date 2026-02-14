@@ -457,6 +457,7 @@ c.btn-small:hover {
     margin-right: 1rem;
 }
 
+/* 1 */
 .c-navbar-side-menu {
     background: var(--sec-bg-color);
     position: fixed;
