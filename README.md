@@ -37,9 +37,9 @@ The platform serves as an all-in-one space where users can explore eco-friendly 
 ---
 
 ## 👨‍💻 Author
-Ng Xiao Wei (xweii06)
-Mi Yoonadi Mon (YoonadiMon)
-Lee Xin Ci (Emma031506)
+- Ng Xiao Wei (xweii06)
+- Mi Yoonadi Mon (YoonadiMon)
+- Lee Xin Ci (Emma031506)
 
 ---
 
