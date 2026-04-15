@@ -1,5 +1,7 @@
 # 🌱 ReLeaf – Community-Based Sustainability Platform
 
+<img width="947" height="437" alt="image" src="https://github.com/user-attachments/assets/a54bf6d7-1394-4b0e-8a14-daa5a6f92abb" />
+
 ## Description
 ReLeaf is a community-based web application that promotes environmental awareness while encouraging collaboration among individuals who care about sustainability.
 
@@ -54,4 +56,3 @@ Make sure the following modules are started in the XAMPP Control Panel:
 The project will not run correctly if these services are not active.
 
 Additionally, ensure the database `rwddgroup7` (`rwddgroup7.sql`) has been imported via phpMyAdmin before testing the system.
-
