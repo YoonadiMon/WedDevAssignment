@@ -56,3 +56,5 @@ Make sure the following modules are started in the XAMPP Control Panel:
 The project will not run correctly if these services are not active.
 
 Additionally, ensure the database `rwddgroup7` (`rwddgroup7.sql`) has been imported via phpMyAdmin before testing the system.
+
+- NOTE: The dataset used in this project consists of **dummy data only** and is intended strictly for development, testing, and demonstration purposes.
